@@ -1,129 +1,333 @@
+@import url("https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap");
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: var(--font-sans);
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
 }
 
 @layer base {
   * {
+    font-family: "Vazirmatn", sans-serif ;
     @apply border-border outline-ring/50;
-    }
+  }
   body {
     @apply bg-background text-foreground;
-    }
+  }
   html {
     @apply font-sans;
-    }
+  }
+}
+
+:root {
+  --background: oklch(0.98 0.02 85); /* #fff9f0 */
+  --foreground: oklch(0.18 0.03 20); /* #280000 */
+
+  --card: oklch(0.94 0.04 80); /* #f6e4cb */
+  --card-foreground: oklch(0.18 0.03 20);
+
+  --popover: oklch(0.98 0.02 85);
+  --popover-foreground: oklch(0.18 0.03 20);
+
+  --primary: oklch(0.45 0.14 30); /* #9f3422 */
+  --primary-foreground: oklch(0.98 0.02 85);
+
+  --secondary: oklch(0.92 0.03 80); /* soft beige */
+  --secondary-foreground: oklch(0.25 0.04 20);
+
+  --muted: oklch(0.92 0.02 80);
+  --muted-foreground: oklch(0.55 0.03 40);
+
+  --accent: oklch(0.65 0.08 180); /* #73a89c */
+  --accent-foreground: oklch(0.18 0.03 20);
+
+  --destructive: oklch(0.55 0.2 25); /* keep red-ish */
+
+  --border: oklch(0.88 0.03 75); /* #e0cdaf */
+  --input: oklch(0.88 0.03 75);
+  --ring: oklch(0.65 0.08 180); /* accent focus */
+
+  --radius: 0.75rem;
+
+  /* optional */
+  --sidebar: oklch(0.96 0.03 80);
+  --sidebar-foreground: oklch(0.18 0.03 20);
+  --sidebar-primary: oklch(0.45 0.14 30);
+  --sidebar-primary-foreground: oklch(0.98 0.02 85);
+  --sidebar-accent: oklch(0.92 0.03 80);
+  --sidebar-accent-foreground: oklch(0.25 0.04 20);
+  --sidebar-border: oklch(0.88 0.03 75);
+  --sidebar-ring: oklch(0.65 0.08 180);
+}
+
+/* =============================================
+   Coffee Roastery Pal — Brand Theme
+   globals.css  (add to your existing globals.css)
+   ============================================= */
+
+/* @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@300;400&display=swap'); */
+
+/* ── Brand Tokens ── */
+:root {
+  /* Palette from brand swatches */
+  --crp-cream: #fff9f0;
+  --crp-warm: #f6e4cb;
+  --crp-sand: #e0cdaf;
+  --crp-espresso: #280000;
+  --crp-terracotta: #9f3422;
+  --crp-sage: #73a89c;
+  --crp-amber: #cc8831;
+  --crp-dark: #511e1d;
+
+  /* Semantic aliases */
+  --background: var(--crp-cream);
+  --foreground: var(--crp-espresso);
+  --card: var(--crp-cream);
+  --card-foreground: var(--crp-espresso);
+  --border: var(--crp-sand);
+  --input: var(--crp-warm);
+  --ring: var(--crp-terracotta);
+  --primary: var(--crp-terracotta);
+  --primary-foreground: var(--crp-cream);
+  --muted: var(--crp-warm);
+  --muted-foreground: var(--crp-dark);
+  --accent: var(--crp-sage);
+  --accent-foreground: var(--crp-cream);
+
+  /* Typography */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-mono: "DM Mono", "Courier New", monospace;
+
+  /* Spacing & radius */
+  --radius: 0px; /* Hard edges for outline style */
+}
+
+/* ── Base Reset for Brand Pages ── */
+.crp-page {
+  font-family: var(--font-mono);
+  background-color: var(--crp-cream);
+  color: var(--crp-espresso);
+  min-height: 100vh;
+}
+
+/* ── Outline Button Override ── */
+.crp-btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--crp-espresso);
+  color: var(--crp-espresso);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.65rem 1.4rem;
+  cursor: pointer;
+  transition:
+    background 0.18s,
+    color 0.18s;
+}
+
+.crp-btn-outline:hover {
+  background: var(--crp-espresso);
+  color: var(--crp-cream);
+}
+
+.crp-btn-primary {
+  background: var(--crp-terracotta);
+  border: 1.5px solid var(--crp-terracotta);
+  color: var(--crp-cream);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.65rem 1.4rem;
+  cursor: pointer;
+  transition:
+    background 0.18s,
+    border-color 0.18s;
+}
+
+.crp-btn-primary:hover {
+  background: var(--crp-dark);
+  border-color: var(--crp-dark);
+}
+
+
+/* ─── Pal Coffee - Friendship Theme for Calendar ─── */
+
+/* ظرف کلی تقویم */
+.rmdp-calendar.crp-calendar {
+  background-color: var(--crp-cream) !important;
+  border: 1.5px solid var(--crp-espresso) !important;
+  border-radius: 0px !important; /* لبه‌های تیز برای حس کلاسیک */
+  box-shadow: 6px 6px 0px var(--crp-sand) !important; /* سایه تخت و ملموس */
+  padding: 10px !important;
+}
+
+/* هدر (ماه و سال) */
+.crp-calendar .rmdp-header-values {
+  color: var(--crp-espresso) !important;
+  font-family: "Vazirmatn", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+}
+
+/* فلش‌های ناوبری */
+.crp-calendar .rmdp-arrow-container:hover {
+  background-color: var(--crp-warm) !important;
+}
+
+.crp-calendar .rmdp-arrow {
+  border: solid var(--crp-espresso) !important;
+  border-width: 0 2px 2px 0 !important;
+}
+
+/* روزهای هفته (شنبه، یکشنبه...) */
+.crp-calendar .rmdp-week-day {
+  color: var(--crp-terracotta) !important; /* رنگ سفالی برای تاکید */
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+}
+
+/* استایل اعداد روزها */
+.crp-calendar .rmdp-day span {
+  color: var(--crp-espresso) !important;
+  font-family: "Vazirmatn", sans-serif !important;
+  border-radius: 0px !important;
+  transition: all 0.2s ease;
+}
+
+/* روز انتخاب شده: رنگ سفالی (Terracotta) */
+.crp-calendar .rmdp-day.rmdp-selected span:not(.highlight) {
+  background-color: var(--crp-terracotta) !important;
+  color: var(--crp-cream) !important;
+  box-shadow: none !important;
+}
+
+/* حالت هاور (وقتی موس روی روزها می‌رود): رنگ سبز سدری (Sage) */
+.crp-calendar .rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden) span:hover {
+  background-color: var(--crp-sage) !important;
+  color: var(--crp-cream) !important;
+}
+
+/* روز جاری (امروز): یک کادر ظریف رنگ شن (Sand) */
+.crp-calendar .rmdp-day.rmdp-today span {
+  background-color: var(--crp-warm) !important;
+  border: 1px solid var(--crp-sand) !important;
+  color: var(--crp-espresso) !important;
+}
+
+/* حذف خط آبی پیش‌فرض انتخاب */
+.rmdp-day.rmdp-selected span:not(.highlight) {
+  box-shadow: none !important;
 }

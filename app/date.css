@@ -1,0 +1,74 @@
+.rmdp-wrapper {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  color: var(--foreground);
+}
+
+/* Header */
+.rmdp-header {
+  color: var(--foreground);
+}
+
+/* Week days */
+.rmdp-week-day {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+/* Day cells */
+.rmdp-day {
+  color: var(--foreground);
+  border-radius: 0.5rem;
+}
+
+/* Hover */
+.rmdp-day:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* Selected day */
+.rmdp-day.rmdp-selected span {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: 0.5rem;
+}
+
+/* Today */
+.rmdp-day.rmdp-today span {
+  border: 1px solid var(--primary);
+}
+
+/* Disabled */
+.rmdp-day.rmdp-disabled {
+  opacity: 0.3;
+}
+
+/* Navigation arrows */
+.rmdp-arrow {
+  border: solid var(--foreground);
+  border-width: 0 2px 2px 0;
+}
+
+/* Month/year picker */
+.rmdp-panel {
+  background: var(--card);
+}
+
+/* Input */
+.rmdp-input {
+  background: var(--background);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+}
+
+/* Focus */
+.rmdp-input:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--accent);
+}
