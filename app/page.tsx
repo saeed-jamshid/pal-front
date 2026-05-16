@@ -229,7 +229,7 @@ export default function PalCoffeeEventForm() {
         </span>
         <span className="flex items-center justify-center gap-1 text-[9px]">
           در صورت وجود مشکل در ثبت نام با این شماره تماس بگیرید
-          <a href="tel:+491234567890">
+          <a href="tel:+989393258985">
             <Badge variant="destructive">09393258985</Badge>
           </a>
         </span>
