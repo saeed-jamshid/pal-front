@@ -244,7 +244,7 @@ export default function Submit() {
             <br />۱ خرداد ماه از ساعت ۱۰ الی ۱۴ منتظرتونیم!
           </p>
 
-          <Badge variant="default">محل برکزاری کافه نوفه</Badge>
+          <Badge variant="default">محل برگزاری کافه نوفه</Badge>
         </div>
         <iframe
           title="map-iframe"
