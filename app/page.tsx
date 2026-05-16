@@ -10,6 +10,7 @@ import GameIconsCoffeePot from "./icons/GameIconsCoffeePot"
 import PhCoffeeBeanFill from "./icons/PhCoffeeBeanFill"
 import StreamlineUltimateCoffeeEspressoMachineBold from "./icons/StreamlineUltimateCoffeeEspressoMachineBold"
 import GravityUiTerminalLine from "./icons/GravityUiTerminalLine"
+import { Badge } from "@/components/ui/badge"
 import {
   Popover,
   PopoverContent,
@@ -71,7 +72,7 @@ export default function PalCoffeeEventForm() {
       <div style={s.topBar}>
         <Popover>
           <PopoverTrigger asChild>
-            <span style={s.brand}>
+            <span style={s.brand} className="font-soraya!">
               <Image
                 src="/img/pal_logo.png"
                 quality={100}
@@ -95,7 +96,7 @@ export default function PalCoffeeEventForm() {
         <Image
           src="/img/pal_cups.png"
           className="boxShadowMain"
-          quality={100}
+          quality={70}
           width="450"
           loading="eager"
           height="400"
@@ -120,16 +121,15 @@ export default function PalCoffeeEventForm() {
         </div>
       </section>
 
-      <h1 className="mt-10 w-full text-center font-bold">
-        پَل , کم کردن فاصله ها
+      <h1 className="mt-10 w-full text-center font-eng text-3xl font-bold">
+        After Taste
       </h1>
       {/* middle page */}
-      <section className="mt-4 flex w-full flex-col">
+      <section className="mt-2 flex w-full flex-col">
         <article className="mx-auto mt-4 flex flex-col items-center justify-between gap-2">
           <Image
-            src="img/pal_people.png"
+            src="/img/pal_people.png"
             quality={70}
-            unoptimized
             width="300"
             loading="lazy"
             height="300"
@@ -181,7 +181,6 @@ export default function PalCoffeeEventForm() {
             quality={70}
             width="250"
             height="250"
-            objectFit="contain"
             alt="pal_logo"
           />
           <p className="absolute right-3 bottom-3 flex items-center gap-1 rounded-[8px] border bg-primary px-2 py-1 text-xs text-white">
@@ -193,7 +192,6 @@ export default function PalCoffeeEventForm() {
           <Image
             src="/img/beans.jpeg"
             quality={70}
-            objectFit="contain"
             width="250"
             height="250"
             alt="pal_logo"
@@ -210,7 +208,7 @@ export default function PalCoffeeEventForm() {
             quality={70}
             width="250"
             id="second-card"
-            className="m-h-full! object-cover!"
+            className="h-[166px]! object-cover!"
             height="250"
             alt="pal_logo"
           />
@@ -224,11 +222,16 @@ export default function PalCoffeeEventForm() {
         <span className="mb-auto">
           اردیبهشت ۱۴۰۵ — تمامی حقوق این رویداد محفوظ است ©
         </span>
-        <span className="mx-auto">
+        <span className="mx-auto items-center flex flex-col">
+          Made With Suffer
+          <span>Saeed & Jamshid</span>
           <GravityUiTerminalLine />
         </span>
-        <span className="text-[9px]">
-          در صورت وجود مشکل در ثبت نام با این شماره تماس بگیرید 09393258985
+        <span className="flex items-center justify-center gap-1 text-[9px]">
+          در صورت وجود مشکل در ثبت نام با این شماره تماس بگیرید
+          <a href="tel:+491234567890">
+            <Badge variant="destructive">09393258985</Badge>
+          </a>
         </span>
       </footer>
     </main>

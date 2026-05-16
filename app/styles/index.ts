@@ -8,6 +8,7 @@ export const s = {
     fontFamily: "'Vazirmatn', 'Tahoma', sans-serif",
     color: "#280000",
     padding: "0 1rem 3rem",
+    paddingBottom: "1.5rem",
     direction: "rtl" as const,
     textAlign: "right" as const,
   },
