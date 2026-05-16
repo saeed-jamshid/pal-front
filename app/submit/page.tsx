@@ -32,9 +32,10 @@ import {
 } from "@/components/ui/popover"
 
 const CARD_NUMBER = "6037997462069395"
-const API_URL = "http://10.193.248.220/api/register/"
+const API_URL = "https://palcoffe.ir/api/register/"
 
-type CoffeePref = "brew" | "espresso" | ""
+type CoffeePref = "drip" | "espresso" | ""
+
 
 export default function Submit() {
   const [dragOver, setDragOver] = useState(false)
@@ -54,7 +55,7 @@ export default function Submit() {
   const [loading, setLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const datePickerRef = useRef<HTMLDivElement>(null)
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
+  const [fieldErrors, setFieldErrors] = useState({})
 
   useEffect(() => {
     if (submitted) {
@@ -142,7 +143,7 @@ export default function Submit() {
     setSubmitted(false)
     setReceipt(null)
     setCoffeePref("")
-    setForm({ name: "", phone: "", birthdate: "" })
+    setForm({ name: "", phone: "", birthdate: "", birthdateDisplay: "" })
   }
 
   // ── Header (always visible) ──────────────────────────────────────────────
@@ -205,7 +206,7 @@ export default function Submit() {
                   : []),
                 {
                   label: "ترجیح قهوه",
-                  value: coffeePref === "drip" ? "دمی" : "اسپرسو",
+                  value: coffeePref == "drip" ? "دمی" : "اسپرسو",
                   teal: true,
                 },
                 { label: "رسید پرداخت", value: "آپلود شد", teal: true },
@@ -373,11 +374,6 @@ export default function Submit() {
               </button>
             ))}
           </div>
-          {fieldErrors.coffee_preference && (
-            <p role="alert" className="text-[11px] text-[#9f3422]">
-              {fieldErrors.coffee_preference[0]}
-            </p>
-          )}
         </div>
 
         <Separator className="my-1 bg-[#e0cdaf]" />

@@ -95,6 +95,7 @@ export default function PalCoffeeEventForm() {
         <Image
           src="/img/pal_cups.png"
           className="boxShadowMain"
+          unoptimized={true}
           quality={100}
           width="450"
           loading="eager"
@@ -127,7 +128,8 @@ export default function PalCoffeeEventForm() {
       <section className="mt-4 flex w-full flex-col">
         <article className="mx-auto mt-4 flex flex-col items-center justify-between gap-2">
           <Image
-            src="/img/pal_people.png"
+            src="img/pal_people.png"
+            unoptimized={true}
             width="300"
             loading="lazy"
             height="300"
@@ -147,6 +149,7 @@ export default function PalCoffeeEventForm() {
             <Image
               src="/img/pal_lady.png"
               width="200"
+              unoptimized={true}
               className="h-55! object-contain"
               loading="lazy"
               height="200"
@@ -176,6 +179,7 @@ export default function PalCoffeeEventForm() {
         <article className="boxShadowMain boxShadowMainH relative flex flex-col overflow-hidden rounded-[8px] transition hover:scale-105">
           <Image
             src="/img/brew.jpeg"
+            unoptimized={true}
             quality={70}
             width="250"
             height="250"
@@ -192,6 +196,7 @@ export default function PalCoffeeEventForm() {
             src="/img/beans.jpeg"
             quality={70}
             objectFit="contain"
+            unoptimized={true}
             width="250"
             height="250"
             alt="pal_logo"
@@ -207,6 +212,7 @@ export default function PalCoffeeEventForm() {
             src="/img/espersso.jpeg"
             quality={70}
             width="250"
+            unoptimized={true}
             id="second-card"
             className="m-h-full! object-cover!"
             height="250"
@@ -224,6 +230,10 @@ export default function PalCoffeeEventForm() {
         </span>
         <span className="mx-auto">
           <GravityUiTerminalLine />
+        </span>
+        <span className="text-[9px]">
+          در صورت وجود مشکل در ثبت نام با این شماره تماس بگیرید
+          09393258985
         </span>
       </footer>
     </main>
