@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/popover"
 
 const CARD_NUMBER = "6037997462069395"
-const API_URL = "https://palcoffe.ir/api/register/"
+const API_URL = "https://palcoffee.ir/api/register/"
 
 type CoffeePref = "drip" | "espresso" | ""
 
