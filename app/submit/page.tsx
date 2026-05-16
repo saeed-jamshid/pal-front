@@ -36,7 +36,6 @@ const API_URL = "https://palcoffee.ir/api/register/"
 
 type CoffeePref = "drip" | "espresso" | ""
 
-
 export default function Submit() {
   const [dragOver, setDragOver] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -102,6 +101,10 @@ export default function Submit() {
     }
     if (!form.phone) {
       toast.error("لطفاً شماره همراه را وارد کنید.")
+      return
+    }
+    if (!form.birthdate) {
+      toast.error("لطفا تاریخ تولد خود را وارد کنید")
       return
     }
     if (!coffeePref) {
@@ -227,12 +230,6 @@ export default function Submit() {
             </CardContent>
           </Card>
 
-          <p className="mb-5 text-xs leading-7 text-[#511e1d]">
-            پس از بررسی رسید
-            تاییدیه ثبتنام از طریق پیامک ارسال میشه
-            <br />
-            ۱ خرداد ماه از ساعت ۱۰ الی ۱۴ منتظرتونیم!
-          </p>
           <Button
             variant="outline"
             className="rounded-xl border-[#e0cdaf] text-[#511e1d]"
@@ -241,6 +238,22 @@ export default function Submit() {
             ثبت‌نام جدید
           </Button>
         </div>
+        <div className="mt-8 ml-auto flex flex-col text-center w-full items-center justify-center border-t py-2">
+          <p className="mb-5 text-xs leading-7 text-[#511e1d]">
+            پس از بررسی رسید تاییدیه ثبتنام از طریق پیامک ارسال میشه
+            <br />۱ خرداد ماه از ساعت ۱۰ الی ۱۴ منتظرتونیم!
+          </p>
+
+          <Badge variant="default">محل برکزاری کافه نوفه</Badge>
+        </div>
+        <iframe
+          title="map-iframe"
+          src="https://neshan.org/maps/iframe/places/_boQ5ZpJ77NN#c32.850-59.227-22z-0p/32.8495323970823/59.22647602662667"
+          height="250"
+          width="350"
+          loading="lazy"
+          className="my-4 rounded-2xl p-1 outline-2"
+        ></iframe>
       </div>
     )
 
@@ -317,6 +330,7 @@ export default function Submit() {
                 <Calendar
                   calendar={persian}
                   locale={persian_fa}
+                  className="rmdp-wrapper custom-input custom-calendar"
                   value={form.birthdateDisplay}
                   onChange={(date) => {
                     if (!date) return
@@ -454,13 +468,11 @@ export default function Submit() {
             <p className="text-sm text-[#511e1d]">
               {dragOver ? "رها کنید…" : "کلیک کنید یا فایل را اینجا بکشید"}
             </p>
-            <p className="text-[11px] text-[#c8b89a]">
-              PNG، JPG یا PDF — حداکثر ۵ مگابایت
-            </p>
+            <p className="text-[11px] text-[#c8b89a]">PNG , JPG , JPEG</p>
             <input
               ref={fileRef}
               type="file"
-              accept="image/*,.pdf"
+              accept=".png,.jpg,.jpeg,image/png,image/jpeg"
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0]
