@@ -5,6 +5,8 @@ import { Calendar } from "react-multi-date-picker"
 import persian from "react-date-object/calendars/persian"
 import persian_fa from "react-date-object/locales/persian_fa"
 
+import gregorian from "react-date-object/calendars/gregorian"
+import gregorian_en from "react-date-object/locales/gregorian_en"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -17,6 +19,7 @@ import { s } from "../styles/index"
 import Link from "next/link"
 import LineMdCoffeeHalfEmptyTwotoneLoop from "@/app/icons/LineMdCoffeeHalfEmptyTwotoneLoop"
 import GameIconsCoffeePot from "@/app/icons/GameIconsCoffeePot"
+import MaterialSymbolsArrowBackRounded from "@/app/icons/MaterialSymbolsArrowBackRounded"
 import PhCoffeeBeanFill from "@/app/icons/PhCoffeeBeanFill"
 import StreamlineUltimateCoffeeEspressoMachineBold from "@/app/icons/StreamlineUltimateCoffeeEspressoMachineBold"
 import {
@@ -29,7 +32,7 @@ import {
 } from "@/components/ui/popover"
 
 const CARD_NUMBER = "6037997462069395"
-const API_URL = "/api/register"
+const API_URL = "http://10.193.248.220/api/register/"
 
 type CoffeePref = "brew" | "espresso" | ""
 
@@ -39,13 +42,19 @@ export default function Submit() {
   const [successVisible, setSuccessVisible] = useState(false)
   const [formVisible, setFormVisible] = useState(false)
   const [receipt, setReceipt] = useState<File | null>(null)
-  const [form, setForm] = useState({ name: "", phone: "", birthdate: "" })
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    birthdate: "",
+    birthdateDisplay: "",
+  })
   const [coffeePref, setCoffeePref] = useState<CoffeePref>("")
   const [copied, setCopied] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const datePickerRef = useRef<HTMLDivElement>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
 
   useEffect(() => {
     if (submitted) {
@@ -68,8 +77,10 @@ export default function Submit() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const handle = (e: React.ChangeEvent<HTMLInputElement>) =>
+  const handle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }))
+    setFieldErrors((p) => ({ ...p, [e.target.name]: undefined }))
+  }
 
   const addFile = (file: File) => {
     if (file.size < 5 * 1024 * 1024) setReceipt(file)
@@ -111,9 +122,10 @@ export default function Submit() {
       body.append("payment_receipt", receipt)
 
       const res = await fetch(API_URL, { method: "POST", body })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        toast.error(err?.message ?? "خطایی رخ داد. لطفاً دوباره تلاش کنید.")
+      const err = await res.json().catch(() => ({}))
+      if (!err?.success) {
+        toast.error(err.message ?? "خطایی رخ داد. لطفاً دوباره تلاش کنید.")
+        setFieldErrors(err.errors)
         return
       }
       setSubmitted(true)
@@ -157,16 +169,20 @@ export default function Submit() {
           </PopoverHeader>
         </PopoverContent>
       </Popover>
+
+      <Link href="/">
+        <MaterialSymbolsArrowBackRounded />
+      </Link>
     </div>
   )
 
   // ── Success screen ───────────────────────────────────────────────────────
   if (submitted)
     return (
-      <>
+      <div style={s.page}>
         <Header />
         <div
-          className={`w-full max-w-md px-5 py-8 text-center transition-all duration-300 ${successVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
+          className={`w-full max-w-md px-5 text-center transition-all duration-300 ${successVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
         >
           <div className="mb-3 text-4xl">☕</div>
           <p className="mb-4 text-lg font-bold text-[#280000]">
@@ -179,18 +195,24 @@ export default function Submit() {
                 { label: "نام و نام خانوادگی", value: form.name },
                 { label: "شماره همراه", value: form.phone, ltr: true },
                 ...(form.birthdate
-                  ? [{ label: "تاریخ تولد", value: form.birthdate, ltr: true }]
+                  ? [
+                      {
+                        label: "تاریخ تولد",
+                        value: form.birthdateDisplay,
+                        ltr: true,
+                      },
+                    ]
                   : []),
                 {
                   label: "ترجیح قهوه",
-                  value: coffeePref === "brew" ? "قهوه دمی" : "اسپرسو",
+                  value: coffeePref === "drip" ? "دمی" : "اسپرسو",
                   teal: true,
                 },
-                { label: "رسید پرداخت", value: "✓ آپلود شد", teal: true },
+                { label: "رسید پرداخت", value: "آپلود شد", teal: true },
               ].map((row, i, arr) => (
                 <div
                   key={i}
-                  className={`flex items-center justify-between py-2 text-sm ${i < arr.length - 1 ? "border-b border-[#e0cdaf]" : ""}`}
+                  className={`flex flex-row-reverse items-center justify-between py-2 text-sm ${i < arr.length - 1 ? "border-b border-[#e0cdaf]" : ""}`}
                 >
                   <span
                     className={row.ltr ? "direction-ltr inline-block" : ""}
@@ -207,9 +229,7 @@ export default function Submit() {
           <p className="mb-5 text-xs leading-7 text-[#511e1d]">
             پس از بررسی رسید، تأییدیه ثبت‌نام
             <br />
-            از طریق پیامک ارسال می‌شود.
-
-            ۱خرداد ماه ساعت ۱۰ الی ۱۴ منتظرتیم!
+            از طریق پیامک ارسال می‌شود. ۱خرداد ماه ساعت ۱۰ الی ۱۴ منتظرتیم!
           </p>
           <Button
             variant="outline"
@@ -219,7 +239,7 @@ export default function Submit() {
             ثبت‌نام جدید
           </Button>
         </div>
-      </>
+      </div>
     )
 
   // ── Form ─────────────────────────────────────────────────────────────────
@@ -241,6 +261,15 @@ export default function Submit() {
             placeholder="نام و نام خانوادگی"
             className="boxShadowMainH boxShadowMain rounded-[8px] border bg-white transition focus:scale-105"
           />
+          {fieldErrors?.full_name && (
+            <p
+              id="phone-error"
+              role="alert"
+              className="mt-3 text-[11px] text-[#9f3422]"
+            >
+              {fieldErrors?.full_name[0]}
+            </p>
+          )}
         </div>
 
         {/* ── Phone ── */}
@@ -254,8 +283,17 @@ export default function Submit() {
             value={form.phone}
             onChange={handle}
             placeholder="شماره همراه"
-            className="boxShadowMainH boxShadowMain placeholder:text-right rounded-[8px] border bg-white transition focus:scale-105"
+            className="boxShadowMainH boxShadowMain rounded-[8px] border bg-white transition placeholder:text-right focus:scale-105"
           />
+          {fieldErrors?.phone_number && (
+            <p
+              id="phone-error"
+              role="alert"
+              className="mt-3 text-[11px] text-[#9f3422]"
+            >
+              {fieldErrors?.phone_number[0]}
+            </p>
+          )}
         </div>
 
         {/* ── Birthdate ── */}
@@ -265,7 +303,7 @@ export default function Submit() {
               id="birthdate"
               name="birthdate"
               readOnly
-              value={form.birthdate}
+              value={form.birthdateDisplay}
               placeholder="تاریخ تولد"
               style={{ direction: "ltr", textAlign: "left" }}
               className="boxShadowMainH boxShadowMain rounded-[8px] border bg-white transition placeholder:text-right focus:scale-105"
@@ -277,25 +315,43 @@ export default function Submit() {
                 <Calendar
                   calendar={persian}
                   locale={persian_fa}
-                  value={form.birthdate}
+                  value={form.birthdateDisplay}
                   onChange={(date) => {
+                    if (!date) return
+
+                    const test = date.convert("gregorian").format("YYYY-MM-DD")
+                    console.log(form.birthdate)
+                    const gregorianDate = date
+                      .convert(gregorian, gregorian_en)
+                      .format("YYYY-MM-DD")
+
                     setForm((p) => ({
                       ...p,
-                      birthdate: date?.format?.("YYYY/MM/DD") || "",
+                      birthdate: gregorianDate,
+                      birthdateDisplay: test,
                     }))
                     setIsOpen(false)
                   }}
                 />
               </div>
             )}
+            {fieldErrors?.birth_date && (
+              <p
+                id="phone-error"
+                role="alert"
+                className="mt-3 text-[11px] text-[#9f3422]"
+              >
+                {fieldErrors?.birth_date[0]}
+              </p>
+            )}
           </div>
         </div>
 
         {/* ── Coffee preference ── */}
-        <div className="space-y-2 mt-2">
+        <div className="mt-2 space-y-2">
           <Label className="text-xs text-[#511e1d]">کدوم رو ترجیح میدی؟</Label>
           <div className="grid grid-cols-2 gap-3">
-            {(["brew", "espresso"] as const).map((opt) => (
+            {(["drip", "espresso"] as const).map((opt) => (
               <button
                 key={opt}
                 type="button"
@@ -306,17 +362,22 @@ export default function Submit() {
                     : "border-[#e0cdaf] text-[#511e1d] hover:border-[#9f3422]/50"
                 }`}
               >
-                {opt === "brew" ? (
+                {opt === "drip" ? (
                   <GameIconsCoffeePot fontSize={30} />
                 ) : (
                   <StreamlineUltimateCoffeeEspressoMachineBold fontSize={30} />
                 )}
                 <span className="text-xs font-medium">
-                  {opt === "brew" ? "قهوه دمی" : "اسپرسو"}
+                  {opt === "drip" ? "قهوه دمی" : "اسپرسو"}
                 </span>
               </button>
             ))}
           </div>
+          {fieldErrors.coffee_preference && (
+            <p role="alert" className="text-[11px] text-[#9f3422]">
+              {fieldErrors.coffee_preference[0]}
+            </p>
+          )}
         </div>
 
         <Separator className="my-1 bg-[#e0cdaf]" />
