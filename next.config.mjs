@@ -2,7 +2,7 @@
 const nextConfig = {
   //cacheComponents: true,
   images: {
-      qualities: [80,100],
+      qualities: [70,80,100],
     },
 }
 

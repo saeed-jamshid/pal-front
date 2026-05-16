@@ -4,33 +4,48 @@ import { useState, useRef, useEffect } from "react"
 import { Calendar } from "react-multi-date-picker"
 import persian from "react-date-object/calendars/persian"
 import persian_fa from "react-date-object/locales/persian_fa"
-// import "react-multi-date-picker/styles/colors/teal.css"
-// import "react-multi-date-picker/styles/layouts/mobile.css"
+
+import Image from "next/image"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
+import { toast } from "sonner" // shadcn uses sonner for toasts
 import { s } from "../styles/index"
+import Link from "next/link"
+import LineMdCoffeeHalfEmptyTwotoneLoop from "@/app/icons/LineMdCoffeeHalfEmptyTwotoneLoop"
+import GameIconsCoffeePot from "@/app/icons/GameIconsCoffeePot"
+import PhCoffeeBeanFill from "@/app/icons/PhCoffeeBeanFill"
+import StreamlineUltimateCoffeeEspressoMachineBold from "@/app/icons/StreamlineUltimateCoffeeEspressoMachineBold"
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 const CARD_NUMBER = "6037997462069395"
+const API_URL = "/api/register"
 
-const Submit = () => {
+type CoffeePref = "brew" | "espresso" | ""
+
+export default function Submit() {
   const [dragOver, setDragOver] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const [successVisible, setSuccessVisible] = useState(false)
   const [formVisible, setFormVisible] = useState(false)
   const [receipt, setReceipt] = useState<File | null>(null)
   const [form, setForm] = useState({ name: "", phone: "", birthdate: "" })
+  const [coffeePref, setCoffeePref] = useState<CoffeePref>("")
   const [copied, setCopied] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const datePickerRef = useRef<HTMLDivElement>(null)
-
-  const [toast, setToast] = useState("")
-
-  useEffect(() => {
-    if (!toast) return
-
-    const id = window.setTimeout(() => setToast(""), 3200)
-    return () => window.clearTimeout(id)
-  }, [toast])
 
   useEffect(() => {
     if (submitted) {
@@ -42,231 +57,230 @@ const Submit = () => {
   }, [submitted])
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (
         datePickerRef.current &&
-        !datePickerRef.current.contains(event.target as Node)
-      ) {
+        !datePickerRef.current.contains(e.target as Node)
+      )
         setIsOpen(false)
-      }
     }
-
     document.addEventListener("mousedown", handleClickOutside)
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
+
   const handle = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }))
 
   const addFile = (file: File) => {
-    if (file.size < 5 * 1024 * 1024) {
-      setReceipt(file)
-    } else {
-      setToast("حجم فایل نمی‌تواند بیش از ۵ مگابایت باشد.")
-    }
+    if (file.size < 5 * 1024 * 1024) setReceipt(file)
+    else toast.error("حجم فایل نمی‌تواند بیش از ۵ مگابایت باشد.")
   }
 
   const copyCard = () => {
-    navigator.clipboard.writeText(CARD_NUMBER.replace(/\s/g, ""))
+    navigator.clipboard.writeText(CARD_NUMBER)
     setCopied(true)
     setTimeout(() => setCopied(false), 2200)
   }
 
-  const focus = (e: React.FocusEvent<HTMLInputElement>) =>
-    (e.target.style.borderBottomColor = "#9f3422")
-  const blur = (e: React.FocusEvent<HTMLInputElement>) =>
-    (e.target.style.borderBottomColor = "#e0cdaf")
-
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (!form.name || !form.phone || !receipt) {
-      if (!form.name && !form.phone && !receipt) {
-        setToast("لطفاً نام، شماره همراه و رسید پرداخت را وارد کنید.")
-      } else if (!form.name) {
-        setToast("لطفاً نام خود را وارد کنید.")
-      } else if (!form.phone) {
-        setToast("لطفاً شماره همراه را وارد کنید.")
-      } else if (!receipt) {
-        setToast("لطفاً رسید پرداخت را آپلود کنید.")
-      }
+    if (!form.name) {
+      toast.error("لطفاً نام خود را وارد کنید.")
+      return
+    }
+    if (!form.phone) {
+      toast.error("لطفاً شماره همراه را وارد کنید.")
+      return
+    }
+    if (!coffeePref) {
+      toast.error("لطفاً ترجیح قهوه خود را انتخاب کنید.")
+      return
+    }
+    if (!receipt) {
+      toast.error("لطفاً رسید پرداخت را آپلود کنید.")
       return
     }
 
-    setSubmitted(true)
-    setSuccessVisible(false)
+    try {
+      setLoading(true)
+      const body = new FormData()
+      body.append("full_name", form.name)
+      body.append("phone_number", form.phone)
+      body.append("birth_date", form.birthdate)
+      body.append("coffee_preference", coffeePref)
+      body.append("payment_receipt", receipt)
+
+      const res = await fetch(API_URL, { method: "POST", body })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        toast.error(err?.message ?? "خطایی رخ داد. لطفاً دوباره تلاش کنید.")
+        return
+      }
+      setSubmitted(true)
+      setSuccessVisible(false)
+    } catch {
+      toast.error("اتصال برقرار نشد. لطفاً اینترنت خود را بررسی کنید.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   const reset = () => {
     setFormVisible(false)
     setSubmitted(false)
     setReceipt(null)
+    setCoffeePref("")
     setForm({ name: "", phone: "", birthdate: "" })
   }
 
-  return (
-    <>
-      !submitted && (
-      {toast && (
-        <div style={s.toastContainer}>
-          <div style={s.toastMessage}>{toast}</div>
-        </div>
-      )}
-      <div style={s.logoWrap}>
-        <svg
-          width="32"
-          height="40"
-          viewBox="0 0 36 44"
-          fill="none"
-          style={{ marginBottom: "0.5rem" }}
-        >
-          <ellipse
-            cx="18"
-            cy="10"
-            rx="14"
-            ry="5"
-            stroke="#280000"
-            strokeWidth="1.4"
-            fill="none"
-          />
-          <path
-            d="M10 12 Q18 22 18 34"
-            stroke="#280000"
-            strokeWidth="1.4"
-            fill="none"
-          />
-          <circle cx="18" cy="38" r="2.5" fill="#9f3422" />
-          <path
-            d="M20 8 Q24 4 28 6"
-            stroke="#511e1d"
-            strokeWidth="1"
-            fill="none"
-            strokeLinecap="round"
-          />
-        </svg>
-        <div style={s.logoText}>ثبت‌نام رویداد</div>
-        <div style={s.logoSub}>palCoffee — Coffee Roastery Pal</div>
-        <div style={s.locationBadge}>
-          <svg width="9" height="11" viewBox="0 0 9 11" fill="none">
-            <path
-              d="M4.5 0C2.57 0 1 1.57 1 3.5c0 2.63 3.5 7 3.5 7S8 6.13 8 3.5C8 1.57 6.43 0 4.5 0zm0 4.75a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5z"
-              fill="#73a89c"
+  // ── Header (always visible) ──────────────────────────────────────────────
+  const Header = () => (
+    <div style={s.topBar}>
+      <Popover>
+        <PopoverTrigger asChild>
+          <span style={s.brand}>
+            <Image
+              src="/img/pal_logo.png"
+              quality={100}
+              unoptimized
+              width="50"
+              loading="eager"
+              height="20"
+              alt="pal_logo"
             />
-          </svg>
-          بیرجند-کافه نوفه
-        </div>
-        <div style={s.priceBadge}>۲۰۰،۰۰۰ تومان</div>
-        <div style={s.dividerLine} />
-      </div>
-      )
-      {submitted ? (
+            برشته کاری پَل
+          </span>
+        </PopoverTrigger>
+        <PopoverContent className="mr-5 w-50">
+          <PopoverHeader className="text-center text-base">
+            <PopoverTitle>پَل یعنی دوستی</PopoverTitle>
+          </PopoverHeader>
+        </PopoverContent>
+      </Popover>
+    </div>
+  )
+
+  // ── Success screen ───────────────────────────────────────────────────────
+  if (submitted)
+    return (
+      <>
+        <Header />
         <div
-          style={{
-            ...s.success,
-            ...(successVisible ? s.successActive : s.successEnter),
-          }}
+          className={`w-full max-w-md px-5 py-8 text-center transition-all duration-300 ${successVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
         >
-          <div style={s.successIcon}>☕</div>
-          <div style={s.successTitle}>ثبت‌نام تکمیل شد!</div>
-          <div style={s.successCard}>
-            <div style={s.row}>
-              <span>{form.name}</span>
-              <span style={s.rowKey}>نام و نام خانوادگی</span>
-            </div>
-            <div style={s.row}>
-              <span style={{ direction: "ltr", display: "inline-block" }}>
-                {form.phone}
-              </span>
-              <span style={s.rowKey}>شماره همراه</span>
-            </div>
-            {form.birthdate && (
-              <div style={s.row}>
-                <span style={{ direction: "ltr", display: "inline-block" }}>
-                  {form.birthdate}
-                </span>
-                <span style={s.rowKey}>تاریخ تولد</span>
-              </div>
-            )}
-            <div style={s.rowLast}>
-              <span style={{ color: "#73a89c" }}>✓ آپلود شد</span>
-              <span style={s.rowKey}>رسید پرداخت</span>
-            </div>
-          </div>
-          <p style={s.successNote}>
+          <div className="mb-3 text-4xl">☕</div>
+          <p className="mb-4 text-lg font-bold text-[#280000]">
+            ثبت‌نام تکمیل شد!
+          </p>
+
+          <Card className="mb-4 rounded-xl border-[#e0cdaf] text-right">
+            <CardContent className="space-y-0 p-4">
+              {[
+                { label: "نام و نام خانوادگی", value: form.name },
+                { label: "شماره همراه", value: form.phone, ltr: true },
+                ...(form.birthdate
+                  ? [{ label: "تاریخ تولد", value: form.birthdate, ltr: true }]
+                  : []),
+                {
+                  label: "ترجیح قهوه",
+                  value: coffeePref === "brew" ? "قهوه دمی" : "اسپرسو",
+                  teal: true,
+                },
+                { label: "رسید پرداخت", value: "✓ آپلود شد", teal: true },
+              ].map((row, i, arr) => (
+                <div
+                  key={i}
+                  className={`flex items-center justify-between py-2 text-sm ${i < arr.length - 1 ? "border-b border-[#e0cdaf]" : ""}`}
+                >
+                  <span
+                    className={row.ltr ? "direction-ltr inline-block" : ""}
+                    style={row.teal ? { color: "#73a89c" } : {}}
+                  >
+                    {row.value}
+                  </span>
+                  <span className="text-xs text-[#c8b89a]">{row.label}</span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <p className="mb-5 text-xs leading-7 text-[#511e1d]">
             پس از بررسی رسید، تأییدیه ثبت‌نام
             <br />
             از طریق پیامک ارسال می‌شود.
+
+            ۱خرداد ماه ساعت ۱۰ الی ۱۴ منتظرتیم!
           </p>
-          <button style={s.resetBtn} onClick={reset}>
-            ثبت‌نام جدید
-          </button>
-        </div>
-      ) : (
-        /* ── فرم ── */
-        <form
-          style={{ ...s.form, ...(formVisible ? s.formActive : s.formEnter) }}
-          onSubmit={submit}
-        >
-          <div style={s.fieldWrap}>
-            <Input
-              id="name"
-              name="name"
-              required
-              value={form.name}
-              onChange={handle}
-              placeholder="نام و نام خانوادگی"
-              style={s.input}
-              onFocus={focus}
-              onBlur={blur}
-              className="rounded-2xl"
-              aria-label="نام و نام خانوادگی"
-            />
-          </div>
-
-          <div style={s.fieldWrap}>
-            <Input
-              id="phone"
-              name="phone"
-              type="tel"
-              dir="ltr"
-              required
-              value={form.phone}
-              onChange={handle}
-              className="text-left placeholder:text-right"
-              placeholder="شماره همراه"
-              style={{ ...s.input }}
-              onFocus={focus}
-              onBlur={blur}
-            />
-          </div>
-
-          <div
-            style={{ ...s.fieldWrap, ...s.datePickerWrapper }}
-            ref={datePickerRef}
+          <Button
+            variant="outline"
+            className="rounded-xl border-[#e0cdaf] text-[#511e1d]"
+            onClick={reset}
           >
+            ثبت‌نام جدید
+          </Button>
+        </div>
+      </>
+    )
+
+  // ── Form ─────────────────────────────────────────────────────────────────
+  return (
+    <div style={s.page}>
+      <Header />
+      <form
+        onSubmit={submit}
+        className={`flex w-full max-w-md flex-col gap-2 space-y-3 px-5 transition-all duration-300 ${formVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
+      >
+        {/* ── Name ── */}
+        <div className="space-y-1">
+          <Input
+            id="name"
+            name="name"
+            required
+            value={form.name}
+            onChange={handle}
+            placeholder="نام و نام خانوادگی"
+            className="boxShadowMainH boxShadowMain rounded-[8px] border bg-white transition focus:scale-105"
+          />
+        </div>
+
+        {/* ── Phone ── */}
+        <div className="space-y-1">
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            dir="ltr"
+            required
+            value={form.phone}
+            onChange={handle}
+            placeholder="شماره همراه"
+            className="boxShadowMainH boxShadowMain placeholder:text-right rounded-[8px] border bg-white transition focus:scale-105"
+          />
+        </div>
+
+        {/* ── Birthdate ── */}
+        <div className="space-y-1" ref={datePickerRef}>
+          <div className="relative">
             <Input
               id="birthdate"
               name="birthdate"
-              value={form.birthdate}
               readOnly
-              placeholder="۱۴۰۳/۰۱/۰۱"
-              style={{ ...s.input, direction: "ltr", textAlign: "left" }}
+              value={form.birthdate}
+              placeholder="تاریخ تولد"
+              style={{ direction: "ltr", textAlign: "left" }}
+              className="boxShadowMainH boxShadowMain rounded-[8px] border bg-white transition placeholder:text-right focus:scale-105"
               onFocus={() => setIsOpen(true)}
               onClick={() => setIsOpen(true)}
-              aria-label="تاریخ تولد"
             />
             {isOpen && (
-              <div style={s.calendarPopup}>
+              <div className="absolute top-[calc(100%+6px)] right-0 z-50 overflow-hidden rounded-xl shadow-lg">
                 <Calendar
                   calendar={persian}
                   locale={persian_fa}
-                  className="crp-calendar"
                   value={form.birthdate}
                   onChange={(date) => {
-                    setForm((prev) => ({
-                      ...prev,
+                    setForm((p) => ({
+                      ...p,
                       birthdate: date?.format?.("YYYY/MM/DD") || "",
                     }))
                     setIsOpen(false)
@@ -275,167 +289,166 @@ const Submit = () => {
               </div>
             )}
           </div>
+        </div>
 
-          {/* پرداخت */}
-          <div style={s.sectionLabel}>پرداخت هزینه رویداد</div>
-
-          <div style={s.payCard}>
-            <div style={s.payRow}>
-              <div>
-                <div style={s.payAmount}>۲۰۰،۰۰۰</div>
-                <div style={s.payAmountSub}>تومان — هزینه شرکت در رویداد</div>
-              </div>
-              <svg width="26" height="26" viewBox="0 0 36 44" fill="none">
-                <ellipse
-                  cx="18"
-                  cy="10"
-                  rx="14"
-                  ry="5"
-                  stroke="#e0cdaf"
-                  strokeWidth="1.2"
-                  fill="none"
-                />
-                <path
-                  d="M10 12 Q18 22 18 34"
-                  stroke="#e0cdaf"
-                  strokeWidth="1.2"
-                  fill="none"
-                />
-                <circle cx="18" cy="38" r="2.5" fill="#e0cdaf" />
-              </svg>
-            </div>
-
-            <div style={s.payCardLabel}>شماره کارت جهت واریز:</div>
-            <span style={s.payCardNumber}>{CARD_NUMBER}</span>
-            <button
-              type="button"
-              style={s.copyBtn}
-              onClick={copyCard}
-              onMouseEnter={(e) => {
-                ;(e.target as HTMLButtonElement).style.background = "#280000"
-                ;(e.target as HTMLButtonElement).style.color = "#fff9f0"
-              }}
-              onMouseLeave={(e) => {
-                ;(e.target as HTMLButtonElement).style.background =
-                  "transparent"
-                ;(e.target as HTMLButtonElement).style.color = "#511e1d"
-              }}
-            >
-              {copied ? "✓ کپی شد" : "کپی شماره کارت"}
-            </button>
-            <div style={s.payNote}>
-              لطفاً پس از واریز، رسید پرداخت را در قسمت زیر آپلود کنید.
-            </div>
+        {/* ── Coffee preference ── */}
+        <div className="space-y-2 mt-2">
+          <Label className="text-xs text-[#511e1d]">کدوم رو ترجیح میدی؟</Label>
+          <div className="grid grid-cols-2 gap-3">
+            {(["brew", "espresso"] as const).map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => setCoffeePref(opt)}
+                className={`flex flex-col items-center justify-center gap-1 rounded-xl border py-3 text-sm transition-all ${
+                  coffeePref === opt
+                    ? "border-[#9f3422] text-[#511e1d]"
+                    : "border-[#e0cdaf] text-[#511e1d] hover:border-[#9f3422]/50"
+                }`}
+              >
+                {opt === "brew" ? (
+                  <GameIconsCoffeePot fontSize={30} />
+                ) : (
+                  <StreamlineUltimateCoffeeEspressoMachineBold fontSize={30} />
+                )}
+                <span className="text-xs font-medium">
+                  {opt === "brew" ? "قهوه دمی" : "اسپرسو"}
+                </span>
+              </button>
+            ))}
           </div>
+        </div>
 
-          {/* آپلود رسید */}
-          <div style={s.sectionLabel}>آپلود رسید پرداخت *</div>
+        <Separator className="my-1 bg-[#e0cdaf]" />
 
-          <div style={s.fieldWrap}>
-            <div
-              style={{
-                ...s.uploadZone,
-                ...(dragOver ? s.uploadZoneActive : {}),
-              }}
-              onClick={() => fileRef.current?.click()}
-              onDragOver={(e) => {
-                e.preventDefault()
-                setDragOver(true)
-              }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={(e) => {
-                e.preventDefault()
-                setDragOver(false)
-                const f = e.dataTransfer.files[0]
+        {/* ── Payment card ── */}
+        <div className="space-y-2">
+          <Label className="text-xs text-[#511e1d]">پرداخت هزینه رویداد</Label>
+          <Card className="overflow-hidden rounded-xl border-0 bg-[#280000]">
+            <CardContent className="p-4">
+              <div className="mb-3 flex items-start justify-between">
+                <div>
+                  <p className="text-xl font-bold text-[#fff9f0]">۲۰۰،۰۰۰</p>
+                  <p className="text-[11px] text-[#e0cdaf]">
+                    تومان — هزینه شرکت در رویداد
+                  </p>
+                </div>
+              </div>
+              <p className="mb-1 text-[11px] text-[#e0cdaf]">
+                شماره کارت جهت واریز:
+              </p>
+              <p
+                className="ltr mb-3 font-mono text-sm tracking-widest text-[#fff9f0]"
+                dir="ltr"
+              >
+                {CARD_NUMBER.replace(/(.{4})/g, "$1 ").trim()}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={copyCard}
+                className="h-7 rounded-lg border-[#e0cdaf]/50 bg-transparent text-xs text-[#e0cdaf] hover:bg-[#fff9f0]/10 hover:text-[#fff9f0]"
+              >
+                {copied ? "✓ کپی شد" : "کپی شماره کارت"}
+              </Button>
+              <p className="mt-3 text-[11px] leading-6 text-[#c8b89a]">
+                لطفاً پس از واریز، رسید پرداخت را در قسمت زیر آپلود کنید.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* ── Upload receipt ── */}
+        <div className="space-y-2">
+          <Label className="text-xs text-[#511e1d]">آپلود رسید پرداخت </Label>
+          <div
+            onClick={() => fileRef.current?.click()}
+            onDragOver={(e) => {
+              e.preventDefault()
+              setDragOver(true)
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setDragOver(false)
+              const f = e.dataTransfer.files[0]
+              if (f) addFile(f)
+            }}
+            className={`flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed py-6 transition-colors ${
+              dragOver
+                ? "border-[#73a89c] bg-[#E1F5EE]"
+                : "border-[#c8b89a] bg-white hover:border-[#9f3422]/40"
+            }`}
+          >
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={dragOver ? "#73a89c" : "#c8b89a"}
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+            </svg>
+            <p className="text-sm text-[#511e1d]">
+              {dragOver ? "رها کنید…" : "کلیک کنید یا فایل را اینجا بکشید"}
+            </p>
+            <p className="text-[11px] text-[#c8b89a]">
+              PNG، JPG یا PDF — حداکثر ۵ مگابایت
+            </p>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*,.pdf"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0]
                 if (f) addFile(f)
               }}
-            >
-              <div style={{ marginBottom: "0.5rem" }}>
-                <svg
-                  width="26"
-                  height="26"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={dragOver ? "#73a89c" : "#c8b89a"}
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-                </svg>
-              </div>
-              <div style={s.uploadText}>
-                {dragOver ? "رها کنید…" : "کلیک کنید یا فایل را اینجا بکشید"}
-              </div>
-              <div style={s.uploadSub}>PNG، JPG یا PDF — حداکثر ۵ مگابایت</div>
-              <input
-                ref={fileRef}
-                type="file"
-                accept="image/*,.pdf"
-                style={{ display: "none" }}
-                onChange={(e) => {
-                  const f = e.target.files?.[0]
-                  if (f) addFile(f)
-                }}
-              />
+            />
+          </div>
+
+          {receipt && (
+            <div className="flex items-center gap-2 rounded-xl border border-[#e0cdaf] bg-white px-3 py-2 text-xs text-[#511e1d]">
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#73a89c"
+                strokeWidth="2"
+                strokeLinecap="round"
+              >
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <span className="flex-1 truncate">{receipt.name}</span>
+              <span className="text-[10px] text-[#73a89c]">✓</span>
+              <button
+                type="button"
+                onClick={() => setReceipt(null)}
+                className="ml-1 text-base leading-none text-[#c8b89a] transition-colors hover:text-[#9f3422]"
+              >
+                ×
+              </button>
             </div>
+          )}
+        </div>
 
-            {receipt && (
-              <div style={s.uploadPreview}>
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#73a89c"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                >
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-                <span
-                  style={{
-                    flex: 1,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap" as const,
-                  }}
-                >
-                  {receipt.name}
-                </span>
-                <span style={{ fontSize: "0.6rem", color: "#73a89c" }}>✓</span>
-                <button
-                  type="button"
-                  style={s.removeBtn}
-                  onClick={() => setReceipt(null)}
-                >
-                  ×
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* ارسال */}
-          <div style={s.footerRow}>
-            <button
-              type="submit"
-              style={s.submitBtn}
-              onMouseEnter={(e) =>
-                ((e.target as HTMLButtonElement).style.background = "#511e1d")
-              }
-              onMouseLeave={(e) =>
-                ((e.target as HTMLButtonElement).style.background = "#9f3422")
-              }
-            >
-              ← تکمیل ثبت‌نام
-            </button>
-            <span style={s.hint}>* ضروری</span>
-          </div>
-        </form>
-      )}
-    </>
+        {/* ── Submit ── */}
+        <div className="flex items-center justify-center pt-1">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="rounded-xl bg-[#9f3422] text-[#fff9f0] transition-colors hover:bg-[#511e1d]"
+          >
+            {loading ? "در حال ارسال…" : " تکمیل ثبت‌نام"}
+          </Button>
+        </div>
+      </form>
+    </div>
   )
 }
-
-export default Submit

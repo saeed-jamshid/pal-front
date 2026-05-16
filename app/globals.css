@@ -18,11 +18,10 @@
   font-weight: 700;
   font-style: normal;
   font-display: swap;
-
 }
 
 @theme {
-    --breakpoint-sm: 450px;
+  --breakpoint-sm: 450px;
 }
 
 @theme inline {
@@ -81,6 +80,7 @@
   }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
   }
 }
 
@@ -352,4 +352,8 @@
 
 .boxShadowMain {
   box-shadow: 8px 8px 0px rgb(224, 205, 175);
+}
+
+.boxShadowMainH:hover {
+  box-shadow: 14px 14px 0px rgb(224, 205, 175);
 }
