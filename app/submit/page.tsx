@@ -154,7 +154,7 @@ export default function Submit() {
     <div style={s.topBar}>
       <Popover>
         <PopoverTrigger asChild>
-          <span style={s.brand}>
+          <span style={s.brand} className="font-soraya">
             <Image
               src="/img/pal_logo.png"
               quality={100}

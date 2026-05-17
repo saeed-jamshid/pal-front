@@ -9,12 +9,15 @@ import LineMdCoffeeHalfEmptyTwotoneLoop from "./icons/LineMdCoffeeHalfEmptyTwoto
 import GameIconsCoffeePot from "./icons/GameIconsCoffeePot"
 import PhCoffeeBeanFill from "./icons/PhCoffeeBeanFill"
 import StreamlineUltimateCoffeeEspressoMachineBold from "./icons/StreamlineUltimateCoffeeEspressoMachineBold"
+import MaterialSymbolsCalendarTodayOutline from "./icons/MaterialSymbolsCalendarTodayOutline"
+import MaterialSymbolsLightAlarmOutline from "./icons/MaterialSymbolsLightAlarmOutline"
+import MaterialSymbolsLocationOnRounded from "./icons/MaterialSymbolsLocationOnRounded"
+
 import GravityUiTerminalLine from "./icons/GravityUiTerminalLine"
 import { Badge } from "@/components/ui/badge"
 import {
   Popover,
   PopoverContent,
-  PopoverDescription,
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
@@ -139,7 +142,7 @@ export default function PalCoffeeEventForm() {
             این دورهمی یک بهونه‌ست برای باهم بودن، حرف زدن، چشیدن و تجربه کردن
             یه حس تازه.
             <br />
-            برای اینکه بدونیم قهوه‌ای که توی فنجونه‌مونه، از کجا اومده، چه مسیری
+            برای اینکه بدونیم قهوه‌ای که توی فنجونمونه، از کجا اومده، چه مسیری
             رو طی کرده و چرا هرکدومش یه حس خاص داره.
           </p>
         </article>
@@ -155,17 +158,16 @@ export default function PalCoffeeEventForm() {
               alt="pal_logo"
             />
           </div>
-          <p className="h-[220px] w-50 max-w-2xl rounded-b-[8px] border border-t-0 p-2 text-justify text-xs leading-5 tracking-normal">
-            توی دنیایی که جنگ و تورم هر روز قیمت قهوه رو بالا می‌بره; ما ترجیح
-            می‌دیم به‌جای از دست دادن امید و کم کردن کیفیت و تسلیم شدن از فرهنگ
-            قهوه دست به دست هم بدیم تا با ساده درست کردن قهوه فرهنگ قهوه رو زنده
-            نگه داریم
+          <p className="h-55 w-50 max-w-2xl rounded-b-[8px] border border-t-0 p-2 text-justify text-xs leading-5 tracking-normal">
+            توی دنیایی که جنگ و تورم هر روز قیمت قهوه رو بالا می‌بره؛ ما ترجیح
+            می‌دیم به‌جای کم کردن کیفیت و فراموشی فرهنگ قهوه، دست به دست هم بدیم
+            تا با ساده درست کردن قهوه فرهنگ قهوه رو زنده نگه داریم
             <br />
           </p>
         </article>
         <div className="mx-auto my-6 flex w-full max-w-2xl items-center gap-3">
           <div className="h-px flex-1 bg-border" />
-          <div className="h-[6px] w-[6px] rounded-full bg-accent opacity-60" />
+          <div className="h-1.5 w-1.5 rounded-full bg-accent opacity-60" />
           <div className="h-px flex-1 bg-border" />
         </div>
         <article className="mx-auto mt-4 w-45 text-justify">
@@ -174,6 +176,31 @@ export default function PalCoffeeEventForm() {
         </article>
       </section>
       <h1 className="my-3 mt-10 font-bold">برنامه چیه؟!</h1>
+
+      <div className="flex items-center gap-2 mb-5">
+        <Badge
+          variant="outline"
+          className="gap-1.5 rounded-full px-3 py-1.5 text-sm font-normal"
+        >
+          <MaterialSymbolsCalendarTodayOutline />
+          جمعه ۱ خرداد
+        </Badge>
+        <Badge
+          variant="outline"
+          className="gap-1.5 rounded-full px-3 py-1.5 text-sm font-normal"
+        >
+          <MaterialSymbolsLightAlarmOutline />
+          ۱۰:۰۰ تا ۱۴:۰۰
+        </Badge>
+        <Badge
+          variant="outline"
+          className="gap-1.5 rounded-full px-3 py-1.5 text-sm font-normal"
+        >
+          <MaterialSymbolsLocationOnRounded />
+          کافه نوفه
+        </Badge>
+      </div>
+
       <section className="flex flex-col items-center gap-6 pb-30 md:flex-row">
         <article className="boxShadowMain boxShadowMainH relative flex flex-col overflow-hidden rounded-[8px] transition hover:scale-105">
           <Image
@@ -222,7 +249,7 @@ export default function PalCoffeeEventForm() {
         <span className="mb-auto">
           اردیبهشت ۱۴۰۵ — تمامی حقوق این رویداد محفوظ است ©
         </span>
-        <span className="mx-auto items-center flex flex-col">
+        <span className="mx-auto flex flex-col items-center">
           Made With Suffer
           <span>Saeed & Jamshid</span>
           <GravityUiTerminalLine />
