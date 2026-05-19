@@ -152,6 +152,7 @@ export default function PalCoffeeEventForm() {
           <Image
             src="/img/pal_people.png"
             quality={80}
+            decoding="async"
             className="lg:w-[70%]"
             width="300"
             priority
