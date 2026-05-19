@@ -6,7 +6,6 @@ import persian_fa from "react-date-object/locales/persian_fa"
 import Header from "@/components/layout/Header"
 import dynamic from "next/dynamic"
 
-//import { Calendar } from "react-multi-date-picker"
 const Calendar = dynamic(
   () =>
     import("react-multi-date-picker").then((mod) => ({
@@ -46,11 +45,7 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner" // shadcn uses sonner for toasts
 import { s } from "../styles/index"
-import Link from "next/link"
-import LineMdCoffeeHalfEmptyTwotoneLoop from "@/app/icons/LineMdCoffeeHalfEmptyTwotoneLoop"
 import GameIconsCoffeePot from "@/app/icons/GameIconsCoffeePot"
-import MaterialSymbolsArrowBackRounded from "@/app/icons/MaterialSymbolsArrowBackRounded"
-import PhCoffeeBeanFill from "@/app/icons/PhCoffeeBeanFill"
 import StreamlineUltimateCoffeeEspressoMachineBold from "@/app/icons/StreamlineUltimateCoffeeEspressoMachineBold"
 import { useRouter } from "next/navigation"
 

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import dynamic from "next/dynamic"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { s } from "./styles/index"
@@ -93,7 +92,7 @@ export default function PalCoffeeEventForm() {
   //  window.addEventListener("resize", syncHeight)
 
   return (
-    <main style={s.page} className="animate-fadeIn">
+    <main style={s.page} className="">
       <Header />
       <section className="pt-20">
         <Image
@@ -148,7 +147,7 @@ export default function PalCoffeeEventForm() {
         After Taste
       </h1>
       {/* middle page */}
-      <section className="mt-2 flex w-full flex-col">
+      <section className="mt-2 flex w-full flex-col animate-fadeIn">
         <article className="relative mx-auto mt-4 flex flex-col items-center justify-between gap-2">
           <Image
             src="/img/pal_people.png"
@@ -177,7 +176,6 @@ export default function PalCoffeeEventForm() {
               src="/img/pal_lady.png"
               width="200"
               style={{
-                width: "100%",
                 height: "auto",
               }}
               className="h-55! object-contain lg:h-80!"
@@ -186,7 +184,7 @@ export default function PalCoffeeEventForm() {
               alt="pal_logo"
             />
           </div>
-          <p className="my-auto h-55 w-50 rounded-b-[8px] border border-t-0 p-2 text-justify text-xs leading-6 tracking-normal xs:p-4 sm:border-none lg:w-1/4 lg:text-base">
+          <p className="my-auto h-55 w-[calc(100%-200px)] rounded-b-[8px] border border-t-0 p-2 text-justify text-xs leading-6 tracking-normal xs:p-4 sm:border-none lg:w-1/4 lg:text-base">
             توی دنیایی که جنگ و تورم هر روز قیمت قهوه رو بالا می‌بره؛ ما ترجیح
             می‌دیم به‌جای کم کردن کیفیت و فراموشی فرهنگ قهوه، دست به دست هم بدیم
             تا با ساده درست کردن قهوه فرهنگ قهوه رو زنده نگه داریم
