@@ -15,13 +15,7 @@ import MaterialSymbolsLocationOnRounded from "./icons/MaterialSymbolsLocationOnR
 
 import GravityUiTerminalLine from "./icons/GravityUiTerminalLine"
 import { Badge } from "@/components/ui/badge"
-import {
-  Popover,
-  PopoverContent,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import Header from "@/components/layout/Header"
 
 function getTimeLeft(targetDate: Date) {
   const now = new Date().getTime()
@@ -40,9 +34,11 @@ function getTimeLeft(targetDate: Date) {
 }
 function TimeBox({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex min-h-8 w-14 items-center justify-center gap-2 rounded-lg px-1 py-2 text-xs sm:w-18 sm:justify-around sm:px-2">
-      <span className="grid h-3 place-items-center">
-        {value.toString().padStart(2, "0")}{" "}
+    <div className="flex items-center justify-center gap-2 rounded-lg px-1 py-2 text-xs sm:w-18 sm:justify-around sm:px-2">
+      <span className="grid h-5 w-5 place-items-center transition-all duration-300">
+        <span key={value} className="animate-pop">
+          {value.toString().padStart(2, "0")}
+        </span>
       </span>
       <span className="grid place-items-center text-sm opacity-70 sm:mr-auto sm:ml-2">
         {label}
@@ -71,41 +67,42 @@ export default function PalCoffeeEventForm() {
   //  window.addEventListener("resize", syncHeight)
 
   return (
-    <main style={s.page}>
-      <div style={s.topBar}>
-        <Popover>
-          <PopoverTrigger asChild>
-            <span style={s.brand} className="font-soraya!">
-              <Image
-                src="/img/pal_logo.png"
-                quality={100}
-                unoptimized
-                width="50"
-                loading="eager"
-                height="20"
-                alt="pal_logo"
-              />
-              برشته کاری پَل
-            </span>
-          </PopoverTrigger>
-          <PopoverContent className="mr-5 w-50">
-            <PopoverHeader className="text-center text-base">
-              <PopoverTitle>پَل یعنی دوستی</PopoverTitle>
-            </PopoverHeader>
-          </PopoverContent>
-        </Popover>
-      </div>
-      <section className="">
+    <main style={s.page} className="animate-fadeIn">
+      <Header />
+      <section className="pt-20">
         <Image
           src="/img/pal_cups.png"
-          className="boxShadowMain"
+          className="boxShadowMain animate-scaleIn"
           quality={70}
           width="450"
           loading="eager"
           height="400"
           alt="pal_logo"
         />
-        <div className="mx-auto mt-4 flex flex-col-reverse items-center justify-center gap-2 sm:flex-row sm:gap-2">
+        <div className="animate-fadeUp mt-8 mb-5 flex w-full justify-center gap-2 delay-200 *:min-h-6">
+          <Badge
+            variant="outline"
+            className="gap-1.5 rounded-full px-3 py-1.5 text-sm font-normal"
+          >
+            <MaterialSymbolsCalendarTodayOutline />
+            جمعه ۱ خرداد
+          </Badge>
+          <Badge
+            variant="outline"
+            className="gap-1.5 rounded-full px-3 py-1.5 text-sm font-normal"
+          >
+            <MaterialSymbolsLightAlarmOutline />
+            ۱۰:۰۰ تا ۱۴:۰۰
+          </Badge>
+          <Badge
+            variant="outline"
+            className="gap-1.5 rounded-full px-3 py-1.5 text-sm font-normal"
+          >
+            <MaterialSymbolsLocationOnRounded />
+            کافه نوفه
+          </Badge>
+        </div>
+        <div className="animate-fadeUp mx-auto mt-4 flex flex-col-reverse items-center justify-center gap-2 delay-300 sm:flex-row sm:gap-2">
           <Link href="/submit">
             <Button variant="outline" className="boxShadowMain">
               ثبت نام
@@ -114,7 +111,7 @@ export default function PalCoffeeEventForm() {
           </Link>
           <div
             dir="rtl"
-            className="flex w-full items-center justify-between gap-2 rounded-[8px] border px-2 text-center sm:w-84 sm:justify-center sm:gap-4"
+            className="flex w-full items-center justify-evenly gap-2 rounded-[8px] border px-2 text-center sm:w-84 sm:gap-4"
           >
             <TimeBox label="روز" value={timeLeft.days} />
             <TimeBox label="ساعت" value={timeLeft.hours} />
@@ -129,26 +126,29 @@ export default function PalCoffeeEventForm() {
       </h1>
       {/* middle page */}
       <section className="mt-2 flex w-full flex-col">
-        <article className="mx-auto mt-4 flex flex-col items-center justify-between gap-2">
+        <article className="relative mx-auto mt-4 flex flex-col items-center justify-between gap-2">
           <Image
             src="/img/pal_people.png"
-            quality={70}
+            quality={80}
             width="300"
-            loading="lazy"
+            loading="eager"
             height="300"
             alt="pal_logo"
           />
-          <p className="mx-auto w-full max-w-2xl rounded-t-[8px] border border-b-0 p-2 pb-6 text-justify text-xs leading-5 tracking-normal">
+          <p className="mx-auto w-full max-w-2xl rounded-t-[8px] border border-b-0 px-4 py-2 text-justify text-xs leading-6 tracking-normal">
             این دورهمی یک بهونه‌ست برای باهم بودن، حرف زدن، چشیدن و تجربه کردن
             یه حس تازه.
             <br />
             برای اینکه بدونیم قهوه‌ای که توی فنجونمونه، از کجا اومده، چه مسیری
             رو طی کرده و چرا هرکدومش یه حس خاص داره.
           </p>
+          <span className="absolute -bottom-px left-0 z-5 h-5 w-[3%] rounded-bl-[8px] border-b border-l"></span>
+          <span className="absolute -bottom-px left-0 z-4 h-5 w-[3%] border-b border-l border-transparent! bg-[#fff9f0]"></span>
         </article>
         <article className="mx-auto mb-4 flex flex-row-reverse items-center justify-between">
-          <div className="relative border-t">
-            <span className="absolute -top-px -right-px z-2 hidden size-4 rounded-tr-[8px] border-t border-r"></span>
+          <div className="relative">
+            <span className="absolute top-0 -right-px z-3 h-5 w-full rounded-tr-[8px] border-t border-r"></span>
+            <span className="absolute -top-px -right-px z-2 size-4 border-t border-r border-transparent! bg-[#fff9f0]"></span>
             <Image
               src="/img/pal_lady.png"
               width="200"
@@ -158,7 +158,7 @@ export default function PalCoffeeEventForm() {
               alt="pal_logo"
             />
           </div>
-          <p className="h-55 w-50 max-w-2xl rounded-b-[8px] border border-t-0 p-2 text-justify text-xs leading-5 tracking-normal">
+          <p className="my-auto h-55 w-50 max-w-2xl rounded-b-[8px] border border-t-0 p-4 text-justify text-xs leading-6 tracking-normal">
             توی دنیایی که جنگ و تورم هر روز قیمت قهوه رو بالا می‌بره؛ ما ترجیح
             می‌دیم به‌جای کم کردن کیفیت و فراموشی فرهنگ قهوه، دست به دست هم بدیم
             تا با ساده درست کردن قهوه فرهنگ قهوه رو زنده نگه داریم
@@ -170,42 +170,26 @@ export default function PalCoffeeEventForm() {
           <div className="h-1.5 w-1.5 rounded-full bg-accent opacity-60" />
           <div className="h-px flex-1 bg-border" />
         </div>
-        <article className="mx-auto mt-4 w-45 text-justify">
-          قهوه فقط یه نوشیدنی نیست یک صنعت است یک فرهنگ است و برای خیلی ها تمام
-          زندگی شان….
+        <article className="relative mx-auto mt-10 max-w-md px-6 py-6 text-center">
+          <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-5xl text-[var(--crp-sand)]">
+            “
+          </span>
+          <p className="text-lg leading-8 text-[var(--crp-espresso)] italic">
+            قهوه فقط یک نوشیدنی نیست؛ یک صنعت است، یک فرهنگ است، و برای بسیاری،
+            تمام زندگی‌شان…
+          </p>
+          <div className="mx-auto mt-4 h-[2px] w-12 rounded-full bg-[var(--crp-terracotta)]"></div>
         </article>
       </section>
-      <h1 className="my-3 mt-10 font-bold">برنامه چیه؟!</h1>
 
-      <div className="flex items-center gap-2 mb-5">
-        <Badge
-          variant="outline"
-          className="gap-1.5 rounded-full px-3 py-1.5 text-sm font-normal"
-        >
-          <MaterialSymbolsCalendarTodayOutline />
-          جمعه ۱ خرداد
-        </Badge>
-        <Badge
-          variant="outline"
-          className="gap-1.5 rounded-full px-3 py-1.5 text-sm font-normal"
-        >
-          <MaterialSymbolsLightAlarmOutline />
-          ۱۰:۰۰ تا ۱۴:۰۰
-        </Badge>
-        <Badge
-          variant="outline"
-          className="gap-1.5 rounded-full px-3 py-1.5 text-sm font-normal"
-        >
-          <MaterialSymbolsLocationOnRounded />
-          کافه نوفه
-        </Badge>
-      </div>
+      <h1 className="my-3 mt-10 font-bold">برنامه چیه؟!</h1>
 
       <section className="flex flex-col items-center gap-6 pb-30 md:flex-row">
         <article className="boxShadowMain boxShadowMainH relative flex flex-col overflow-hidden rounded-[8px] transition hover:scale-105">
           <Image
             src="/img/brew.jpeg"
             quality={70}
+            loading="lazy"
             width="250"
             height="250"
             alt="pal_logo"
@@ -219,6 +203,7 @@ export default function PalCoffeeEventForm() {
           <Image
             src="/img/beans.jpeg"
             quality={70}
+            loading="lazy"
             width="250"
             height="250"
             alt="pal_logo"
@@ -234,6 +219,7 @@ export default function PalCoffeeEventForm() {
             src="/img/espersso.jpeg"
             quality={70}
             width="250"
+            loading="lazy"
             id="second-card"
             className="h-[166px]! object-cover!"
             height="250"
@@ -245,16 +231,16 @@ export default function PalCoffeeEventForm() {
           </p>
         </article>
       </section>
-      <footer className="flex size-full flex-col justify-between gap-2 rounded-[8px] bg-[#280000] py-2 text-center text-[10px] text-[#fff9ef]">
+      <footer className="flex size-full flex-col justify-between gap-2 rounded-[8px] bg-[#280000] py-2 text-center text-xs text-[10px] text-[#fff9ef]">
         <span className="mb-auto">
           اردیبهشت ۱۴۰۵ — تمامی حقوق این رویداد محفوظ است ©
         </span>
         <span className="mx-auto flex flex-col items-center">
           Made With Suffer
-          <span>Saeed & Jamshid</span>
+          <span>Saeed && Jamshid</span>
           <GravityUiTerminalLine />
         </span>
-        <span className="flex items-center justify-center gap-1 text-[9px]">
+        <span className="flex flex-col items-center justify-center gap-1">
           در صورت وجود مشکل در ثبت نام با این شماره تماس بگیرید
           <a href="tel:+989393258985">
             <Badge variant="destructive">09393258985</Badge>

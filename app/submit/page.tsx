@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { Calendar } from "react-multi-date-picker"
 import persian from "react-date-object/calendars/persian"
 import persian_fa from "react-date-object/locales/persian_fa"
+import Header from "@/components/layout/Header"
 
 import gregorian from "react-date-object/calendars/gregorian"
 import gregorian_en from "react-date-object/locales/gregorian_en"
@@ -141,6 +142,48 @@ export default function Submit() {
     }
   }
 
+  function generateICS() {
+    const start = new Date("2026-05-22T10:00:00")
+    const end = new Date("2026-05-22T14:00:00")
+
+    const formatDate = (date: Date) =>
+      date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z"
+
+    const icsContent = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Pal Coffee//EN",
+      "BEGIN:VEVENT",
+      "SUMMARY:After Taste - Pal Coffee Event",
+      "DESCRIPTION:رویداد قهوه پَل ☕",
+      "LOCATION:32.84950182154514\,59.226566755939080",
+      "DESCRIPTION:رویداد قهوه پَل ☕\\nمسیریابی: https://neshan.org/maps/places/e3e384c27293cbcd49bde3c6a622dfde#c32.849-59.227-20z-0p",
+      `DTSTART:${formatDate(start)}`,
+      `DTEND:${formatDate(end)}`,
+      "BEGIN:VALARM",
+      "TRIGGER:-P1D",
+      "ACTION:DISPLAY",
+      "DESCRIPTION:یادآوری: رویداد قهوه پَل فرداست ☕",
+      "END:VALARM",
+      "BEGIN:VALARM",
+      "TRIGGER:-PT30M",
+      "ACTION:DISPLAY",
+      "DESCRIPTION:۳۰ دقیقه تا شروع رویداد ☕",
+      "END:VALARM",
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\r\n")
+
+    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "pal-coffee-event.ics"
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
   const reset = () => {
     setFormVisible(false)
     setSubmitted(false)
@@ -149,44 +192,13 @@ export default function Submit() {
     setForm({ name: "", phone: "", birthdate: "", birthdateDisplay: "" })
   }
 
-  // ── Header (always visible) ──────────────────────────────────────────────
-  const Header = () => (
-    <div style={s.topBar}>
-      <Popover>
-        <PopoverTrigger asChild>
-          <span style={s.brand} className="font-soraya">
-            <Image
-              src="/img/pal_logo.png"
-              quality={100}
-              unoptimized
-              width="50"
-              loading="eager"
-              height="20"
-              alt="pal_logo"
-            />
-            برشته کاری پَل
-          </span>
-        </PopoverTrigger>
-        <PopoverContent className="mr-5 w-50">
-          <PopoverHeader className="text-center text-base">
-            <PopoverTitle>پَل یعنی دوستی</PopoverTitle>
-          </PopoverHeader>
-        </PopoverContent>
-      </Popover>
-
-      <Link href="/">
-        <MaterialSymbolsArrowBackRounded />
-      </Link>
-    </div>
-  )
-
   // ── Success screen ───────────────────────────────────────────────────────
   if (submitted)
     return (
       <div style={s.page}>
-        <Header />
+        <Header back />
         <div
-          className={`w-full max-w-md px-5 text-center transition-all duration-300 ${successVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
+          className={`w-full max-w-md px-5 pt-20 text-center transition-all duration-300 ${successVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
         >
           <div className="mb-3 text-4xl">☕</div>
           <p className="mb-4 text-lg font-bold text-[#280000]">
@@ -238,7 +250,13 @@ export default function Submit() {
             ثبت‌نام جدید
           </Button>
         </div>
-        <div className="mt-8 ml-auto flex flex-col text-center w-full items-center justify-center border-t py-2">
+        <Button
+          onClick={generateICS}
+          className="mt-2 rounded-xl bg-[var(--crp-sage)] text-white hover:opacity-90"
+        >
+          افزودن به تقویم 📅
+        </Button>
+        <div className="mt-8 ml-auto flex w-full flex-col items-center justify-center border-t py-2 text-center">
           <p className="mb-5 text-xs leading-7 text-[#511e1d]">
             پس از بررسی رسید تاییدیه ثبتنام از طریق پیامک ارسال میشه
             <br />۱ خرداد ماه از ساعت ۱۰ الی ۱۴ منتظرتونیم!
@@ -260,10 +278,10 @@ export default function Submit() {
   // ── Form ─────────────────────────────────────────────────────────────────
   return (
     <div style={s.page}>
-      <Header />
+      <Header back />
       <form
         onSubmit={submit}
-        className={`flex w-full max-w-md flex-col gap-2 space-y-3 px-5 transition-all duration-300 ${formVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
+        className={`flex w-full max-w-md flex-col gap-2 space-y-3 px-5 pt-20 transition-all duration-300 ${formVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
       >
         {/* ── Name ── */}
         <div className="space-y-1">
