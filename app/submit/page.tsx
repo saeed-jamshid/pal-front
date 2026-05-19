@@ -1,14 +1,43 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Calendar } from "react-multi-date-picker"
 import persian from "react-date-object/calendars/persian"
 import persian_fa from "react-date-object/locales/persian_fa"
 import Header from "@/components/layout/Header"
+import dynamic from "next/dynamic"
+
+//import { Calendar } from "react-multi-date-picker"
+const Calendar = dynamic(
+  () =>
+    import("react-multi-date-picker").then((mod) => ({
+      default: mod.Calendar,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center rounded-xl bg-white px-4 py-4 shadow-lg">
+        <svg
+          className="animate-spin"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <circle cx="12" cy="12" r="10" stroke="#e0cdaf" strokeWidth="3" />
+          <path
+            d="M12 2a10 10 0 0 1 10 10"
+            stroke="#9f3422"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+        </svg>
+      </div>
+    ),
+  }
+)
 
 import gregorian from "react-date-object/calendars/gregorian"
 import gregorian_en from "react-date-object/locales/gregorian_en"
-import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -23,14 +52,7 @@ import GameIconsCoffeePot from "@/app/icons/GameIconsCoffeePot"
 import MaterialSymbolsArrowBackRounded from "@/app/icons/MaterialSymbolsArrowBackRounded"
 import PhCoffeeBeanFill from "@/app/icons/PhCoffeeBeanFill"
 import StreamlineUltimateCoffeeEspressoMachineBold from "@/app/icons/StreamlineUltimateCoffeeEspressoMachineBold"
-import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { useRouter } from "next/navigation"
 
 const CARD_NUMBER = "6037997462069395"
 const API_URL = "https://palcoffee.ir/api/register/"
@@ -56,6 +78,7 @@ export default function Submit() {
   const [isOpen, setIsOpen] = useState(false)
   const datePickerRef = useRef<HTMLDivElement>(null)
   const [fieldErrors, setFieldErrors] = useState({})
+  const router = useRouter()
 
   useEffect(() => {
     if (submitted) {
@@ -190,10 +213,11 @@ export default function Submit() {
     setReceipt(null)
     setCoffeePref("")
     setForm({ name: "", phone: "", birthdate: "", birthdateDisplay: "" })
+    router.push("/submit")
   }
 
   // ── Success screen ───────────────────────────────────────────────────────
-  if (!submitted)
+  if (submitted)
     return (
       <div
         style={s.page}
@@ -201,7 +225,7 @@ export default function Submit() {
       >
         <Header back />
         <div
-          className={`w-full max-w-md px-5 pt-20 text-center transition-all duration-300 lg:col-start-1 lg:row-span-1 lg:mt-auto ${!successVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
+          className={`w-full max-w-md px-5 pt-20 text-center transition-all duration-300 lg:col-start-1 lg:row-span-1 lg:mt-auto ${successVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
         >
           <div className="mb-3 text-4xl">☕</div>
           <p className="mb-4 text-lg font-bold text-[#280000]">
@@ -272,7 +296,7 @@ export default function Submit() {
           src="https://neshan.org/maps/iframe/places/_boQ5ZpJ77NN#c32.850-59.227-22z-0p/32.8495323970823/59.22647602662667"
           height="250"
           loading="lazy"
-          className="my-4 rounded-2xl p-1 outline-2 lg:col-span-2 lg:col-start-1 lg:row-start-3 w-full!"
+          className="my-4 w-full! rounded-2xl p-1 outline-2 lg:col-span-2 lg:col-start-1 lg:row-start-3"
         ></iframe>
       </div>
     )
@@ -346,7 +370,7 @@ export default function Submit() {
               onClick={() => setIsOpen(true)}
             />
             {isOpen && (
-              <div className="absolute top-[calc(100%+6px)] right-0 z-50 overflow-hidden rounded-xl shadow-lg">
+              <div className="absolute top-[calc(100%+6px)] right-0 z-50 min-h-20 overflow-hidden rounded-xl shadow-lg">
                 <Calendar
                   calendar={persian}
                   locale={persian_fa}

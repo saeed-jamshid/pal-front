@@ -1,10 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { s } from "./styles/index"
 import Link from "next/link"
+
 import LineMdCoffeeHalfEmptyTwotoneLoop from "./icons/LineMdCoffeeHalfEmptyTwotoneLoop"
 import GameIconsCoffeePot from "./icons/GameIconsCoffeePot"
 import PhCoffeeBeanFill from "./icons/PhCoffeeBeanFill"
@@ -47,6 +49,30 @@ function TimeBox({ label, value }: { label: string; value: number }) {
   )
 }
 
+function Countdown() {
+  const targetDate = new Date("2026-05-22T10:00:00+03:30")
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft(targetDate))
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeLeft(getTimeLeft(targetDate))
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <div
+      dir="rtl"
+      className="flex w-full items-center justify-evenly gap-2 rounded-[8px] border px-2 text-center sm:w-84 sm:gap-4"
+    >
+      <TimeBox label="روز" value={timeLeft.days} />
+      <TimeBox label="ساعت" value={timeLeft.hours} />
+      <TimeBox label="دقیقه" value={timeLeft.minutes} />
+      <TimeBox label="ثانیه" value={timeLeft.seconds} />
+    </div>
+  )
+}
+
 export default function PalCoffeeEventForm() {
   const targetDate = new Date("2026-05-22T10:00:00")
   const [timeLeft, setTimeLeft] = useState(getTimeLeft(targetDate))
@@ -73,13 +99,13 @@ export default function PalCoffeeEventForm() {
         <Image
           src="/img/pal_cups.png"
           className="boxShadowMain animate-scaleIn"
-          quality={70}
+          priority
+          quality={80}
           width={"450"}
           style={{
             width: "100%",
             height: "auto",
           }}
-          loading="eager"
           height="400"
           alt="pal_logo"
         />
@@ -113,15 +139,8 @@ export default function PalCoffeeEventForm() {
               <LineMdCoffeeHalfEmptyTwotoneLoop />
             </Button>
           </Link>
-          <div
-            dir="rtl"
-            className="flex w-full items-center justify-evenly gap-2 rounded-[8px] border px-2 text-center sm:w-84 sm:gap-4"
-          >
-            <TimeBox label="روز" value={timeLeft.days} />
-            <TimeBox label="ساعت" value={timeLeft.hours} />
-            <TimeBox label="دقیقه" value={timeLeft.minutes} />
-            <TimeBox label="ثانیه" value={timeLeft.seconds} />
-          </div>
+
+          <Countdown />
         </div>
       </section>
 
@@ -136,7 +155,7 @@ export default function PalCoffeeEventForm() {
             quality={80}
             className="lg:w-[70%]"
             width="300"
-            loading="eager"
+            priority
             height="300"
             alt="pal_logo"
           />
