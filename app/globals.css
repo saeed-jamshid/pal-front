@@ -33,6 +33,7 @@
 
 @theme {
   --breakpoint-sm: 450px;
+  --breakpoint-xs: 375px;
 }
 
 @theme inline {

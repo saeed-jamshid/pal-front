@@ -74,35 +74,39 @@ export default function PalCoffeeEventForm() {
           src="/img/pal_cups.png"
           className="boxShadowMain animate-scaleIn"
           quality={70}
-          width="450"
+          width={"450"}
+          style={{
+            width: "100%",
+            height: "auto",
+          }}
           loading="eager"
           height="400"
           alt="pal_logo"
         />
-        <div className="animate-fadeUp mt-8 mb-5 flex w-full justify-center gap-2 delay-200 *:min-h-6">
+        <div className="animate-fadeUp mt-8 mb-5 flex w-full justify-center gap-2 px-2 text-xs delay-200 *:min-h-6">
           <Badge
             variant="outline"
-            className="gap-1.5 rounded-full px-3 py-1.5 text-sm font-normal"
+            className="gap-1.5 rounded-full px-3 py-1.5 font-normal"
           >
             <MaterialSymbolsCalendarTodayOutline />
             جمعه ۱ خرداد
           </Badge>
           <Badge
             variant="outline"
-            className="gap-1.5 rounded-full px-3 py-1.5 text-sm font-normal"
+            className="gap-1.5 rounded-full px-3 py-1.5 font-normal"
           >
             <MaterialSymbolsLightAlarmOutline />
             ۱۰:۰۰ تا ۱۴:۰۰
           </Badge>
           <Badge
             variant="outline"
-            className="gap-1.5 rounded-full px-3 py-1.5 text-sm font-normal"
+            className="gap-1.5 rounded-full px-3 py-1.5 font-normal"
           >
             <MaterialSymbolsLocationOnRounded />
             کافه نوفه
           </Badge>
         </div>
-        <div className="animate-fadeUp mx-auto mt-4 flex flex-col-reverse items-center justify-center gap-2 delay-300 sm:flex-row sm:gap-2">
+        <div className="animate-fadeUp mx-auto mt-4 flex flex-col-reverse items-center justify-center gap-2 px-2 delay-300 sm:flex-row sm:gap-2">
           <Link href="/submit">
             <Button variant="outline" className="boxShadowMain">
               ثبت نام
@@ -130,35 +134,40 @@ export default function PalCoffeeEventForm() {
           <Image
             src="/img/pal_people.png"
             quality={80}
+            className="lg:w-[70%]"
             width="300"
             loading="eager"
             height="300"
             alt="pal_logo"
           />
-          <p className="mx-auto w-full max-w-2xl rounded-t-[8px] border border-b-0 px-4 py-2 text-justify text-xs leading-6 tracking-normal">
+          <p className="mx-auto w-full max-w-2xl rounded-t-[8px] border border-b-0 p-2 py-2 text-justify text-xs leading-6 tracking-normal xs:px-4 sm:border-none lg:text-base">
             این دورهمی یک بهونه‌ست برای باهم بودن، حرف زدن، چشیدن و تجربه کردن
             یه حس تازه.
             <br />
             برای اینکه بدونیم قهوه‌ای که توی فنجونمونه، از کجا اومده، چه مسیری
             رو طی کرده و چرا هرکدومش یه حس خاص داره.
           </p>
-          <span className="absolute -bottom-px left-0 z-5 h-5 w-[3%] rounded-bl-[8px] border-b border-l"></span>
-          <span className="absolute -bottom-px left-0 z-4 h-5 w-[3%] border-b border-l border-transparent! bg-[#fff9f0]"></span>
+          <span className="absolute -bottom-px left-0 z-5 h-5 w-[3%] rounded-bl-[8px] border-b border-l sm:hidden"></span>
+          <span className="absolute -bottom-px left-0 z-4 h-5 w-[3%] border-b border-l border-transparent! bg-[#fff9f0] sm:hidden"></span>
         </article>
-        <article className="mx-auto mb-4 flex flex-row-reverse items-center justify-between">
+        <article className="mx-auto mb-4 flex flex-row-reverse items-center justify-between lg:justify-center">
           <div className="relative">
-            <span className="absolute top-0 -right-px z-3 h-5 w-full rounded-tr-[8px] border-t border-r"></span>
-            <span className="absolute -top-px -right-px z-2 size-4 border-t border-r border-transparent! bg-[#fff9f0]"></span>
+            <span className="absolute top-0 -right-px z-3 h-5 w-full rounded-tr-[8px] border-t border-r sm:hidden"></span>
+            <span className="absolute -top-px -right-px z-2 size-4 border-t border-r border-transparent! bg-[#fff9f0] sm:hidden"></span>
             <Image
               src="/img/pal_lady.png"
               width="200"
-              className="h-55! object-contain"
+              style={{
+                width: "100%",
+                height: "auto",
+              }}
+              className="h-55! object-contain lg:h-80!"
               loading="lazy"
               height="200"
               alt="pal_logo"
             />
           </div>
-          <p className="my-auto h-55 w-50 max-w-2xl rounded-b-[8px] border border-t-0 p-4 text-justify text-xs leading-6 tracking-normal">
+          <p className="my-auto h-55 w-50 rounded-b-[8px] border border-t-0 p-2 text-justify text-xs leading-6 tracking-normal xs:p-4 sm:border-none lg:w-1/4 lg:text-base">
             توی دنیایی که جنگ و تورم هر روز قیمت قهوه رو بالا می‌بره؛ ما ترجیح
             می‌دیم به‌جای کم کردن کیفیت و فراموشی فرهنگ قهوه، دست به دست هم بدیم
             تا با ساده درست کردن قهوه فرهنگ قهوه رو زنده نگه داریم
@@ -170,15 +179,15 @@ export default function PalCoffeeEventForm() {
           <div className="h-1.5 w-1.5 rounded-full bg-accent opacity-60" />
           <div className="h-px flex-1 bg-border" />
         </div>
-        <article className="relative mx-auto mt-10 max-w-md px-6 py-6 text-center">
-          <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-5xl text-[var(--crp-sand)]">
+        <article className="relative mx-auto mt-10 max-w-md py-6 text-center">
+          <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-5xl text-(--crp-sand)">
             “
           </span>
-          <p className="text-lg leading-8 text-[var(--crp-espresso)] italic">
+          <p className="w-50 text-base leading-8 italic xs:w-80 xs:text-lg">
             قهوه فقط یک نوشیدنی نیست؛ یک صنعت است، یک فرهنگ است، و برای بسیاری،
             تمام زندگی‌شان…
           </p>
-          <div className="mx-auto mt-4 h-[2px] w-12 rounded-full bg-[var(--crp-terracotta)]"></div>
+          <div className="mx-auto mt-4 h-0.5 w-12 rounded-full bg-(--crp-terracotta)"></div>
         </article>
       </section>
 

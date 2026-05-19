@@ -193,19 +193,22 @@ export default function Submit() {
   }
 
   // ── Success screen ───────────────────────────────────────────────────────
-  if (submitted)
+  if (!submitted)
     return (
-      <div style={s.page}>
+      <div
+        style={s.page}
+        className="lg:m-auto! lg:grid! lg:grid-cols-2 lg:place-content-center lg:gap-x-4 lg:gap-y-2"
+      >
         <Header back />
         <div
-          className={`w-full max-w-md px-5 pt-20 text-center transition-all duration-300 ${successVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
+          className={`w-full max-w-md px-5 pt-20 text-center transition-all duration-300 lg:col-start-1 lg:row-span-1 lg:mt-auto ${!successVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
         >
           <div className="mb-3 text-4xl">☕</div>
           <p className="mb-4 text-lg font-bold text-[#280000]">
             ثبت‌نام تکمیل شد!
           </p>
 
-          <Card className="mb-4 rounded-xl border-[#e0cdaf] text-right">
+          <Card className="mb-4 hidden rounded-xl border-[#e0cdaf] text-right">
             <CardContent className="space-y-0 p-4">
               {[
                 { label: "نام و نام خانوادگی", value: form.name },
@@ -252,12 +255,12 @@ export default function Submit() {
         </div>
         <Button
           onClick={generateICS}
-          className="mt-2 rounded-xl bg-[var(--crp-sage)] text-white hover:opacity-90"
+          className="mt-2 rounded-xl bg-(--crp-sage) text-white hover:opacity-90 lg:col-start-1 lg:row-start-2 lg:mb-auto lg:place-self-center"
         >
           افزودن به تقویم 📅
         </Button>
-        <div className="mt-8 ml-auto flex w-full flex-col items-center justify-center border-t py-2 text-center">
-          <p className="mb-5 text-xs leading-7 text-[#511e1d]">
+        <div className="mt-8 ml-auto flex w-full flex-col items-center justify-center border-t py-2 text-center lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-auto lg:border-none">
+          <p className="mb-5 text-xs leading-7 font-bold text-[#511e1d]">
             پس از بررسی رسید تاییدیه ثبتنام از طریق پیامک ارسال میشه
             <br />۱ خرداد ماه از ساعت ۱۰ الی ۱۴ منتظرتونیم!
           </p>
@@ -268,9 +271,8 @@ export default function Submit() {
           title="map-iframe"
           src="https://neshan.org/maps/iframe/places/_boQ5ZpJ77NN#c32.850-59.227-22z-0p/32.8495323970823/59.22647602662667"
           height="250"
-          width="350"
           loading="lazy"
-          className="my-4 rounded-2xl p-1 outline-2"
+          className="my-4 rounded-2xl p-1 outline-2 lg:col-span-2 lg:col-start-1 lg:row-start-3 w-full!"
         ></iframe>
       </div>
     )
@@ -281,10 +283,10 @@ export default function Submit() {
       <Header back />
       <form
         onSubmit={submit}
-        className={`flex w-full max-w-md flex-col gap-2 space-y-3 px-5 pt-20 transition-all duration-300 ${formVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
+        className={`flex w-full flex-col gap-2 space-y-3 px-5 pt-20 transition-all duration-300 lg:m-auto lg:grid lg:grid-cols-2 lg:gap-x-4 ${formVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
       >
         {/* ── Name ── */}
-        <div className="space-y-1">
+        <div className="col-start-1 space-y-1">
           <Input
             id="name"
             name="name"
@@ -292,7 +294,7 @@ export default function Submit() {
             value={form.name}
             onChange={handle}
             placeholder="نام و نام خانوادگی"
-            className="boxShadowMainH boxShadowMain rounded-[8px] border bg-white transition focus:scale-105"
+            className="boxShadowMainH boxShadowMain rounded-[8px] border bg-white transition focus:scale-110"
           />
           {fieldErrors?.full_name && (
             <p
@@ -306,7 +308,7 @@ export default function Submit() {
         </div>
 
         {/* ── Phone ── */}
-        <div className="space-y-1">
+        <div className="col-start-1 space-y-1">
           <Input
             id="phone"
             name="phone"
@@ -316,7 +318,7 @@ export default function Submit() {
             value={form.phone}
             onChange={handle}
             placeholder="شماره همراه"
-            className="boxShadowMainH boxShadowMain rounded-[8px] border bg-white transition placeholder:text-right focus:scale-105"
+            className="boxShadowMainH boxShadowMain rounded-[8px] border bg-white transition placeholder:text-right focus:scale-110"
           />
           {fieldErrors?.phone_number && (
             <p
@@ -330,7 +332,7 @@ export default function Submit() {
         </div>
 
         {/* ── Birthdate ── */}
-        <div className="space-y-1" ref={datePickerRef}>
+        <div className="col-start-1 space-y-1" ref={datePickerRef}>
           <div className="relative">
             <Input
               id="birthdate"
@@ -339,7 +341,7 @@ export default function Submit() {
               value={form.birthdateDisplay}
               placeholder="تاریخ تولد"
               style={{ direction: "ltr", textAlign: "left" }}
-              className="boxShadowMainH boxShadowMain rounded-[8px] border bg-white transition placeholder:text-right focus:scale-105"
+              className="boxShadowMainH boxShadowMain rounded-[8px] border bg-white transition placeholder:text-right focus:scale-110"
               onFocus={() => setIsOpen(true)}
               onClick={() => setIsOpen(true)}
             />
@@ -382,7 +384,7 @@ export default function Submit() {
         </div>
 
         {/* ── Coffee preference ── */}
-        <div className="mt-2 space-y-2">
+        <div className="col-start-1 mt-2 space-y-2">
           <Label className="text-xs text-[#511e1d]">کدوم رو ترجیح میدی؟</Label>
           <div className="grid grid-cols-2 gap-3">
             {(["drip", "espresso"] as const).map((opt) => (
@@ -409,12 +411,14 @@ export default function Submit() {
           </div>
         </div>
 
-        <Separator className="my-1 bg-[#e0cdaf]" />
+        <Separator className="my-1 bg-[#e0cdaf] lg:hidden" />
 
         {/* ── Payment card ── */}
-        <div className="space-y-2">
-          <Label className="text-xs text-[#511e1d]">پرداخت هزینه رویداد</Label>
-          <Card className="overflow-hidden rounded-xl border-0 bg-[#280000]">
+        <div className="col-start-2 row-span-4 row-start-1 space-y-2 font-bold">
+          <Label className="text-xs text-[#511e1d] lg:hidden">
+            پرداخت هزینه رویداد
+          </Label>
+          <Card className="h-full overflow-hidden rounded-xl border-0 bg-[#280000]">
             <CardContent className="p-4">
               <div className="mb-3 flex items-start justify-between">
                 <div>
@@ -450,8 +454,10 @@ export default function Submit() {
         </div>
 
         {/* ── Upload receipt ── */}
-        <div className="space-y-2">
-          <Label className="text-xs text-[#511e1d]">آپلود رسید پرداخت </Label>
+        <div className="col-span-2 col-start-1 space-y-2">
+          <Label className="text-xs text-[#511e1d] lg:hidden">
+            آپلود رسید پرداخت{" "}
+          </Label>
           <div
             onClick={() => fileRef.current?.click()}
             onDragOver={(e) => {
@@ -527,7 +533,7 @@ export default function Submit() {
         </div>
 
         {/* ── Submit ── */}
-        <div className="flex items-center justify-center pt-1">
+        <div className="col-span-2 flex items-center justify-center pt-1">
           <Button
             type="submit"
             disabled={loading}
