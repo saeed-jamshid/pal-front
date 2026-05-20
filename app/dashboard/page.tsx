@@ -591,7 +591,7 @@ function UserCard({
         title="View receipt"
       >
         <AuthImg
-          src={user.payment_receipt || ""}
+          src={user.payment_receipt.replace("http", "https") || ""}
           alt="receipt"
           className="receipt-thumb"
           token={token}
