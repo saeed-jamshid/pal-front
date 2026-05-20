@@ -907,7 +907,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
 
       {receiptUser && (
         <ReceiptPopup
-          url={receiptUser.payment_receipt}
+          url={receiptUser.payment_receipt.replace('http', 'https')}
           name={receiptUser.full_name}
           token={token}
           onClose={() => setReceiptUser(null)}
