@@ -108,24 +108,31 @@ export default function PalCoffeeEventForm() {
           height="400"
           alt="pal_logo"
         />
-        <div className="animate-fadeUp mt-8 mb-5 flex w-full justify-center gap-2 px-2 text-xs delay-200 *:min-h-6">
+        <div className="animate-fadeUp mt-8 mb-5 flex w-full justify-center gap-2 px-2 text-xs delay-200 *:min-h-6 *:lg:text-base">
           <Badge
             variant="outline"
-            className="gap-1.5 rounded-full px-3 py-1.5 font-normal"
+            className="gap-1.5 rounded-full px-3 py-1.5 font-vazir font-normal lg:py-3"
           >
             <MaterialSymbolsCalendarTodayOutline />
             جمعه ۱ خرداد
           </Badge>
           <Badge
             variant="outline"
-            className="gap-1.5 rounded-full px-3 py-1.5 font-normal"
+            className="gap-1.5 rounded-full px-3 py-1.5 font-normal lg:py-3"
           >
             <MaterialSymbolsLightAlarmOutline />
             ۱۰:۰۰ تا ۱۴:۰۰
           </Badge>
           <Badge
             variant="outline"
-            className="gap-1.5 rounded-full px-3 py-1.5 font-normal"
+            onClick={() =>
+              window.open(
+                "https://neshan.org/maps/places/e3e384c27293cbcd49bde3c6a622dfde#c32.849-59.227-20z-0p",
+                "_blank",
+                "noopener,noreferrer"
+              )
+            }
+            className="cursor-pointer gap-1.5 rounded-full px-3 py-1.5 font-normal lg:py-3"
           >
             <MaterialSymbolsLocationOnRounded />
             کافه نوفه
@@ -147,7 +154,7 @@ export default function PalCoffeeEventForm() {
         After Taste
       </h1>
       {/* middle page */}
-      <section className="mt-2 flex w-full flex-col animate-fadeIn">
+      <section className="animate-fadeIn mt-2 flex w-full flex-col">
         <article className="relative mx-auto mt-4 flex flex-col items-center justify-between gap-2">
           <Image
             src="/img/pal_people.png"
@@ -170,7 +177,7 @@ export default function PalCoffeeEventForm() {
           <span className="absolute -bottom-px left-0 z-4 h-5 w-[3%] border-b border-l border-transparent! bg-[#fff9f0] sm:hidden"></span>
         </article>
         <article className="mx-auto mb-4 flex flex-row-reverse items-center justify-between lg:justify-center">
-          <div className="relative">
+          <div className="relative h-60 sm:h-55">
             <span className="absolute top-0 -right-px z-3 h-5 w-full rounded-tr-[8px] border-t border-r sm:hidden"></span>
             <span className="absolute -top-px -right-px z-2 size-4 border-t border-r border-transparent! bg-[#fff9f0] sm:hidden"></span>
             <Image
@@ -185,7 +192,7 @@ export default function PalCoffeeEventForm() {
               alt="pal_logo"
             />
           </div>
-          <p className="my-auto h-55 w-[calc(100%-200px)] rounded-b-[8px] border border-t-0 p-2 text-justify text-xs leading-6 tracking-normal xs:p-4 sm:border-none lg:w-1/4 lg:text-base">
+          <p className="my-auto h-60 sm:h-55 w-[calc(100%-200px)] rounded-b-[8px] border border-t-0 px-2 py-0 text-justify text-xs leading-6 tracking-normal xs:p-4 sm:border-none sm:py-2 lg:w-1/4 lg:text-base">
             توی دنیایی که جنگ و تورم هر روز قیمت قهوه رو بالا می‌بره؛ ما ترجیح
             می‌دیم به‌جای کم کردن کیفیت و فراموشی فرهنگ قهوه، دست به دست هم بدیم
             تا با ساده درست کردن قهوه فرهنگ قهوه رو زنده نگه داریم
