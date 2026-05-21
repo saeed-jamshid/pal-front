@@ -50,7 +50,11 @@ import StreamlineUltimateCoffeeEspressoMachineBold from "@/app/icons/StreamlineU
 import { useRouter } from "next/navigation"
 
 const CARD_NUMBER = "6037997462069395"
-const API_URL = "https://palcoffee.ir/api/register/"
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://palcoffee.ir"
+const API_REGISTER_PATH =
+  process.env.NEXT_PUBLIC_API_REGISTER_ENDPOINT ?? "/api/register/"
+const API_URL = `${API_BASE_URL}${API_REGISTER_PATH}`
 
 type CoffeePref = "drip" | "espresso" | ""
 
@@ -73,7 +77,13 @@ export default function Submit() {
   const [isOpen, setIsOpen] = useState(false)
   const datePickerRef = useRef<HTMLDivElement>(null)
   const [fieldErrors, setFieldErrors] = useState({})
+  const [now, setNow] = useState(new Date())
   const router = useRouter()
+
+  const EVENT_START = new Date("2026-05-22T10:00:00")
+  const EVENT_END = new Date("2026-05-22T14:00:00")
+  const eventLive = now >= EVENT_START && now < EVENT_END
+  const signupClosed = now >= EVENT_START
 
   useEffect(() => {
     if (submitted) {
@@ -83,6 +93,11 @@ export default function Submit() {
     const id = window.setTimeout(() => setFormVisible(true), 20)
     return () => window.clearTimeout(id)
   }, [submitted])
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 30000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -114,6 +129,10 @@ export default function Submit() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (signupClosed) {
+      toast.error("ثبت نام برای این رویداد بسته شده است.")
+      return
+    }
     if (!form.name) {
       toast.error("لطفاً نام خود را وارد کنید.")
       return
@@ -304,6 +323,11 @@ export default function Submit() {
         onSubmit={submit}
         className={`flex w-full flex-col gap-2 space-y-3 px-5 pt-20 transition-all duration-300 lg:m-auto lg:grid lg:grid-cols-2 lg:gap-x-4 ${formVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}
       >
+        {eventLive && (
+          <div className="col-span-2 rounded-xl border border-[#9f3422] bg-[#f5ebe5] px-4 py-3 text-center text-sm font-bold text-[#511e1d]">
+            ایونت در حال برگزاریه!
+          </div>
+        )}
         {/* ── Name ── */}
         <div className="col-start-1 space-y-1">
           <Input
@@ -555,10 +579,14 @@ export default function Submit() {
         <div className="col-span-2 flex items-center justify-center pt-1">
           <Button
             type="submit"
-            disabled={loading}
+            disabled={loading || signupClosed}
             className="rounded-xl bg-[#9f3422] text-[#fff9f0] transition-colors hover:bg-[#511e1d]"
           >
-            {loading ? "در حال ارسال…" : " تکمیل ثبت‌نام"}
+            {loading
+              ? "در حال ارسال…"
+              : signupClosed
+              ? "ثبت نام بسته است"
+              : " تکمیل ثبت‌نام"}
           </Button>
         </div>
       </form>

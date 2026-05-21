@@ -18,6 +18,9 @@ import GravityUiTerminalLine from "./icons/GravityUiTerminalLine"
 import { Badge } from "@/components/ui/badge"
 import Header from "@/components/layout/Header"
 
+const EVENT_START_DATE = new Date("2026-05-22T10:00:00+03:30")
+const EVENT_END_DATE = new Date("2026-05-22T14:00:00+03:30")
+
 function getTimeLeft(targetDate: Date) {
   const now = new Date().getTime()
   const distance = targetDate.getTime() - now
@@ -49,12 +52,11 @@ function TimeBox({ label, value }: { label: string; value: number }) {
 }
 
 function Countdown() {
-  const targetDate = new Date("2026-05-22T10:00:00+03:30")
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft(targetDate))
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft(EVENT_START_DATE))
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimeLeft(getTimeLeft(targetDate))
+      setTimeLeft(getTimeLeft(EVENT_START_DATE))
     }, 1000)
     return () => clearInterval(interval)
   }, [])
@@ -73,11 +75,13 @@ function Countdown() {
 }
 
 export default function PalCoffeeEventForm() {
-  const targetDate = new Date("2026-05-22T10:00:00")
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft(targetDate))
+  const [now, setNow] = useState(new Date())
+  const eventLive = now >= EVENT_START_DATE && now < EVENT_END_DATE
+  const signupClosed = now >= EVENT_START_DATE
+
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimeLeft(getTimeLeft(targetDate))
+      setNow(new Date())
     }, 1000)
     return () => clearInterval(interval)
   }, [])
@@ -138,15 +142,35 @@ export default function PalCoffeeEventForm() {
             کافه نوفه
           </Badge>
         </div>
+        {eventLive && (
+          <div className="mx-auto mb-4 animate-[borderMove_8s_ease_infinite] rounded-xl bg-[linear-gradient(120deg,#9f3422,#cc8831,#73a89c,#9f3422)] bg-size-[250%_250%] p-0.5">
+            <div className="flex items-center justify-center gap-2 rounded-xl bg-(--crp-cream) px-4 py-3 text-center text-sm font-bold text-[var(--crp-dark)]">
+              ایونت در حال برگزاریه!
+            </div>
+          </div>
+        )}
         <div className="animate-fadeUp mx-auto mt-4 flex flex-col-reverse items-center justify-center gap-2 px-2 delay-300 sm:flex-row sm:gap-2">
-          <Link href="/submit">
-            <Button variant="outline" className="boxShadowMain">
-              ثبت نام
-              <LineMdCoffeeHalfEmptyTwotoneLoop />
-            </Button>
-          </Link>
+          {signupClosed ? (
+            <div className="party" title=":party:">
+              <a title=":party:">
+                <ul>
+                  <li></li>
+                  <li></li>
+                  <li></li>
+                  <li></li>
+                </ul>
+              </a>
+            </div>
+          ) : (
+            <Link href="/submit">
+              <Button variant="outline" className="boxShadowMain">
+                ثبت نام
+                <LineMdCoffeeHalfEmptyTwotoneLoop />
+              </Button>
+            </Link>
+          )}
 
-          <Countdown />
+          {!signupClosed && <Countdown />}
         </div>
       </section>
 
@@ -177,7 +201,7 @@ export default function PalCoffeeEventForm() {
           <span className="absolute -bottom-px left-0 z-4 h-5 w-[3%] border-b border-l border-transparent! bg-[#fff9f0] sm:hidden"></span>
         </article>
         <article className="mx-auto mb-4 flex flex-row-reverse items-center justify-between lg:justify-center">
-          <div className="relative h-60 sm:h-55">
+          <div className="relative h-60">
             <span className="absolute top-0 -right-px z-3 h-5 w-full rounded-tr-[8px] border-t border-r sm:hidden"></span>
             <span className="absolute -top-px -right-px z-2 size-4 border-t border-r border-transparent! bg-[#fff9f0] sm:hidden"></span>
             <Image
@@ -186,20 +210,20 @@ export default function PalCoffeeEventForm() {
               style={{
                 height: "auto",
               }}
-              className="h-55! object-contain lg:h-80!"
+              className="h-60! object-contain lg:h-80!"
               loading="lazy"
               height="200"
               alt="pal_logo"
             />
           </div>
-          <p className="my-auto h-60 sm:h-55 w-[calc(100%-200px)] rounded-b-[8px] border border-t-0 px-2 py-0 text-justify text-xs leading-6 tracking-normal xs:p-4 sm:border-none sm:py-2 lg:w-1/4 lg:text-base">
+          <p className="my-auto h-60 w-[calc(100%-200px)] rounded-b-[8px] border border-t-0 px-2 py-0 text-justify text-xs leading-6 tracking-normal xs:p-4 sm:h-60 sm:border-none sm:py-2 lg:w-1/4 lg:text-base">
             توی دنیایی که جنگ و تورم هر روز قیمت قهوه رو بالا می‌بره؛ ما ترجیح
             می‌دیم به‌جای کم کردن کیفیت و فراموشی فرهنگ قهوه، دست به دست هم بدیم
             تا با ساده درست کردن قهوه فرهنگ قهوه رو زنده نگه داریم
             <br />
           </p>
         </article>
-        <div className="mx-auto my-6 flex w-full max-w-2xl items-center gap-3">
+        <div className="mx-auto my-6 flex w-full max-w-2xl items-center gap-3 lg:mt-20">
           <div className="h-px flex-1 bg-border" />
           <div className="h-1.5 w-1.5 rounded-full bg-accent opacity-60" />
           <div className="h-px flex-1 bg-border" />
@@ -255,7 +279,7 @@ export default function PalCoffeeEventForm() {
             width="250"
             loading="lazy"
             id="second-card"
-            className="h-[166px]! object-cover!"
+            className="h-41.5! object-cover!"
             height="250"
             alt="pal_logo"
           />

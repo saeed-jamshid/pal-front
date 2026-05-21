@@ -1,8 +1,17 @@
 "use client"
 
+import Image from "next/image"
 import { useState, useEffect, useCallback, useRef } from "react"
 
-const API_URL = "https://palcoffee.ir"
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://palcoffee.ir"
+const API_ENDPOINT_TOKEN =
+  process.env.NEXT_PUBLIC_API_TOKEN_ENDPOINT ?? "/api/token/"
+const API_ENDPOINT_REGISTER =
+  process.env.NEXT_PUBLIC_API_REGISTER_ENDPOINT ?? "/api/register/"
+const API_ENDPOINT_DASHBOARD =
+  process.env.NEXT_PUBLIC_API_DASHBOARD_ENDPOINT ?? "/api/dashboard/"
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type StatusChoice = "pending" | "confirmed" | "rejected"
@@ -50,7 +59,6 @@ const STATUS_TO_API: Record<StatusChoice, string> = {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function calcAge(birthDate: string): string {
-  console.log(birthDate)
   if (!birthDate) return "—"
   const birth = new Date(birthDate)
   if (isNaN(birth.getTime())) return "—"
@@ -63,9 +71,18 @@ function calcAge(birthDate: string): string {
   return `${age}`
 }
 
+function addTimeOffset(date: Date, hours: number, minutes: number) {
+  const copy = new Date(date.getTime())
+  copy.setHours(copy.getHours() + hours, copy.getMinutes() + minutes)
+  return copy
+}
+
 function fmt(iso: string) {
   if (!iso) return "—"
-  return new Date(iso).toLocaleDateString("en-GB", {
+  const date = new Date(iso)
+  if (isNaN(date.getTime())) return "—"
+  const adjusted = addTimeOffset(date, 3, 30)
+  return adjusted.toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
@@ -116,7 +133,7 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
     setLoading(true)
     setError("")
     try {
-      const res = await fetch(API_URL + "/api/token/", {
+      const res = await fetch(API_BASE_URL + API_ENDPOINT_TOKEN, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -258,7 +275,17 @@ function AuthImg({
     }
   }, [])
 
-  return <img src={objectUrl} alt={alt} className={className} style={style} />
+  return (
+    <Image
+      src={objectUrl}
+      alt={alt}
+      className={className}
+      style={style}
+      unoptimized
+      width={400}
+      height={300}
+    />
+  )
 }
 
 // ─── Receipt Popup ────────────────────────────────────────────────────────────
@@ -372,10 +399,7 @@ function AddUserModal({
       body.append("coffee_preference", coffee)
       body.append("payment_receipt", file)
 
-      for (const [key, value] of body.entries()) {
-        console.log(key, value)
-      }
-      const res = await fetch(API_URL + "/api/register/", {
+      const res = await fetch(API_BASE_URL + API_ENDPOINT_REGISTER, {
         method: "POST",
         body,
       })
@@ -702,7 +726,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
     }
     setLoading(true)
     setFetchError("")
-    fetch(API_URL + "/api/dashboard/", {
+    fetch(API_BASE_URL + API_ENDPOINT_DASHBOARD, {
       headers: { Authorization: `Bearer ${t}` },
     })
       .then(async (res) => {
@@ -769,14 +793,17 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       )
       const t = getToken()
       try {
-        const res = await fetch(API_URL + `/api/dashboard/${id}/`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${t}`,
-          },
-          body: JSON.stringify({ status: STATUS_TO_API[status] }),
-        })
+        const res = await fetch(
+          API_BASE_URL + `${API_ENDPOINT_DASHBOARD}${id}/`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${t}`,
+            },
+            body: JSON.stringify({ status: STATUS_TO_API[status] }),
+          }
+        )
         if (res.status === 401) onLogout()
       } catch {
         // keep optimistic
