@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { useState, useEffect, useCallback, useRef } from "react"
+import * as XLSX from "xlsx"
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://palcoffee.ir"
@@ -642,9 +643,11 @@ function UserCard({
       <div className="card-body">
         <div className="card-row">
           <span className="card-key">Age</span>
-            <span className="card-val">
-              {user.age !== "-" ? `${user.age}` : calcAge(user?.birth_date || "-")}
-            </span>
+          <span className="card-val">
+            {user.age !== "-"
+              ? `${user.age}`
+              : calcAge(user?.birth_date || "-")}
+          </span>
         </div>
         <div className="card-row">
           <span className="card-key">Coffee</span>
@@ -761,6 +764,47 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
       .finally(() => setLoading(false))
   }
 
+  // 1. Define the translation mapping
+  const STATUS_TRANSLATIONS: Record<string, string> = {
+    "تایید شده": "Approved",
+    "در انتظار بررسی": "Pending",
+    "رد شده": "Rejected",
+  }
+  const handleExport = () => {
+    // 2. Map, filter, and translate the data
+    const processedData = users.map((user) => {
+      const result = {
+        "Full Name": user?.full_name,
+        "Phone Number": user?.phone_number,
+        Status:
+          STATUS_TRANSLATIONS[user?.status_choices] || user?.status_choices,
+      }
+      console.log(result)
+      return result
+    })
+
+    // 3. Convert JSON data to an Excel Worksheet
+    const worksheet = XLSX.utils.json_to_sheet(processedData)
+
+    // 4. Create a new Workbook and append the worksheet
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Users List")
+
+    // Optional: Auto-adjust column widths for better readability
+    const maxNameLen = Math.max(
+      ...processedData.map((u) => u["Full Name"]?.length || 10),
+      12
+    )
+    worksheet["!cols"] = [
+      { wch: maxNameLen + 3 }, // Full Name column width
+      { wch: 15 }, // Phone Number column width
+      { wch: 12 }, // Status column width
+    ]
+
+    // 5. Trigger the browser download
+    XLSX.writeFile(workbook, "exported_users.xlsx")
+  }
+
   useEffect(() => {
     loadUsers()
   }, [])
@@ -845,6 +889,9 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           <span className="topbar-title">Admin Dashboard</span>
         </div>
         <div className="topbar-right">
+          <button className="btn-refresh" onClick={handleExport} title="export">
+            Export
+          </button>
           <button className="btn-refresh" onClick={loadUsers} title="Refresh">
             ↻
           </button>
@@ -934,7 +981,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
 
       {receiptUser && (
         <ReceiptPopup
-          url={receiptUser.payment_receipt.replace('http', 'https')}
+          url={receiptUser.payment_receipt.replace("http", "https")}
           name={receiptUser.full_name}
           token={token}
           onClose={() => setReceiptUser(null)}
