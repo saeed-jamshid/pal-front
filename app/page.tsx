@@ -112,7 +112,7 @@ export default function PalCoffeeEventForm() {
           height="400"
           alt="pal_logo"
         />
-        <div className="animate-fadeUp mt-8 mb-5 flex w-full justify-center gap-2 px-2 text-xs delay-200 *:min-h-6 *:lg:text-base">
+        <div className="animate-fadeUp mt-8 mb-5 hidden w-full justify-center gap-2 px-2 text-xs delay-200 *:min-h-6 *:opacity-50 *:lg:text-base">
           <Badge
             variant="outline"
             className="gap-1.5 rounded-full px-3 py-1.5 font-vazir font-normal lg:py-3"
@@ -150,7 +150,7 @@ export default function PalCoffeeEventForm() {
           </div>
         )}
         <div className="animate-fadeUp mx-auto mt-4 flex flex-col-reverse items-center justify-center gap-2 px-2 delay-300 sm:flex-row sm:gap-2">
-          {signupClosed ? (
+          {signupClosed && eventLive ? (
             <div className="party" title=":party:">
               <a title=":party:">
                 <ul>
@@ -162,12 +162,22 @@ export default function PalCoffeeEventForm() {
               </a>
             </div>
           ) : (
-            <Link href="/submit">
-              <Button variant="outline" className="boxShadowMain">
-                ثبت نام
-                <LineMdCoffeeHalfEmptyTwotoneLoop />
-              </Button>
-            </Link>
+            !eventLive && (
+              <Link
+                href="/"
+                className="mt-5 flex cursor-default flex-col items-center gap-2"
+              >
+                <Button
+                  variant="default"
+                  disabled
+                  className="boxShadowMain text-base"
+                >
+                  گالری
+                  <LineMdCoffeeHalfEmptyTwotoneLoop />
+                </Button>
+                <span className="text-xs lg:text-base">به زودی...</span>
+              </Link>
+            )
           )}
 
           {!signupClosed && <Countdown />}
