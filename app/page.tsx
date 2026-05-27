@@ -164,18 +164,16 @@ export default function PalCoffeeEventForm() {
           ) : (
             !eventLive && (
               <Link
-                href="/"
+                href="/gallery"
                 className="mt-5 flex cursor-default flex-col items-center gap-2"
               >
                 <Button
                   variant="default"
-                  disabled
                   className="boxShadowMain text-base"
                 >
                   گالری
                   <LineMdCoffeeHalfEmptyTwotoneLoop />
                 </Button>
-                <span className="text-xs lg:text-base">به زودی...</span>
               </Link>
             )
           )}

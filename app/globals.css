@@ -653,3 +653,26 @@
     border-left-color: var(--crp-terracotta);
   }
 }
+
+.pal-text {
+  font-size: clamp(6rem, 15vw, 16rem);
+  font-weight: 900;
+  letter-spacing: -0.05em;
+
+  color: white;
+
+  /* fade the end */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    black 0%,
+    black 70%,
+    transparent 100%
+  );
+
+  mask-image: linear-gradient(
+    to right,
+    black 0%,
+    black 70%,
+    transparent 100%
+  );
+}
