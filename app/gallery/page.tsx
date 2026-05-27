@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import Header from "@/components/layout/Header"
 import { s } from "../styles"
+import  MinimalVideoPlayer  from "@/components/player"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -37,8 +38,15 @@ const TILE_POOL: TileSize[] = [
   { col: 2, row: 2 }, // big (rare)
 ]
 
+// function pickTiles(count: number, seed: number): TileSize[] {
+//   return Array.from({ length: count }, (_, i) => {
+//     const idx = Math.abs((seed * 31 + i * 17) % TILE_POOL.length)
+//     return TILE_POOL[idx]
+//   })
+// }
 function pickTiles(count: number, seed: number): TileSize[] {
   return Array.from({ length: count }, (_, i) => {
+    if (i === 14) return { col: 2, row: 1 } // will be overridden by col-span-full on mobile
     const idx = Math.abs((seed * 31 + i * 17) % TILE_POOL.length)
     return TILE_POOL[idx]
   })
@@ -80,10 +88,12 @@ function GridItem({
   image,
   tile,
   onClick,
+  forceFullRow = false,
 }: {
   image: GalleryImage
   tile: TileSize
   onClick: () => void
+  forceFullRow?: boolean
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)
@@ -109,7 +119,7 @@ function GridItem({
     <div
       ref={ref}
       className={[
-        COL_SPAN[tile.col],
+        forceFullRow ? "col-span-full! md:col-span-3!" : COL_SPAN[tile.col],
         ROW_SPAN[tile.row],
         "group relative cursor-pointer overflow-hidden rounded-md bg-muted",
       ].join(" ")}
@@ -121,9 +131,9 @@ function GridItem({
       {visible && (
         <Image
           src={image.src}
-          alt={image.alt}
+          alt="Pal_image"
           fill
-          sizes={tile.col === 2 ? "50vw" : "25vw"}
+          sizes={tile.col === 2 ? "50vw" : "75vw"}
           className={[
             "object-cover transition-all duration-500",
             loaded ? "scale-100 opacity-100" : "scale-105 opacity-0",
@@ -265,7 +275,7 @@ export default function Gallery() {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [heroLoading, setHeroLoading] = useState(true)
-
+  const [videoOpen, setVideoOpen] = useState(false)
   // full-array shuffle so hero can be random too (stable per page load via `seed`)
   const displayed = useMemo(() => {
     if (images.length === 0) return []
@@ -327,7 +337,7 @@ export default function Gallery() {
           {!heroLoading && (
             <h1
               className={[
-                "pal-text absolute top-1/2 transition-all left-0 object-cover text-background duration-500",
+                "pal-text absolute top-1/2 left-0 object-cover text-background transition-all duration-500",
                 !heroLoading ? "opacity-100" : "opacity-0",
                 "pal-text",
               ].join(" ")}
@@ -356,7 +366,6 @@ export default function Gallery() {
           </div>
         </div>
       )}
-
       {/* ── Mosaic grid ── */}
       {grid.length > 0 && (
         <div
@@ -372,11 +381,18 @@ export default function Gallery() {
               image={img}
               tile={tiles[i] ?? { col: 1, row: 1 }}
               onClick={() => openAt(i + 1)}
+              forceFullRow={img.id === 14}
             />
           ))}
         </div>
       )}
-
+      {/* ── Vertical Video ── */}
+      <div
+        className="group relative w-full cursor-pointer overflow-hidden rounded-lg sm:w-95"
+        style={{ aspectRatio: "9/16", maxHeight: 700 }}
+      >
+        <MinimalVideoPlayer src="/img/gallery/pal.mp4" />
+      </div>
       {/* ── Lightbox ── */}
       <Lightbox
         images={displayed}
