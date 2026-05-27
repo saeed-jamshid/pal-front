@@ -22,7 +22,6 @@ export interface GalleryImage {
   label?: string
 }
 
-
 // ─── Tile sizes ───────────────────────────────────────────────────────────────
 
 type TileSize = { col: 1 | 2; row: 1 | 2 }
@@ -172,6 +171,7 @@ function Lightbox({
   onNavigate: (dir: -1 | 1) => void
 }) {
   const current = images[index]
+  const [loadingD, setLoadingD] = useState(true)
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
@@ -218,15 +218,18 @@ function Lightbox({
             <ChevronLeft className="h-6 w-6" />
           </Button>
           <div className="relative aspect-3/4 w-full">
+            {!loadingD && (
+              <div className="absolute inset-0 size-full animate-pulse rounded-xl bg-gray-200/50 backdrop-blur-2xl" />
+            )}
             <Image
               key={current.id}
               src={current.src}
               alt={current.alt}
               fill
               sizes="100vw"
-              quality={100}
+              loading="eager"
               className="absolute animate-in rounded-xl object-cover duration-200 fade-in-0 zoom-in-95"
-              priority
+              onLoad={() => setLoadingD(false)}
             />
           </div>
           <Button
@@ -261,6 +264,7 @@ export default function Gallery() {
   const [shuffleKey] = useState(() => Math.floor(Math.random() * 10000))
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [heroLoading, setHeroLoading] = useState(true)
 
   // full-array shuffle so hero can be random too (stable per page load via `seed`)
   const displayed = useMemo(() => {
@@ -303,19 +307,38 @@ export default function Gallery() {
           style={{ height: ROW_HEIGHT * 2.5 }}
           onClick={() => openAt(0)}
         >
+          {!heroLoading && (
+            <div className="absolute inset-0 animate-pulse bg-muted-foreground/10" />
+          )}
           <Image
             src={hero.src}
             alt={hero.alt}
             fill
             sizes="100vw"
-            className="object-cover transition-all duration-500 group-hover:scale-105 group-hover:brightness-75"
+            className={[
+              "object-cover transition-all duration-500",
+              !heroLoading ? "scale-100 opacity-100" : "scale-115 opacity-0",
+              "group-hover:scale-105 group-hover:brightness-75",
+            ].join(" ")}
             priority
+            quality={100}
+            onLoad={() => setHeroLoading(false)}
           />
-          <h1 className="absolute pal-text top-1/2 left-0 text-background">
-            {title}
-          </h1>
+          {!heroLoading && (
+            <h1
+              className={[
+                "pal-text absolute top-1/2 transition-all left-0 object-cover text-background duration-500",
+                !heroLoading ? "opacity-100" : "opacity-0",
+                "pal-text",
+              ].join(" ")}
+            >
+              {title}
+            </h1>
+          )}
           <div className="absolute inset-0 flex flex-col justify-end bg-linear-to-t from-black/70 via-black/10 to-transparent p-5 transition-opacity duration-300 group-hover:opacity-100 md:opacity-0">
-            <p className="mb-2 text-base font-medium text-white">{title} Gallery</p>
+            <p className="mb-2 text-base font-medium text-white">
+              {title} Gallery
+            </p>
             <Button
               size="icon"
               variant="secondary"

@@ -164,6 +164,7 @@ export default function PalCoffeeEventForm() {
           ) : (
             !eventLive && (
               <Link
+                prefetch
                 href="/gallery"
                 className="mt-5 flex cursor-default flex-col items-center gap-2"
               >
