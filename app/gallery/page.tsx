@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import Header from "@/components/layout/Header"
 import { s } from "../styles"
-import  MinimalVideoPlayer  from "@/components/player"
+import MinimalVideoPlayer from "@/components/player"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -109,7 +109,7 @@ function GridItem({
           observer.disconnect()
         }
       },
-      { rootMargin: "300px" }
+      { rootMargin: "100px" }
     )
     observer.observe(el)
     return () => observer.disconnect()
@@ -275,8 +275,24 @@ export default function Gallery() {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [heroLoading, setHeroLoading] = useState(true)
-  const [videoOpen, setVideoOpen] = useState(false)
+  const videoRef = useRef<HTMLDivElement>(null)
+  const [videoVisible, setVideoVisible] = useState(false)
+
+  useEffect(() => {
+    const el = videoRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setVideoVisible(true)
+      },
+      { rootMargin: "300px" }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   // full-array shuffle so hero can be random too (stable per page load via `seed`)
+  //
   const displayed = useMemo(() => {
     if (images.length === 0) return []
     return isShuffled ? shuffleArr(images, seed) : images
@@ -388,10 +404,11 @@ export default function Gallery() {
       )}
       {/* ── Vertical Video ── */}
       <div
+        ref={videoRef}
         className="group relative w-full cursor-pointer overflow-hidden rounded-lg sm:w-95"
         style={{ aspectRatio: "9/16", maxHeight: 700 }}
       >
-        <MinimalVideoPlayer src="/img/gallery/pal.mp4" />
+        {videoVisible && <MinimalVideoPlayer src="/img/gallery/pal.mp4" />}
       </div>
       {/* ── Lightbox ── */}
       <Lightbox

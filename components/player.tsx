@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useCallback } from "react"
 import {
   createPlayer,
   PlayButton,
@@ -11,6 +11,95 @@ import { Video, videoFeatures } from "@videojs/react/video"
 
 const Player = createPlayer({ features: videoFeatures })
 
+// ── Touch seek controls via store ─────────────────────────────────────────────
+function TouchControls() {
+  const media = Player.useMedia()
+  const store = Player.usePlayer()
+  const touchStartX = useRef<number | null>(null)
+  const touchStartY = useRef<number | null>(null)
+  const [seekHint, setSeekHint] = useState<"forward" | "backward" | null>(null)
+  const lastTap = useRef<number>(0)
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+  }, [])
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartX.current === null || touchStartY.current === null) return
+
+      const dx = e.changedTouches[0].clientX - touchStartX.current
+      const dy = e.changedTouches[0].clientY - touchStartY.current
+      touchStartX.current = null
+      touchStartY.current = null
+
+      // Double tap fullscreen
+      const now = Date.now()
+      if (now - lastTap.current < 300) {
+        store.toggleFullscreen()
+        return
+      }
+      lastTap.current = now
+
+      // Ignore vertical swipes
+      if (Math.abs(dy) > Math.abs(dx)) return
+      // Ignore small swipes
+      if (Math.abs(dx) < 40 || !media) return
+
+      if (dx > 0) {
+        media.currentTime = Math.min(media.currentTime + 5, media.duration)
+        setSeekHint("forward")
+      } else {
+        media.currentTime = Math.max(media.currentTime - 5, 0)
+        setSeekHint("backward")
+      }
+
+      setTimeout(() => setSeekHint(null), 800)
+    },
+    [media, store]
+  )
+
+  return (
+    <div
+      className="vjs-touch-surface"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {seekHint && (
+        <div className={`vjs-seek-hint vjs-seek-hint--${seekHint}`}>
+          {seekHint === "backward" ? (
+            <>
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                width="26"
+                height="26"
+              >
+                <path d="M11 18V6l-8.5 6 8.5 6zm.5-6 8.5 6V6l-8.5 6z" />
+              </svg>
+              <span>5s</span>
+            </>
+          ) : (
+            <>
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                width="26"
+                height="26"
+              >
+                <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" />
+              </svg>
+              <span>5s</span>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 interface MinimalVideoPlayerProps {
   src: string
   poster?: string
@@ -20,78 +109,22 @@ export default function MinimalVideoPlayer({
   src,
   poster,
 }: MinimalVideoPlayerProps) {
-  const touchStartX = useRef<number | null>(null)
-  const [seekHint, setSeekHint] = useState<"forward" | "backward" | null>(null)
-
-  function handleTouchStart(e: React.TouchEvent) {
-    touchStartX.current = e.touches[0].clientX
-  }
-
-  function handleTouchEnd(e: React.TouchEvent) {
-    if (touchStartX.current === null) return
-    const diff = e.changedTouches[0].clientX - touchStartX.current
-    touchStartX.current = null
-
-    // Only trigger on horizontal swipe > 40px
-    if (Math.abs(diff) < 40) return
-
-    const video = e.currentTarget.querySelector("video")
-    if (!video) return
-
-    if (diff > 0) {
-      video.currentTime = Math.min(video.currentTime + 5, video.duration)
-      setSeekHint("forward")
-    } else {
-      video.currentTime = Math.max(video.currentTime - 5, 0)
-      setSeekHint("backward")
-    }
-
-    setTimeout(() => setSeekHint(null), 800)
-  }
-
   return (
     <Player.Provider>
-      <Player.Container
-        className="vjs-minimal-container"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        <Video src={src} playsInline poster="/img/gallery/videoPreview.jpeg" />
+      <Player.Container className="vjs-minimal-container">
+        <Video
+          src={src}
+          playsInline
+          preload="metadata"
+          poster="/img/gallery/videoPreview.jpeg"
+        />
 
         {poster && (
           <Poster className="vjs-minimal-poster" src={poster} alt="" />
         )}
 
-        {/* Seek hint overlay */}
-        {seekHint && (
-          <div className={`vjs-seek-hint vjs-seek-hint--${seekHint}`}>
-            {seekHint === "backward" ? (
-              <>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  width="28"
-                  height="28"
-                >
-                  <path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z" />
-                </svg>
-                <span>5s</span>
-              </>
-            ) : (
-              <>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  width="28"
-                  height="28"
-                >
-                  <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" />
-                </svg>
-                <span>5s</span>
-              </>
-            )}
-          </div>
-        )}
+        {/* Full touch surface — seek + double tap fullscreen */}
+        <TouchControls />
 
         {/* Play button — centered */}
         <PlayButton
@@ -167,7 +200,6 @@ export default function MinimalVideoPlayer({
           background: #000;
           border-radius: 12px;
           overflow: hidden;
-          touch-action: pan-y;
         }
 
         .vjs-minimal-container video {
@@ -186,8 +218,14 @@ export default function MinimalVideoPlayer({
           transition: opacity 0.3s;
         }
 
-        .vjs-minimal-poster:not([data-visible]) {
-          opacity: 0;
+        .vjs-minimal-poster:not([data-visible]) { opacity: 0; }
+
+        /* Touch surface covers entire player */
+        .vjs-touch-surface {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          touch-action: pan-y;
         }
 
         /* Seek hint */
@@ -200,7 +238,7 @@ export default function MinimalVideoPlayer({
           align-items: center;
           gap: 4px;
           color: white;
-          background: rgba(0, 0, 0, 0.45);
+          background: rgba(0,0,0,0.45);
           backdrop-filter: blur(8px);
           border-radius: 12px;
           padding: 12px 16px;
@@ -208,11 +246,7 @@ export default function MinimalVideoPlayer({
           animation: vjs-hint-fade 0.8s ease forwards;
         }
 
-        .vjs-seek-hint span {
-          font-size: 13px;
-          font-weight: 500;
-        }
-
+        .vjs-seek-hint span { font-size: 13px; font-weight: 500; }
         .vjs-seek-hint--backward { left: 20px; }
         .vjs-seek-hint--forward  { right: 20px; }
 
@@ -228,6 +262,7 @@ export default function MinimalVideoPlayer({
           position: absolute;
           top: 50%;
           left: 50%;
+          z-index: 2;
           transform: translate(-50%, -50%);
           display: flex;
           align-items: center;
@@ -235,7 +270,7 @@ export default function MinimalVideoPlayer({
           width: 56px;
           height: 56px;
           border-radius: 50%;
-          background: rgba(0, 0, 0, 0.4);
+          background: rgba(0,0,0,0.4);
           border: none;
           color: white;
           cursor: pointer;
@@ -244,7 +279,7 @@ export default function MinimalVideoPlayer({
         }
 
         .vjs-minimal-play:hover {
-          background: rgba(0, 0, 0, 0.6);
+          background: rgba(0,0,0,0.6);
           transform: translate(-50%, -50%) scale(1.08);
         }
 
@@ -263,13 +298,14 @@ export default function MinimalVideoPlayer({
           position: absolute;
           bottom: 12px;
           right: 12px;
+          z-index: 2;
           display: flex;
           align-items: center;
           justify-content: center;
           width: 36px;
           height: 36px;
           border-radius: 8px;
-          background: rgba(0, 0, 0, 0.4);
+          background: rgba(0,0,0,0.4);
           border: none;
           color: white;
           cursor: pointer;
@@ -278,17 +314,9 @@ export default function MinimalVideoPlayer({
           transition: opacity 0.2s, background 0.2s;
         }
 
-        .vjs-minimal-container:hover .vjs-minimal-fullscreen {
-          opacity: 1;
-        }
-
-        .vjs-minimal-fullscreen:hover {
-          background: rgba(0, 0, 0, 0.6);
-        }
-
-        .vjs-minimal-fullscreen[data-availability="unsupported"] {
-          display: none;
-        }
+        .vjs-minimal-container:hover .vjs-minimal-fullscreen { opacity: 1; }
+        .vjs-minimal-fullscreen:hover { background: rgba(0,0,0,0.6); }
+        .vjs-minimal-fullscreen[data-availability="unsupported"] { display: none; }
       `}</style>
     </Player.Provider>
   )
