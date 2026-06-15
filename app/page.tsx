@@ -168,10 +168,7 @@ export default function PalCoffeeEventForm() {
                 href="/gallery"
                 className="mt-5 flex cursor-default flex-col items-center gap-2"
               >
-                <Button
-                  variant="default"
-                  className="boxShadowMain text-base"
-                >
+                <Button variant="default" className="boxShadowMain text-base">
                   گالری
                   <LineMdCoffeeHalfEmptyTwotoneLoop />
                 </Button>
@@ -219,13 +216,13 @@ export default function PalCoffeeEventForm() {
               style={{
                 height: "auto",
               }}
-              className="h-60! object-contain lg:h-80!"
+              className="mr-2 h-60! object-contain lg:h-80!"
               loading="lazy"
               height="200"
               alt="pal_logo"
             />
           </div>
-          <p className="my-auto h-60 w-[calc(100%-200px)] rounded-b-[8px] border border-t-0 px-2 py-0 text-justify text-xs leading-6 tracking-normal xs:p-4 sm:h-60 sm:border-none sm:py-2 lg:w-1/4 lg:text-base">
+          <p className="my-auto h-60 w-full rounded-b-[8px] border border-t-0 px-2 py-0 text-justify text-xs leading-6 tracking-normal xs:w-[calc(100%-200px)] xs:p-4 sm:h-60 sm:border-none sm:py-2 lg:w-1/4 lg:text-base">
             توی دنیایی که جنگ و تورم هر روز قیمت قهوه رو بالا می‌بره؛ ما ترجیح
             می‌دیم به‌جای کم کردن کیفیت و فراموشی فرهنگ قهوه، دست به دست هم بدیم
             تا با ساده درست کردن قهوه فرهنگ قهوه رو زنده نگه داریم

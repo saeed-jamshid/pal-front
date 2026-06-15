@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { useZoom } from "@/hooks/useZoom"
 import { useEffect, useRef, useState, useCallback, useMemo } from "react"
 import Image from "next/image"
 import { Download, ChevronLeft, ChevronRight } from "lucide-react"
@@ -122,7 +123,7 @@ function GridItem({
       className={[
         forceFullRow ? "col-span-full! md:col-span-3!" : COL_SPAN[tile.col],
         ROW_SPAN[tile.row],
-        "group relative cursor-pointer overflow-hidden rounded-md bg-muted",
+        "group relative overflow-hidden rounded-md bg-muted",
       ].join(" ")}
       onClick={onClick}
     >
@@ -184,6 +185,20 @@ function Lightbox({
   const current = images[index]
   const [loadingD, setLoadingD] = useState(true)
   const [scale, setScale] = useState(1)
+  const { onTouchStart, onTouchMove, onTouchEnd } = useZoom({
+    scale,
+    setScale,
+    minScale: 1,
+    maxScale: 4,
+  })
+  const motionRef = useRef(null)
+
+  useEffect(() => {
+    const el = motionRef.current
+    if (!el) return
+    el?.addEventListener("touchmove", onTouchMove, { passive: false })
+    return () => el?.removeEventListener("touchmove", onTouchMove)
+  }, [onTouchMove])
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
@@ -221,7 +236,7 @@ function Lightbox({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="box-shadow-none md:min-w-[30vw] gap-0 overflow-hidden bg-transparent p-0 px-2 shadow-none ring-0 backdrop-blur-none outline-none">
+      <DialogContent className="box-shadow-none gap-0 overflow-hidden bg-transparent p-0 px-2 shadow-none ring-0 backdrop-blur-none outline-none md:min-w-[30vw]">
         <DialogTitle />
         <div className="relative mb-5 flex items-center justify-between rounded-xl border-b border-none border-white/10 bg-white/5 px-4 py-4 backdrop-blur-3xl">
           <div className="flex items-center">
@@ -255,18 +270,12 @@ function Lightbox({
             onTouchEnd={handleTouchEnd}
           >
             <motion.div
-              // drag="x"
+              ref={motionRef}
               drag={scale > 1}
               onDragEnd={(_, info) => {
-                if (info.offset.x > 100) onNavigate(-1)
-                if (info.offset.x < -100) onNavigate(1)
                 const swipeThreshold = 100
-
-                if (info.offset.x > swipeThreshold) {
-                  onNavigate(-1)
-                } else if (info.offset.x < -swipeThreshold) {
-                  onNavigate(1)
-                }
+                if (info.offset.x > swipeThreshold) onNavigate(-1)
+                else if (info.offset.x < -swipeThreshold) onNavigate(1)
               }}
               className="size-full cursor-grab active:cursor-grabbing"
               dragElastic={0.2}
@@ -279,6 +288,9 @@ function Lightbox({
               animate={{ scale }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               onDoubleClick={() => setScale(scale > 1 ? 1 : 2)}
+              onTouchStart={onTouchStart}
+              onTouchMove={onTouchMove} // ← needs passive: false, see note below
+              onTouchEnd={onTouchEnd}
             >
               {!loadingD && (
                 <div className="absolute inset-0 size-full rounded-xl" />

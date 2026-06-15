@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   //cacheComponents: true,
+   //output : "export",
   images: {
     qualities: [70, 80, 100],
     imageSizes: [350, 450, 700],
