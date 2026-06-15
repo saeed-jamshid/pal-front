@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { useEffect, useRef, useState, useCallback, useMemo } from "react"
 import Image from "next/image"
 import { Download, ChevronLeft, ChevronRight } from "lucide-react"
@@ -182,6 +183,7 @@ function Lightbox({
 }) {
   const current = images[index]
   const [loadingD, setLoadingD] = useState(true)
+  const [scale, setScale] = useState(1)
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
@@ -195,11 +197,31 @@ function Lightbox({
     window.addEventListener("keydown", handleKey)
     return () => window.removeEventListener("keydown", handleKey)
   }, [handleKey])
-
+  const touchStartX = useRef<number | null>(null)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return
+    const touchEndX = e.changedTouches[0].clientX
+    const diff = touchStartX.current - touchEndX
+    const threshold = 50
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        // swipe left -> next image
+        onNavigate(1)
+      } else {
+        // swipe right -> previous image
+        onNavigate(-1)
+      }
+    }
+    touchStartX.current = null
+  }
   if (!current) return null
+
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="box-shadow-none w-full max-w-lg gap-0 overflow-hidden bg-transparent p-0 px-2 shadow-none ring-0 backdrop-blur-none outline-none">
+      <DialogContent className="box-shadow-none md:min-w-[30vw] gap-0 overflow-hidden bg-transparent p-0 px-2 shadow-none ring-0 backdrop-blur-none outline-none">
         <DialogTitle />
         <div className="relative mb-5 flex items-center justify-between rounded-xl border-b border-none border-white/10 bg-white/5 px-4 py-4 backdrop-blur-3xl">
           <div className="flex items-center">
@@ -227,24 +249,55 @@ function Lightbox({
           >
             <ChevronLeft className="h-6 w-6" />
           </Button>
-          <div className="relative aspect-3/4 w-full">
-            {!loadingD && (
-              <div className="absolute inset-0 size-full animate-pulse rounded-xl bg-gray-200/50 backdrop-blur-2xl" />
-            )}
-            <Image
-              key={current.id}
-              src={current.src}
-              alt={current.alt}
-              fill
-              sizes="100vw"
-              loading="eager"
-              className="absolute animate-in rounded-xl object-cover duration-200 fade-in-0 zoom-in-95"
-              onLoad={() => setLoadingD(false)}
-            />
+          <div
+            className="relative aspect-3/4 w-full overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            <motion.div
+              // drag="x"
+              drag={scale > 1}
+              onDragEnd={(_, info) => {
+                if (info.offset.x > 100) onNavigate(-1)
+                if (info.offset.x < -100) onNavigate(1)
+                const swipeThreshold = 100
+
+                if (info.offset.x > swipeThreshold) {
+                  onNavigate(-1)
+                } else if (info.offset.x < -swipeThreshold) {
+                  onNavigate(1)
+                }
+              }}
+              className="size-full cursor-grab active:cursor-grabbing"
+              dragElastic={0.2}
+              dragConstraints={{
+                top: -1000,
+                left: -1000,
+                right: 1000,
+                bottom: 1000,
+              }}
+              animate={{ scale }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              onDoubleClick={() => setScale(scale > 1 ? 1 : 2)}
+            >
+              {!loadingD && (
+                <div className="absolute inset-0 size-full rounded-xl" />
+              )}
+              <Image
+                key={current.id}
+                src={current.src}
+                alt={current.alt}
+                fill
+                sizes="100vw"
+                loading="eager"
+                className="absolute w-full animate-in object-contain duration-200 fade-in-0 zoom-in-95"
+                onLoad={() => setLoadingD(false)}
+              />
+            </motion.div>
           </div>
           <Button
             size="icon"
-            className="absolute top-1/2 right-1 z-10 h-10 w-10 border-2 text-white backdrop-blur-3xl"
+            className="absolute top-1/2 right-1 z-10 h-10 w-10 border-2 text-white"
             onClick={() => onNavigate(1)}
           >
             <ChevronRight className="h-6 w-6" />
@@ -340,14 +393,13 @@ export default function Gallery() {
             src={hero.src}
             alt={hero.alt}
             fill
-            sizes="100vw"
+            sizes="500px"
             className={[
               "object-cover transition-all duration-500",
               !heroLoading ? "scale-100 opacity-100" : "scale-115 opacity-0",
               "group-hover:scale-105 group-hover:brightness-75",
             ].join(" ")}
             priority
-            quality={100}
             onLoad={() => setHeroLoading(false)}
           />
           {!heroLoading && (
