@@ -3,6 +3,13 @@
 import Image from "next/image"
 import { useState, useEffect, useCallback, useRef } from "react"
 import * as XLSX from "xlsx"
+import {
+  createProductSlug,
+  defaultCatalogProducts,
+  loadCatalogProducts,
+  saveCatalogProducts,
+  type CatalogProduct,
+} from "@/lib/catalog"
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://palcoffee.ir"
@@ -28,6 +35,7 @@ interface User {
   reference_number: string
   created_at: string
   updated_at: string
+  birth_date?: string
 }
 
 const STORAGE_CHECKED = "dashboard_checked_users"
@@ -699,6 +707,189 @@ function UserCard({
   )
 }
 
+// ─── Catalog manager ─────────────────────────────────────────────────────────
+
+const emptyCatalogProduct: CatalogProduct = {
+  slug: "",
+  title: "",
+  subtitle: "",
+  image: "/img/beans.jpeg",
+  roast: "",
+  process: "",
+  origin: "",
+  notes: [],
+  description: "",
+  brewGuide: "",
+  price: "تماس بگیرید",
+}
+
+function CatalogManager() {
+  const [products, setProducts] = useState<CatalogProduct[]>(() =>
+    loadCatalogProducts()
+  )
+  const [editing, setEditing] = useState<CatalogProduct | null>(null)
+  const [notesText, setNotesText] = useState("")
+
+  function persist(next: CatalogProduct[]) {
+    setProducts(next)
+    saveCatalogProducts(next)
+  }
+
+  function startEdit(product?: CatalogProduct) {
+    const next = product ?? emptyCatalogProduct
+    setEditing({ ...next, notes: [...next.notes] })
+    setNotesText(next.notes.join("، "))
+  }
+
+  function updateEditing(field: keyof CatalogProduct, value: string) {
+    if (!editing) return
+    setEditing({ ...editing, [field]: value })
+  }
+
+  function saveEditing() {
+    if (!editing) return
+    const slug = editing.slug || createProductSlug(editing.title)
+    if (!slug || !editing.title) return
+
+    const product: CatalogProduct = {
+      ...editing,
+      slug,
+      notes: notesText
+        .split(/[،,]/)
+        .map((note) => note.trim())
+        .filter(Boolean),
+    }
+
+    const exists = products.some((item) => item.slug === product.slug)
+    persist(
+      exists
+        ? products.map((item) => (item.slug === product.slug ? product : item))
+        : [...products, product]
+    )
+    setEditing(null)
+  }
+
+  function removeProduct(slug: string) {
+    if (!confirm("Remove this catalog item?")) return
+    persist(products.filter((product) => product.slug !== slug))
+  }
+
+  function resetDefaults() {
+    if (!confirm("Reset catalog to default products?")) return
+    persist(defaultCatalogProducts)
+    setEditing(null)
+  }
+
+  return (
+    <section className="catalog-admin">
+      <div className="catalog-admin-head">
+        <div>
+          <h2>Catalog Manager</h2>
+          <p>Products are saved in browser localStorage for this site.</p>
+        </div>
+        <div className="catalog-actions">
+          <button className="btn-add-user" onClick={() => startEdit()}>
+            ➕ Add Product
+          </button>
+          <button className="btn-reset" onClick={resetDefaults}>
+            Reset defaults
+          </button>
+        </div>
+      </div>
+
+      <div className="catalog-grid">
+        {products.map((product) => (
+          <article key={product.slug} className="catalog-card">
+            <Image
+              src={product.image}
+              alt={product.title}
+              width={420}
+              height={260}
+              className="catalog-img"
+            />
+            <div className="catalog-card-body">
+              <h3>{product.title}</h3>
+              <p>{product.subtitle}</p>
+              <span>{product.slug}</span>
+              <div className="catalog-card-actions">
+                <button className="btn-refresh" onClick={() => startEdit(product)}>
+                  Edit
+                </button>
+                <button className="btn-logout" onClick={() => removeProduct(product.slug)}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {editing && (
+        <div className="popup-overlay">
+          <div className="modal-box catalog-modal">
+            <div className="popup-header">
+              <span className="popup-title">
+                {editing.slug ? "Edit product" : "Add product"}
+              </span>
+              <button className="popup-close" onClick={() => setEditing(null)}>
+                ✕
+              </button>
+            </div>
+            <div className="modal-body catalog-form">
+              <Field label="Title" value={editing.title} onChange={(v) => updateEditing("title", v)} />
+              <Field label="Slug" value={editing.slug} onChange={(v) => updateEditing("slug", createProductSlug(v))} placeholder="auto-from-title" />
+              <Field label="Subtitle" value={editing.subtitle} onChange={(v) => updateEditing("subtitle", v)} />
+              <Field label="Image path" value={editing.image} onChange={(v) => updateEditing("image", v)} placeholder="/img/beans.jpeg" />
+              <div className="catalog-form-row">
+                <Field label="Origin" value={editing.origin} onChange={(v) => updateEditing("origin", v)} />
+                <Field label="Roast" value={editing.roast} onChange={(v) => updateEditing("roast", v)} />
+              </div>
+              <Field label="Process" value={editing.process} onChange={(v) => updateEditing("process", v)} />
+              <Field label="Tasting notes" value={notesText} onChange={setNotesText} placeholder="chocolate, caramel" />
+              <Field label="Price" value={editing.price} onChange={(v) => updateEditing("price", v)} />
+              <label className="field">
+                <span className="field-label">Description</span>
+                <textarea className="field-input catalog-textarea" value={editing.description} onChange={(e) => updateEditing("description", e.target.value)} />
+              </label>
+              <label className="field">
+                <span className="field-label">Brew guide</span>
+                <textarea className="field-input catalog-textarea" value={editing.brewGuide} onChange={(e) => updateEditing("brewGuide", e.target.value)} />
+              </label>
+              <button className="btn-add-submit" onClick={saveEditing}>
+                Save product
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  placeholder,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+}) {
+  return (
+    <label className="field">
+      <span className="field-label">{label}</span>
+      <input
+        className="field-input"
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </label>
+  )
+}
+
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 function Dashboard({ onLogout }: { onLogout: () => void }) {
@@ -720,6 +911,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [search, setSearch] = useState("")
   const [receiptUser, setReceiptUser] = useState<User | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [activePanel, setActivePanel] = useState<"users" | "catalog">("users")
 
   function loadUsers() {
     const t = getToken()
@@ -889,24 +1081,44 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           <span className="topbar-title">Admin Dashboard</span>
         </div>
         <div className="topbar-right">
-          <button className="btn-refresh" onClick={handleExport} title="export">
-            Export
-          </button>
-          <button className="btn-refresh" onClick={loadUsers} title="Refresh">
-            ↻
+          <button
+            className={`filter-tab ${activePanel === "users" ? "filter-tab--active" : ""}`}
+            onClick={() => setActivePanel("users")}
+          >
+            Users
           </button>
           <button
-            className="btn-add-user"
-            onClick={() => setShowAddModal(true)}
+            className={`filter-tab ${activePanel === "catalog" ? "filter-tab--active" : ""}`}
+            onClick={() => setActivePanel("catalog")}
           >
-            ➕ Add User
+            Catalog
           </button>
+          {activePanel === "users" && (
+            <>
+              <button className="btn-refresh" onClick={handleExport} title="export">
+                Export
+              </button>
+              <button className="btn-refresh" onClick={loadUsers} title="Refresh">
+                ↻
+              </button>
+              <button
+                className="btn-add-user"
+                onClick={() => setShowAddModal(true)}
+              >
+                ➕ Add User
+              </button>
+            </>
+          )}
           <button className="btn-logout" onClick={onLogout}>
             Sign out
           </button>
         </div>
       </header>
 
+      {activePanel === "catalog" ? (
+        <CatalogManager />
+      ) : (
+        <>
       {/* Stats */}
       <div className="stats-row">
         <div className="stat-card">
@@ -995,6 +1207,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           onAdded={loadUsers}
         />
       )}
+        </>
+      )}
     </div>
   )
 }
@@ -1077,6 +1291,24 @@ export default function Page() {
         .filter-tab--active{background:oklch(0.45 0.14 30);color:#fff;border-color:oklch(0.45 0.14 30)}
         .btn-reset{padding:5px 11px;border-radius:.75rem;font-size:12px;font-weight:500;border:0.5px solid oklch(0.65 0.08 180);background:oklch(0.94 0.04 80);color:oklch(0.65 0.08 180);cursor:pointer;transition:all .15s;white-space:nowrap}
         .btn-reset:hover{background:oklch(0.65 0.08 180);color:#fff}
+
+        /* ── Catalog manager ── */
+        .catalog-admin{padding:1.25rem}
+        .catalog-admin-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+        .catalog-admin-head h2{font-size:1.35rem;color:oklch(0.45 0.14 30);font-weight:700}
+        .catalog-admin-head p{font-size:13px;color:oklch(0.55 0.03 40);margin-top:4px}
+        .catalog-actions{display:flex;gap:8px;flex-wrap:wrap}
+        .catalog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+        .catalog-card{background:oklch(0.94 0.04 80);border:0.5px solid oklch(0.88 0.03 75);border-radius:1rem;overflow:hidden}
+        .catalog-img{width:100%;height:170px;object-fit:cover;display:block;background:oklch(0.91 0.03 80)}
+        .catalog-card-body{padding:.85rem;display:flex;flex-direction:column;gap:6px}
+        .catalog-card-body h3{font-size:15px;font-weight:700;color:oklch(0.18 0.03 20)}
+        .catalog-card-body p{font-size:12px;color:oklch(0.55 0.03 40);line-height:1.6}
+        .catalog-card-body span{font-size:11px;color:oklch(0.45 0.14 30);font-family:monospace}
+        .catalog-card-actions{display:flex;gap:7px;margin-top:7px}
+        .catalog-modal{max-width:720px}
+        .catalog-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .catalog-textarea{min-height:90px;resize:vertical;font-family:inherit}
 
         /* ── Grid / empty ── */
         .user-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding:1.1rem 1.25rem}

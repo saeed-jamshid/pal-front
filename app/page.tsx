@@ -17,6 +17,14 @@ import MaterialSymbolsLocationOnRounded from "./icons/MaterialSymbolsLocationOnR
 import GravityUiTerminalLine from "./icons/GravityUiTerminalLine"
 import { Badge } from "@/components/ui/badge"
 import Header from "@/components/layout/Header"
+import MinimalVideoPlayer from "@/components/player"
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+// import { loadCatalogProducts, type CatalogProduct } from "@/lib/catalog"
 
 const EVENT_START_DATE = new Date("2026-05-22T10:00:00+03:30")
 const EVENT_END_DATE = new Date("2026-05-22T14:00:00+03:30")
@@ -51,6 +59,45 @@ function TimeBox({ label, value }: { label: string; value: number }) {
   )
 }
 
+function VideoDialog() {
+  const [open, setOpen] = useState(false)
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          className="group relative mx-auto mt-5 aspect-video w-full max-w-xl overflow-hidden rounded-xl focus-visible:ring-2 focus-visible:ring-(--crp-terracotta) focus-visible:ring-offset-2"
+          aria-label="پخش ویدیوی پَل"
+        >
+          <Image
+            src="/pal-coffee-poster.jpg"
+            alt=""
+            fill
+            sizes="(max-width: 640px) 100vw, 576px"
+            className="object-cover transition group-hover:scale-105"
+          />
+          <span className="absolute inset-0 grid place-items-center bg-black/20">
+            <span className="grid size-16 place-items-center rounded-full bg-black/55 text-2xl text-white backdrop-blur-sm">
+              ▶
+            </span>
+          </span>
+        </button>
+      </DialogTrigger>
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-4xl overflow-hidden rounded-xl bg-black p-0 sm:max-w-4xl">
+        <DialogTitle className="sr-only">ویدیوی پَل</DialogTitle>
+        {open && (
+          <MinimalVideoPlayer
+            src="/pal-coffee.mp4"
+            poster="/pal-coffee-poster.jpg"
+            aspectRatio="16 / 9"
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 function Countdown() {
   const [timeLeft, setTimeLeft] = useState(getTimeLeft(EVENT_START_DATE))
 
@@ -76,6 +123,7 @@ function Countdown() {
 
 export default function PalCoffeeEventForm() {
   const [now, setNow] = useState(new Date())
+  // const [catalogProducts, setCatalogProducts] = useState<CatalogProduct[]>([])
   const eventLive = now >= EVENT_START_DATE && now < EVENT_END_DATE
   const signupClosed = now >= EVENT_START_DATE
 
@@ -85,6 +133,17 @@ export default function PalCoffeeEventForm() {
     }, 1000)
     return () => clearInterval(interval)
   }, [])
+
+  // useEffect(() => {
+  //   const syncCatalog = () => setCatalogProducts(loadCatalogProducts())
+  //   syncCatalog()
+  //   window.addEventListener("storage", syncCatalog)
+  //   window.addEventListener("catalog-products-updated", syncCatalog)
+  //   return () => {
+  //     window.removeEventListener("storage", syncCatalog)
+  //     window.removeEventListener("catalog-products-updated", syncCatalog)
+  //   }
+  // }, [])
 
   //  const card1 = document.getElementById("main-card")
   //  const card2 = document.getElementById("second-card")
@@ -183,6 +242,7 @@ export default function PalCoffeeEventForm() {
       <h1 className="mt-10 w-full text-center font-eng text-3xl font-bold">
         After Taste
       </h1>
+      <VideoDialog />
       {/* middle page */}
       <section className="animate-fadeIn mt-2 flex w-full flex-col">
         <article className="relative mx-auto mt-4 flex flex-col items-center justify-between gap-2">
@@ -245,6 +305,63 @@ export default function PalCoffeeEventForm() {
           <div className="mx-auto mt-4 h-0.5 w-12 rounded-full bg-(--crp-terracotta)"></div>
         </article>
       </section>
+
+      {/* <section id="catalog" className="mt-16 w-full max-w-5xl scroll-mt-24">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <p className="font-eng text-sm text-(--crp-amber)">Pal Coffee Catalog</p>
+          <h2 className="mt-2 text-2xl font-bold">کاتالوگ قهوه‌ها</h2>
+          <p className="mt-3 max-w-xl text-sm leading-7 text-(--crp-dark)">
+            چند پیشنهاد از قهوه‌های پَل؛ روی هر کارت بزنید تا جزئیات، نت‌های
+            طعمی و پیشنهاد دم‌آوری را ببینید.
+          </p>
+        </div>
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {catalogProducts.map((product) => (
+            <Link
+              key={product.slug}
+              href={`/catalog/${product.slug}`}
+              className="boxShadowMain boxShadowMainH group overflow-hidden rounded-[8px] border bg-[#fff9f0] transition hover:-translate-y-1"
+            >
+              <div className="relative h-54 overflow-hidden">
+                <Image
+                  src={product.image}
+                  alt={product.title}
+                  width={500}
+                  height={360}
+                  loading="lazy"
+                  quality={75}
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                />
+                <Badge className="absolute top-3 right-3 rounded-full">
+                  {product.roast}
+                </Badge>
+              </div>
+              <div className="flex min-h-52 flex-col gap-3 p-4">
+                <div>
+                  <h3 className="text-lg font-bold">{product.title}</h3>
+                  <p className="mt-1 text-sm leading-6 text-(--crp-dark)">
+                    {product.subtitle}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {product.notes.map((note) => (
+                    <span
+                      key={note}
+                      className="rounded-full border px-2 py-1 text-xs text-(--crp-terracotta)"
+                    >
+                      {note}
+                    </span>
+                  ))}
+                </div>
+                <span className="mt-auto text-sm font-bold text-(--crp-terracotta)">
+                  مشاهده جزئیات ←
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section> */}
 
       <h1 className="my-3 mt-10 font-bold">برنامه چیه؟!</h1>
 

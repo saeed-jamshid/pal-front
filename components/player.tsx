@@ -260,21 +260,21 @@ function SmartPlayButton() {
 interface MinimalVideoPlayerProps {
   src: string
   poster?: string
+  aspectRatio?: string
 }
 
 export default function MinimalVideoPlayer({
   src,
-  poster,
+  poster = "/img/gallery/videoPreview.jpeg",
+  aspectRatio = "9 / 16",
 }: MinimalVideoPlayerProps) {
   return (
     <Player.Provider>
-      <Player.Container className="vjs-minimal-container">
-        <Video
-          src={src}
-          playsInline
-          preload="metadata"
-          poster="/img/gallery/videoPreview.jpeg"
-        />
+      <Player.Container
+        className="vjs-minimal-container"
+        style={{ aspectRatio }}
+      >
+        <Video src={src} playsInline preload="metadata" poster={poster} />
 
         {poster && (
           <Poster className="vjs-minimal-poster" src={poster} alt="" />
