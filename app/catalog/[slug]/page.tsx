@@ -17,7 +17,7 @@ export default function CatalogProductPage() {
       <main dir="rtl" className="min-h-screen bg-(--crp-cream) px-4 pt-24 text-center">
         <Header back />
         <h1 className="text-2xl font-bold">این قهوه پیدا نشد</h1>
-        <Link href="/#catalog" className="mt-4 inline-block text-(--crp-terracotta)">
+        <Link href="/catalog" className="mt-4 inline-block text-(--crp-terracotta)">
           بازگشت به کاتالوگ
         </Link>
       </main>
@@ -44,7 +44,7 @@ export default function CatalogProductPage() {
         </div>
 
         <article className="flex flex-1 flex-col gap-5 rounded-[8px] border bg-[#fff9f0]/70 p-5 shadow-sm">
-          <Link href="/#catalog" className="text-sm text-(--crp-terracotta)">
+          <Link href="/catalog" className="text-sm text-(--crp-terracotta)">
             بازگشت به کاتالوگ
           </Link>
 
