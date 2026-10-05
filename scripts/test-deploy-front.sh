@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Isolated deployment/rollback checks; no SSH, live PM2 or network calls.
+set -euo pipefail
+script=$(cd "$(dirname "$0")" && pwd)/deploy-front.sh
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+export PAL_FRONT_ROOT="$tmp/front"
+mkdir -p "$PAL_FRONT_ROOT"/{incoming,releases} "$tmp/bin" "$tmp/package"/{public,.next/static}
+printf '// test server\n' > "$tmp/package/server.js"
+cat > "$tmp/bin/pm2" <<'SH'
+#!/bin/bash
+printf '%s\n' "$*" >> "$PAL_FRONT_ROOT/pm2.log"
+SH
+cat > "$tmp/bin/curl" <<'SH'
+#!/bin/bash
+url=${!#}
+if [[ "$url" == */health/ ]]; then
+  [[ ${FAIL_BACKEND:-0} == 0 ]]
+else
+  [[ $(basename "$(readlink -f "$PAL_FRONT_ROOT/current")") != "${FAIL_RELEASE:-none}" ]]
+fi
+SH
+printf '#!/bin/bash\nexit 0\n' > "$tmp/bin/sleep"
+chmod +x "$tmp/bin/"*
+export PATH="$tmp/bin:$PATH"
+prepare() {
+  mkdir "$PAL_FRONT_ROOT/incoming/$1"
+  tar -czf "$PAL_FRONT_ROOT/incoming/$1/front.tar.gz" -C "$tmp/package" .
+  (cd "$PAL_FRONT_ROOT/incoming/$1" && sha256sum front.tar.gz > front.tar.gz.sha256)
+}
+first=$(printf 'a%.0s' {1..40})-1-1
+second=$(printf 'b%.0s' {1..40})-2-1
+third=$(printf 'c%.0s' {1..40})-3-1
+prepare "$first"
+bash "$script" "$first" 3005 http://127.0.0.1:8091
+[[ $(readlink -f "$PAL_FRONT_ROOT/current") == "$PAL_FRONT_ROOT/releases/$first" ]]
+[[ ! -d "$PAL_FRONT_ROOT/incoming/$first" ]]
+prepare "$second"
+if FAIL_RELEASE="$second" bash "$script" "$second" 3005 http://127.0.0.1:8091; then
+  echo 'Failed health check incorrectly succeeded' >&2; exit 1
+fi
+[[ $(readlink -f "$PAL_FRONT_ROOT/current") == "$PAL_FRONT_ROOT/releases/$first" ]]
+prepare "$third"
+if FAIL_BACKEND=1 bash "$script" "$third" 3005 http://127.0.0.1:8091; then
+  echo 'Unavailable backend incorrectly accepted' >&2; exit 1
+fi
+[[ ! -d "$PAL_FRONT_ROOT/releases/$third" ]]
+[[ $(readlink -f "$PAL_FRONT_ROOT/current") == "$PAL_FRONT_ROOT/releases/$first" ]]
+if bash "$script" '../invalid' 3005 http://127.0.0.1:8091; then
+  echo 'Invalid release accepted' >&2; exit 1
+fi
+echo 'Deployment, rollback, backend gate and input checks passed'

@@ -1,45 +1,87 @@
-name: Deploy
+name: PAL frontend CI/CD
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-concurrency:
-  group: production
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
+concurrency:
+  group: pal-front-production
+  cancel-in-progress: false
+
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_API_BASE_URL: ''
+      PAL_BACKEND_URL: ${{ vars.PAL_BACKEND_URL || 'http://127.0.0.1:8091' }}
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          node-version: 24
-          cache: npm
-
-      - run: npm ci
-      - run: npm run build
-
-      - name: Prepare SSH
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          lfs: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - run: bun test lib/*.test.ts
+      - run: bun run lint && bun run typecheck
+      - run: bash scripts/test-deploy-front.sh
+      - run: bun run build
+      - name: Package standalone release
         run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-
-      - name: Deploy build
+          set -euo pipefail
+          mkdir -p release/.next
+          cp -a .next/standalone/. release/
+          cp -a .next/static release/.next/static
+          cp -a public release/public
+          # Standalone tracing may copy env files; never ship them.
+          find release -type f -name '.env*' -delete
+          if grep -rl '^version https://git-lfs.github.com/spec/v1$' release/public; then
+            echo 'Unhydrated LFS assets in release' >&2
+            exit 1
+          fi
+          tar -czf front.tar.gz -C release .
+          sha256sum front.tar.gz > front.tar.gz.sha256
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pal-front-${{ github.sha }}
+          path: |
+            front.tar.gz
+            front.tar.gz.sha256
+          retention-days: 7
+      - name: Deploy verified release
+        if: vars.DEPLOY_ENABLED == 'true'
         env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          HOST: ${{ vars.DEPLOY_HOST }}
+          USER: ${{ vars.DEPLOY_USER }}
+          SSH_PORT: ${{ vars.DEPLOY_PORT }}
+          FRONTEND_PORT: ${{ vars.FRONTEND_PORT || '3005' }}
         run: |
-          rsync -az --exclude=.env .next/standalone/ "saeed@${SERVER_IP}:~/pal/"
-          rsync -az --delete .next/static/ "saeed@${SERVER_IP}:~/pal/.next/static/"
-          rsync -az --delete public/ "saeed@${SERVER_IP}:~/pal/public/"
+          set -euo pipefail
+          [[ "$HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ "$USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          [[ "$SSH_PORT" =~ ^[0-9]+$ && "$FRONTEND_PORT" =~ ^[0-9]+$ ]]
+          [[ "$PAL_BACKEND_URL" =~ ^http://127\.0\.0\.1:[0-9]+$ ]]
+          [[ -n "$SSH_KEY" && -n "$KNOWN_HOSTS" ]]
+          umask 077
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/pal_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/pal_known_hosts
+          trap 'rm -f ~/.ssh/pal_key ~/.ssh/pal_known_hosts' EXIT
+          opts=(-i ~/.ssh/pal_key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/pal_known_hosts")
+          release="${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          incoming="/opt/pal/front/incoming/$release"
+          ssh "${opts[@]}" -p "$SSH_PORT" "$USER@$HOST" "install -d -m 700 '$incoming'"
+          scp "${opts[@]}" -P "$SSH_PORT" front.tar.gz front.tar.gz.sha256 scripts/deploy-front.sh "$USER@$HOST:$incoming/"
+          ssh "${opts[@]}" -p "$SSH_PORT" "$USER@$HOST" \
+            "bash '$incoming/deploy-front.sh' '$release' '$FRONTEND_PORT' '$PAL_BACKEND_URL'"

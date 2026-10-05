@@ -3,6 +3,7 @@
 Persian-first Next.js 16 **coffee store + events**. Unified Django backend: `../Pal-Back/` (store, shared OTP/JWT account, orders/payments, events and staff review).
 
 - [Current integration docs](docs/README.md): API, flows, setup and test evidence.
+- [CI/CD and recovery](docs/deployment.md): GitHub Actions, standalone releases, PM2 and deployment gates.
 - [Existing visual rules](DESIGN.md): retained until user approves redesign.
 - [Historical event launch plan](docs/friday-event-launch-plan.md): old standalone API assumptions no longer apply.
 
