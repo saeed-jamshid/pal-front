@@ -39,7 +39,8 @@ async function rawFetch<T>(
   path: string,
   init: RequestInit = {},
   auth = false,
-  retried = false
+  retried = false,
+  responseType: "json" | "blob" = "json"
 ): Promise<T> {
   const headers = new Headers(init.headers)
   if (!(init.body instanceof FormData))
@@ -55,7 +56,7 @@ async function rawFetch<T>(
   })
   if (res.status === 401 && auth) {
     if (!retried && (await tryRefresh()))
-      return rawFetch(path, init, auth, true)
+      return rawFetch(path, init, auth, true, responseType)
     clearTokens()
   }
   if (!res.ok) {
@@ -70,17 +71,13 @@ async function rawFetch<T>(
       res.status,
       fields.detail ??
         fields.non_field_errors ??
-        (Object.values(fields).join("، ") || `API ${res.status}: ${path}`),
+        (Object.values(fields).join("، ") ||
+          "پاسخ درخواست در دسترس نیست. پیش از تلاش دوباره، وضعیت را بررسی کنید."),
       fields
     )
   }
   if (res.status === 204) return undefined as T
-  return (
-    init.headers &&
-    new Headers(init.headers).get("Accept") === "application/octet-stream"
-      ? res.blob()
-      : res.json()
-  ) as Promise<T>
+  return (responseType === "blob" ? res.blob() : res.json()) as Promise<T>
 }
 
 async function tryRefresh(): Promise<boolean> {
@@ -109,14 +106,13 @@ export const api = {
       { method: "POST", body: JSON.stringify(body ?? {}) },
       auth
     ),
-  upload: <T>(path: string, body: FormData) =>
-    rawFetch<T>(path, { method: "POST", body }, true),
-  blob: (path: string) =>
-    rawFetch<Blob>(
-      path,
-      { headers: { Accept: "application/octet-stream" } },
-      true
-    ),
+  upload: <T>(
+    path: string,
+    body: FormData,
+    method: "POST" | "PATCH" = "POST"
+  ) => rawFetch<T>(path, { method, body }, true),
+  // DRF negotiates JSON before FileResponse; a binary-only Accept causes 406.
+  blob: (path: string) => rawFetch<Blob>(path, {}, true, false, "blob"),
   patch: <T>(path: string, body: unknown) =>
     rawFetch<T>(path, { method: "PATCH", body: JSON.stringify(body) }, true),
   delete: <T>(path: string) => rawFetch<T>(path, { method: "DELETE" }, true),

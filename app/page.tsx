@@ -84,7 +84,7 @@ export default function HomePage() {
               چند قاب از کنار هم بودن
             </h2>
             <p className="mt-4 leading-8">
-              این عکس‌ها از دورهمی‌های پیشین پَل هستند، نه رویدادهای آینده.
+              عکس‌های دورهمی‌های قبلی پَل را در گالری ببینید.
             </p>
             <div className="mt-5 flex flex-wrap gap-6">
               <Link

@@ -1,5 +1,9 @@
 # Pal Coffee Design System
 
+## Frontend admin — approved implementation (2026-10-05)
+
+User approved `/admin` operational panel and required staff-only backend APIs. [Admin scope/design/testing](docs/admin.md). UI/UX Pro Max verified Data-Dense Dashboard + confirmation/responsive-table/success-feedback guidance; consumer hero/palette search results rejected as poor fit. Preserve PAL warm tokens/Vazirmatn; right desktop sidebar, compact overview/searchable paginated lists, existing accessible Radix editors, native fields, explicit IRR money, private receipt review. Scoped admin CSS; public visual redesign remains unapproved. No fake charts/metrics or provider credential editing. Test mobile375/tablet768/desktop1440, keyboard, light/dark, reduced motion and server permission boundaries.
+
 ## Store + events restart — integration gate (2026-10-05)
 
 User's current brief: PAL is both coffee store and event website. First verify `../Pal-Back`, align frontend API/customer flows, document/test, then obtain explicit user confirmation **before visual redesign**. Older one-off event brief/countdown below is historical, not current homepage truth. See [current docs](docs/README.md).

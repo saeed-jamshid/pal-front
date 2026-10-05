@@ -113,7 +113,7 @@ export default function OrderPayment({
       setPayment(await fetchCardPayment(payment.payment_id))
       onUpdate()
     } catch {
-      setError("بازخوانی پرداخت ممکن نشد.")
+      setError("وضعیت پرداخت به‌روز نشد. دوباره تلاش کنید.")
     } finally {
       setBusy(false)
     }
@@ -147,7 +147,8 @@ export default function OrderPayment({
             ["awaiting_receipt", "rejected"].includes(payment.status) && (
               <form onSubmit={upload} className="space-y-3">
                 <p>
-                  تأیید پرداخت دستی است. تا تأیید مدیر، سفارش پرداخت‌شده نیست.
+                  رسید را مدیر بررسی می‌کند. وضعیت سفارش پس از تأیید رسید به
+                  پرداخت‌شده تغییر می‌کند.
                 </p>
                 <label className="block">
                   رسید (حداکثر ۵ مگابایت)

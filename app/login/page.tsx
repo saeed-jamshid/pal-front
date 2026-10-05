@@ -2,7 +2,13 @@
 
 import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useState } from "react"
-import { requestOtp, verifyOtp, safeNextPath, normalizePhone } from "@/lib/api"
+import {
+  ApiError,
+  requestOtp,
+  verifyOtp,
+  safeNextPath,
+  normalizePhone,
+} from "@/lib/api"
 
 function LoginForm() {
   const router = useRouter()
@@ -21,8 +27,12 @@ function LoginForm() {
     try {
       await requestOtp(phone)
       setStep("code")
-    } catch {
-      setError("ارسال کد ناموفق بود. شماره را بررسی کنید.")
+    } catch (error) {
+      setError(
+        error instanceof ApiError
+          ? error.message
+          : "کد ارسال نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید."
+      )
     } finally {
       setBusy(false)
     }
@@ -36,8 +46,12 @@ function LoginForm() {
     try {
       await verifyOtp(phone, code)
       router.replace(next)
-    } catch {
-      setError("کد وارد شده صحیح نیست.")
+    } catch (error) {
+      setError(
+        error instanceof ApiError
+          ? error.message
+          : "کد بررسی نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید."
+      )
       setBusy(false)
     }
   }
@@ -52,8 +66,8 @@ function LoginForm() {
       </h1>
       <p className="t-body mt-6 border-b border-(--crp-espresso) pb-8 text-(--crp-dark)">
         {step === "phone"
-          ? "برای ادامه، شماره موبایلت رو وارد کن."
-          : `کد ارسال‌شده به ${phone} رو وارد کن.`}
+          ? "برای ورود، شماره موبایل خود را وارد کنید."
+          : `کد پیامک‌شده به ${phone} را وارد کنید.`}
       </p>
 
       {step === "phone" ? (
@@ -105,7 +119,7 @@ function LoginForm() {
               htmlFor="code"
               className="t-label mb-2 block text-(--crp-dark)"
             >
-              کد تایید
+              کد تأیید
             </label>
             <input
               id="code"

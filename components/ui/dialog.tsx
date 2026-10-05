@@ -39,7 +39,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 isolate z-50 bg-black/30 opacity-0 transition-opacity duration-200 data-[state=open]:opacity-100 data-[state=closed]:opacity-0 supports-backdrop-filter:backdrop-blur-sm",
+        "fixed inset-0 isolate z-50 bg-black/30 opacity-0 transition-opacity duration-200 data-[state=closed]:opacity-0 data-[state=open]:opacity-100 supports-backdrop-filter:backdrop-blur-sm",
         className
       )}
       {...props}
@@ -61,7 +61,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 rtl:translate-x-1/2 -translate-y-1/2 gap-6 rounded-4xl bg-popover p-6 text-sm text-popover-foreground shadow-xl ring-1 ring-foreground/5 scale-95 transition-transform duration-200 ease-out outline-none sm:max-w-md dark:ring-foreground/10 data-[state=open]:scale-100 data-[state=closed]:scale-95",
+          "fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 scale-95 gap-6 rounded-4xl bg-popover p-6 text-sm text-popover-foreground shadow-xl ring-1 ring-foreground/5 transition-transform duration-200 ease-out outline-none data-[state=closed]:scale-95 data-[state=open]:scale-100 sm:max-w-md dark:ring-foreground/10",
           className
         )}
         {...props}
@@ -74,9 +74,8 @@ function DialogContent({
               className="absolute top-4 right-4 bg-secondary"
               size="icon-sm"
             >
-              <IconX
-              />
-              <span className="sr-only">Close</span>
+              <IconX />
+              <span className="sr-only">بستن</span>
             </Button>
           </DialogPrimitive.Close>
         )}

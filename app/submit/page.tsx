@@ -226,7 +226,7 @@ export default function Submit() {
                               />
                             </label>
                             <p>
-                              شماره حساب: <span dir="ltr">{phone}</span>
+                              شماره موبایل: <span dir="ltr">{phone}</span>
                             </p>
                             <label className="block">
                               زمان حضور

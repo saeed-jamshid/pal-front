@@ -13,7 +13,7 @@ export default function Gallery() {
     <main className="min-h-screen bg-(--crp-cream) text-(--crp-espresso)">
       <div className="ed-shell pt-28 pb-20">
         <p className="text-sm font-semibold text-(--crp-terracotta)">از دورهمی‌های قبلی پَل</p>
-        <div className="mt-4 flex flex-wrap items-end justify-between gap-5 border-b border-(--crp-sand) pb-7"><h1 className="t-h1">چند قاب از کنار هم بودن</h1><Link href="/" className="min-h-11 content-center text-sm underline underline-offset-4">دورهمی این جمعه</Link></div>
+        <div className="mt-4 flex flex-wrap items-end justify-between gap-5 border-b border-(--crp-sand) pb-7"><h1 className="t-h1">چند قاب از کنار هم بودن</h1><Link href="/submit" className="min-h-11 content-center text-sm underline underline-offset-4">رویدادهای پَل</Link></div>
         <div className="mt-8 grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
           {photos.map((src, i) => <GalleryPhoto key={src} src={src} index={i} onClick={() => setActive(i)} />)}
         </div>

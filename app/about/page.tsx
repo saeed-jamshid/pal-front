@@ -14,12 +14,11 @@ export default function AboutPage() {
         <div className="mt-8 grid items-center gap-10 md:grid-cols-2">
           <div className="max-w-xl">
             <p className="text-lg leading-9">
-              قهوه خوب، بهانه‌ای برای با هم بودن. پَل دورهمی قهوه و فرهنگ در
-              بیرجند است؛ جایی برای دیدن، گفت‌وگو و تجربه‌های تازه کنار هم.
+              در پَل می‌توانید قهوه بخرید و برای دورهمی‌های بیرجند ثبت‌نام کنید.
             </p>
             <p className="mt-5 leading-8">
-              از دانه تا فنجان، دوست داریم قهوه راهی برای آشنایی و کنار هم بودن
-              باشد.
+              عکس‌های دورهمی‌های قبلی در گالری هستند. زمان و هزینهٔ هر برنامه را
+              در صفحهٔ رویدادها ببینید.
             </p>
             <div className="mt-7 flex flex-wrap gap-6">
               <Link
@@ -32,7 +31,7 @@ export default function AboutPage() {
                 href="/submit"
                 className="inline-flex min-h-11 items-center underline underline-offset-4"
               >
-                رویداد این جمعه
+                رویدادهای پَل
               </Link>
             </div>
           </div>

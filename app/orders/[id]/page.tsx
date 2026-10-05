@@ -51,7 +51,7 @@ function OrderDetailPageContent({
     }
     fetchOrder(id)
       .then(setOrder)
-      .catch(() => setError("سفارش پیدا نشد."))
+      .catch(() => setError("اطلاعات سفارش در دسترس نیست. دوباره تلاش کنید."))
   }, [id, router])
 
   const activeIdx = order ? STEPS.findIndex((s) => s === order.status) : -1
@@ -92,7 +92,9 @@ function OrderDetailPageContent({
                   onUpdate={() => {
                     void fetchOrder(id)
                       .then(setOrder)
-                      .catch(() => setError("بازخوانی سفارش ناموفق بود."))
+                      .catch(() =>
+                        setError("وضعیت سفارش به‌روز نشد. دوباره تلاش کنید.")
+                      )
                   }}
                 />
               )}

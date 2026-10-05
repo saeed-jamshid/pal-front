@@ -53,7 +53,7 @@ function ProductPageContent({ params }: { params: Promise<{ slug: string }> }) {
         setProduct(p)
         setGrind(p.allowedGrinds[0] ?? "")
       })
-      .catch(() => setError("محصول پیدا نشد."))
+      .catch(() => setError("اطلاعات محصول در دسترس نیست. دوباره تلاش کنید."))
   }, [slug])
 
   if (error)
@@ -99,7 +99,7 @@ function ProductPageContent({ params }: { params: Promise<{ slug: string }> }) {
       await addCartItem(product!.id, qty, grind)
       router.push("/cart")
     } catch {
-      toast.error("افزودن به سبد ناموفق بود.")
+      toast.error("محصول به سبد اضافه نشد. دوباره تلاش کنید.")
     } finally {
       setAdding(false)
     }
@@ -164,7 +164,7 @@ function ProductPageContent({ params }: { params: Promise<{ slug: string }> }) {
               مشخصات
             </h2>
             <dl className="ed-grid grid-cols-2 sm:grid-cols-3">
-              <Spec label="ریجن" value={product.region} />
+              <Spec label="منطقه" value={product.region} />
               <Spec label="درجه رست" value={product.roastLevel} />
               {isSO ? (
                 <>
@@ -174,7 +174,7 @@ function ProductPageContent({ params }: { params: Promise<{ slug: string }> }) {
                     label="امتیاز"
                     value={product.cuppingScore?.toString()}
                   />
-                  <Spec label="پروسس" value={product.process} />
+                  <Spec label="فرآوری" value={product.process} />
                 </>
               ) : (
                 product.arabicaPercent != null && (
