@@ -45,7 +45,10 @@ fs.writeFileSync(file, JSON.stringify({ apps: [{
 }] }));
 JS
   [[ $? == 0 ]] || return 1
-  pm2 startOrReload "$root/ecosystem.config.json" --update-env
+  # PM2 reload keeps the old absolute script path across versioned releases.
+  # Recreate this app only; failed activation still restores the previous release.
+  pm2 delete pal-front >/dev/null 2>&1 || true
+  pm2 start "$root/ecosystem.config.json" --update-env
 }
 healthy() {
   for attempt in {1..15}; do

@@ -10,6 +10,12 @@ printf '// test server\n' > "$tmp/package/server.js"
 cat > "$tmp/bin/pm2" <<'SH'
 #!/bin/bash
 printf '%s\n' "$*" >> "$PAL_FRONT_ROOT/pm2.log"
+if [[ "$1" == delete ]]; then
+  rm -f "$PAL_FRONT_ROOT/running-release"
+elif [[ "$1" == start ]]; then
+  node -e 'const fs=require("node:fs"); const app=JSON.parse(fs.readFileSync(process.argv[1])).apps[0]; if(app.script !== `${app.cwd}/server.js`) process.exit(1); fs.writeFileSync(process.argv[2],app.cwd)' "$2" "$PAL_FRONT_ROOT/running-release"
+fi
+# Model PM2 reload retaining its old absolute script path.
 SH
 cat > "$tmp/bin/curl" <<'SH'
 #!/bin/bash
@@ -17,6 +23,8 @@ url=${!#}
 if [[ "$url" == */health/ ]]; then
   [[ ${FAIL_BACKEND:-0} == 0 ]]
 else
+  [[ -f "$PAL_FRONT_ROOT/running-release" ]] || exit 1
+  [[ $(< "$PAL_FRONT_ROOT/running-release") == "$(readlink -f "$PAL_FRONT_ROOT/current")" ]] || exit 1
   [[ $(basename "$(readlink -f "$PAL_FRONT_ROOT/current")") != "${FAIL_RELEASE:-none}" ]]
 fi
 SH
@@ -53,6 +61,7 @@ fourth=$(printf 'd%.0s' {1..40})-4-1
 prepare "$fourth"
 FAIL_BACKEND=1 bash "$script" "$fourth" 3005 http://127.0.0.1:8091 false
 [[ $(readlink -f "$PAL_FRONT_ROOT/current") == "$PAL_FRONT_ROOT/releases/$fourth" ]]
+[[ $(< "$PAL_FRONT_ROOT/running-release") == "$PAL_FRONT_ROOT/releases/$fourth" ]]
 if bash "$script" "$fourth" 3005 http://127.0.0.1:8091 invalid; then
   echo 'Invalid API policy accepted' >&2; exit 1
 fi
