@@ -1,6 +1,5 @@
 // app/submit/layout.tsx
-import { Toaster } from "sonner"
-
+// Toaster is mounted globally in app/layout.tsx
 export default function SubmitLayout({
   children,
 }: {
@@ -8,11 +7,10 @@ export default function SubmitLayout({
 }) {
   return (
     <div
-      className="flex min-h-screen flex-col items-center bg-[#fff9f0]"
+      className="flex min-h-screen flex-col items-center bg-(--crp-cream)"
       dir="rtl"
     >
       {children}
-      <Toaster position="top-center" className="bg-[#fff9f0]! text-xs" closeButton/>
     </div>
   )
 }

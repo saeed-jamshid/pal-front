@@ -1,0 +1,21 @@
+bun test v1.4.2 (744846f84)
+
+lib/api.test.ts:
+(pass) login redirect accepts local path, rejects external or script URLs [1.73ms]
+(pass) OTP wire contract and DRF field errors [1.16ms]
+(pass) 401 refresh retries only once then clears invalid tokens [0.33ms]
+
+lib/event.test.ts:
+(pass) Friday 10 Mehr at 10:00 Tehran; countdown never goes negative [5.29ms]
+
+lib/event-api.test.ts:
+(pass) normalize Persian/Arabic phone; CSV neutralizes formula [0.15ms]
+(pass) event registration uses unified multipart route; status requires JWT [0.32ms]
+
+lib/shop.test.ts:
+(pass) backend fields mapped without invented weight, price or status [0.53ms]
+(pass) pagination follows all backend pages, never forwards token to supplied host [0.29ms]
+
+ 8 pass
+ 0 fail
+Ran 8 tests across 4 files. [27.00ms]

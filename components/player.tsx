@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from "react"
 import {
   createPlayer,
+  Container,
   PlayButton,
   FullscreenButton,
   Poster,
@@ -10,12 +11,32 @@ import {
 } from "@videojs/react"
 import { Video, videoFeatures } from "@videojs/react/video"
 
-const Player = createPlayer({ features: videoFeatures })
+const { Player, usePlayer } = createPlayer({ features: videoFeatures })
 
-// ── keyboard controls ────────────────────────────────────────────────────────────
-function KeyboardControls() {
-  const store = Player.usePlayer()
-  const media = Player.useMedia()
+const SEEK_STEP = 5
+
+/**
+ * Resolve the underlying <video> element from the player container.
+ * The store's `media` object is a hook return value: mutating it directly
+ * trips react-hooks/immutability and it isn't typed with HTMLMediaElement
+ * members. Driving the real DOM node avoids both problems.
+ */
+function videoOf(container: HTMLElement | null): HTMLVideoElement | null {
+  return container?.querySelector("video") ?? null
+}
+
+function fmt(sec: number) {
+  if (!Number.isFinite(sec) || sec < 0) return "0:00"
+  const m = Math.floor(sec / 60)
+  const s = Math.floor(sec % 60)
+  return `${m}:${s.toString().padStart(2, "0")}`
+}
+
+// ── Keyboard controls ─────────────────────────────────────────────────────────
+// Scoped to the player container: a global window listener would hijack
+// arrow-key scrolling for the whole page while a video sits idle on screen.
+function KeyboardControls({ containerRef }: { containerRef: React.RefObject<HTMLElement | null> }) {
+  const store = usePlayer()
   const [hint, setHint] = useState<string | null>(null)
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -26,162 +47,213 @@ function KeyboardControls() {
   }, [])
 
   useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
     const onKey = (e: KeyboardEvent) => {
-      // Don't fire when user is typing in an input/textarea
       const tag = (e.target as HTMLElement).tagName
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return
-
-      if (!media) return
 
       switch (e.key) {
         case " ":
         case "k":
           e.preventDefault()
-          store.paused ? store.play() : store.pause()
-          showHint(store.paused ? "▶ Play" : "⏸ Pause")
+          if (store.paused) {
+            store.play()
+            showHint("پخش")
+          } else {
+            store.pause()
+            showHint("مکث")
+          }
           break
-
-        case "ArrowRight":
-        case "l":
+        case "ArrowRight": {
           e.preventDefault()
-          media.currentTime = Math.min(media.currentTime + 5, media.duration)
-          showHint("▶▶ +5s")
+          const v = videoOf(el)
+          if (v) v.currentTime = Math.min(v.currentTime + SEEK_STEP, v.duration)
+          showHint(`+${SEEK_STEP}s`)
           break
-
-        case "ArrowLeft":
-        case "j":
+        }
+        case "ArrowLeft": {
           e.preventDefault()
-          media.currentTime = Math.max(media.currentTime - 5, 0)
-          showHint("◀◀ -5s")
+          const v = videoOf(el)
+          if (v) v.currentTime = Math.max(v.currentTime - SEEK_STEP, 0)
+          showHint(`-${SEEK_STEP}s`)
           break
-
-        case "ArrowUp":
+        }
+        case "ArrowUp": {
           e.preventDefault()
-          store.setVolume(Math.min((store.volume ?? 1) + 0.1, 1))
-          showHint(
-            `🔊 ${Math.round(Math.min((store.volume ?? 1) + 0.1, 1) * 100)}%`
-          )
+          const v = Math.min((store.volume ?? 1) + 0.1, 1)
+          store.setVolume(v)
+          showHint(`صدا ${Math.round(v * 100)}%`)
           break
-
-        case "ArrowDown":
+        }
+        case "ArrowDown": {
           e.preventDefault()
-          store.setVolume(Math.max((store.volume ?? 1) - 0.1, 0))
-          showHint(
-            `🔉 ${Math.round(Math.max((store.volume ?? 1) - 0.1, 0) * 100)}%`
-          )
+          const v = Math.max((store.volume ?? 1) - 0.1, 0)
+          store.setVolume(v)
+          showHint(`صدا ${Math.round(v * 100)}%`)
           break
-
+        }
         case "m":
           e.preventDefault()
           store.toggleMuted()
-          showHint(store.muted ? "🔊 Unmuted" : "🔇 Muted")
+          showHint(store.muted ? "صدا روشن" : "بی‌صدا")
           break
-
         case "f":
           e.preventDefault()
           store.toggleFullscreen()
-          showHint("⛶ Fullscreen")
           break
-
         case "0":
-        case "Home":
+        case "Home": {
           e.preventDefault()
-          media.currentTime = 0
-          showHint("⏮ Start")
+          const v = videoOf(el)
+          if (v) v.currentTime = 0
+          showHint("ابتدا")
           break
-
-        case "End":
+        }
+        case "End": {
           e.preventDefault()
-          media.currentTime = media.duration
-          showHint("⏭ End")
+          const v = videoOf(el)
+          if (v) v.currentTime = v.duration
           break
+        }
       }
     }
 
-    window.addEventListener("keydown", onKey)
+    el.addEventListener("keydown", onKey)
     return () => {
-      window.removeEventListener("keydown", onKey)
+      el.removeEventListener("keydown", onKey)
       if (hintTimer.current) clearTimeout(hintTimer.current)
     }
-  }, [media, store, showHint])
+  }, [store, showHint, containerRef])
 
   if (!hint) return null
+  return (
+    <div className="vjs-key-hint" role="status" aria-live="polite">
+      {hint}
+    </div>
+  )
+}
 
-  return <div className="vjs-key-hint">{hint}</div>
+// ── Seek bar + time ───────────────────────────────────────────────────────────
+function SeekBar({ containerRef }: { containerRef: React.RefObject<HTMLElement | null> }) {
+  const [time, setTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [buffered, setBuffered] = useState(0)
+
+  useEffect(() => {
+    const el = videoOf(containerRef.current)
+    if (!el) return
+    const sync = () => {
+      setTime(el.currentTime || 0)
+      setDuration(Number.isFinite(el.duration) ? el.duration : 0)
+      try {
+        if (el.buffered?.length) setBuffered(el.buffered.end(el.buffered.length - 1))
+      } catch {
+        /* buffered can throw before metadata is ready */
+      }
+    }
+    sync()
+    el.addEventListener("timeupdate", sync)
+    el.addEventListener("loadedmetadata", sync)
+    el.addEventListener("progress", sync)
+    return () => {
+      el.removeEventListener("timeupdate", sync)
+      el.removeEventListener("loadedmetadata", sync)
+      el.removeEventListener("progress", sync)
+    }
+  }, [containerRef])
+
+  const pct = duration ? (time / duration) * 100 : 0
+  const bufPct = duration ? (buffered / duration) * 100 : 0
+
+  return (
+    <div className="vjs-seekbar">
+      <span className="vjs-time">{fmt(time)}</span>
+      <div className="vjs-track">
+        <div className="vjs-track-buffer" style={{ width: `${bufPct}%` }} />
+        <div className="vjs-track-fill" style={{ width: `${pct}%` }} />
+        <input
+          type="range"
+          min={0}
+          max={duration || 0}
+          step={0.1}
+          value={time}
+          aria-label="جابه‌جایی در ویدیو"
+          onChange={(e) => {
+            const v = videoOf(containerRef.current)
+            if (v) v.currentTime = Number(e.target.value)
+          }}
+        />
+      </div>
+      <span className="vjs-time">{fmt(duration)}</span>
+    </div>
+  )
 }
 
 // ── Touch controls ────────────────────────────────────────────────────────────
-function TouchControls() {
-  const media = Player.useMedia()
-  const store = Player.usePlayer()
-  const touchStartX = useRef<number | null>(null)
-  const touchStartY = useRef<number | null>(null)
-  const lastTap = useRef<{ time: number; x: number } | null>(null)
-  const doubleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+function TouchControls({ containerRef }: { containerRef: React.RefObject<HTMLElement | null> }) {
+  const store = usePlayer()
+  const startX = useRef<number | null>(null)
+  const startY = useRef<number | null>(null)
+  const lastTap = useRef<number | null>(null)
+  const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [seekHint, setSeekHint] = useState<"forward" | "backward" | null>(null)
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX
-    touchStartY.current = e.touches[0].clientY
+    startX.current = e.touches[0].clientX
+    startY.current = e.touches[0].clientY
   }, [])
 
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
-      if (touchStartX.current === null || touchStartY.current === null) return
-
+      if (startX.current === null || startY.current === null) return
       const touch = e.changedTouches[0]
-      const dx = touch.clientX - touchStartX.current
-      const dy = touch.clientY - touchStartY.current
-      touchStartX.current = null
-      touchStartY.current = null
-
-      // Ignore swipes (let framer-motion handle drag when scale > 1)
+      const dx = touch.clientX - startX.current
+      const dy = touch.clientY - startY.current
+      startX.current = null
+      startY.current = null
       if (Math.abs(dx) > 10 || Math.abs(dy) > 10) return
 
       const now = Date.now()
-      const prev = lastTap.current
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
 
-      // ── Double tap ────────────────────────────────────────────────────────
-      if (prev && now - prev.time < 300) {
-        // Cancel the pending single-tap action
-        if (doubleTapTimer.current) {
-          clearTimeout(doubleTapTimer.current)
-          doubleTapTimer.current = null
+      if (lastTap.current && now - lastTap.current < 300) {
+        if (tapTimer.current) {
+          clearTimeout(tapTimer.current)
+          tapTimer.current = null
         }
         lastTap.current = null
-
-        if (!media) return
-        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-        const isRightSide = touch.clientX > rect.left + rect.width / 2
-
-        if (isRightSide) {
-          media.currentTime = Math.min(media.currentTime + 5, media.duration)
+        const v = videoOf(containerRef.current)
+        if (!v) return
+        // RTL-agnostic: right half seeks forward
+        if (touch.clientX > rect.left + rect.width / 2) {
+          v.currentTime = Math.min(v.currentTime + SEEK_STEP, v.duration)
           setSeekHint("forward")
         } else {
-          media.currentTime = Math.max(media.currentTime - 5, 0)
+          v.currentTime = Math.max(v.currentTime - SEEK_STEP, 0)
           setSeekHint("backward")
         }
         setTimeout(() => setSeekHint(null), 800)
         return
       }
 
-      // ── Single tap — toggle play/pause after short delay ──────────────────
-      lastTap.current = { time: now, x: touch.clientX }
-      doubleTapTimer.current = setTimeout(() => {
+      lastTap.current = now
+      tapTimer.current = setTimeout(() => {
         lastTap.current = null
-        doubleTapTimer.current = null
-        store.paused ? store.play() : store.pause()
+        tapTimer.current = null
+        if (store.paused) store.play()
+        else store.pause()
       }, 300)
     },
-    [media, store]
+    [store, containerRef],
   )
 
-  // Cleanup on unmount
   useEffect(
     () => () => {
-      if (doubleTapTimer.current) clearTimeout(doubleTapTimer.current)
+      if (tapTimer.current) clearTimeout(tapTimer.current)
     },
-    []
+    [],
   )
 
   return (
@@ -192,31 +264,14 @@ function TouchControls() {
     >
       {seekHint && (
         <div className={`vjs-seek-hint vjs-seek-hint--${seekHint}`}>
-          {seekHint === "backward" ? (
-            <>
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                width="26"
-                height="26"
-              >
-                <path d="M11 18V6l-8.5 6 8.5 6zm.5-6 8.5 6V6l-8.5 6z" />
-              </svg>
-              <span>5s</span>
-            </>
-          ) : (
-            <>
-              <svg
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                width="26"
-                height="26"
-              >
-                <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" />
-              </svg>
-              <span>5s</span>
-            </>
-          )}
+          <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26" aria-hidden="true">
+            {seekHint === "backward" ? (
+              <path d="M11 18V6l-8.5 6 8.5 6zm.5-6 8.5 6V6l-8.5 6z" />
+            ) : (
+              <path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" />
+            )}
+          </svg>
+          <span>{SEEK_STEP}s</span>
         </div>
       )}
     </div>
@@ -225,10 +280,8 @@ function TouchControls() {
 
 // ── Auto-hiding play button ───────────────────────────────────────────────────
 function SmartPlayButton() {
-  const controls = Player.usePlayer(selectControls)
-  const { paused } = Player.usePlayer((s) => ({ paused: s.paused }))
-
-  // visible when: paused OR controls are active (user just interacted)
+  const controls = usePlayer(selectControls)
+  const { paused } = usePlayer((s) => ({ paused: s.paused }))
   const visible = paused || (controls?.controlsVisible ?? true)
 
   return (
@@ -236,17 +289,17 @@ function SmartPlayButton() {
       className="vjs-minimal-play"
       data-visible={visible ? "" : undefined}
       render={(props, state) => (
-        <button {...props}>
+        <button {...props} aria-label={state.paused ? "پخش ویدیو" : "مکث ویدیو"}>
           {state.ended ? (
-            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24" aria-hidden="true">
               <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
             </svg>
           ) : state.paused ? (
-            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24" aria-hidden="true">
               <path d="M8 5v14l11-7z" />
             </svg>
           ) : (
-            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24" aria-hidden="true">
               <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
             </svg>
           )}
@@ -256,202 +309,89 @@ function SmartPlayButton() {
   )
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
 interface MinimalVideoPlayerProps {
   src: string
+  /** Adaptive HLS stream; src remains MP4 fallback. */
+  hlsSrc?: string
   poster?: string
   aspectRatio?: string
+  /** Only the above-the-fold player should preload; others stay at "none". */
+  preload?: "none" | "metadata" | "auto"
 }
 
 export default function MinimalVideoPlayer({
   src,
+  hlsSrc,
   poster = "/img/gallery/videoPreview.jpeg",
   aspectRatio = "9 / 16",
+  preload = "metadata",
 }: MinimalVideoPlayerProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!hlsSrc) return
+    const video = videoOf(containerRef.current)
+    if (!video) return
+    if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = hlsSrc
+      return
+    }
+
+    let disposed = false
+    let player: import("hls.js").default | undefined
+    import("hls.js").then(({ default: Hls }) => {
+      if (disposed || !Hls.isSupported()) return
+      player = new Hls({ enableWorker: true })
+      player.on(Hls.Events.ERROR, (_, data) => {
+        if (data.fatal) {
+          player?.destroy()
+          player = undefined
+          video.src = src
+        }
+      })
+      player.loadSource(hlsSrc)
+      player.attachMedia(video)
+    })
+    return () => { disposed = true; player?.destroy() }
+  }, [hlsSrc, src])
+
   return (
-    <Player.Provider>
-      <Player.Container
+    <Player>
+      <Container
+        ref={containerRef}
+        tabIndex={0}
+        aria-label="پخش‌کننده ویدیو"
         className="vjs-minimal-container"
         style={{ aspectRatio }}
       >
-        <Video src={src} playsInline preload="metadata" poster={poster} />
+        <Video src={src} playsInline preload={preload} poster={poster} />
 
-        {poster && (
-          <Poster className="vjs-minimal-poster" src={poster} alt="" />
-        )}
+        {poster && <Poster.Root className="vjs-minimal-poster"><Poster.Image src={poster} alt="" /></Poster.Root>}
 
-        <TouchControls />
-        <KeyboardControls />
+        <TouchControls containerRef={containerRef} />
+        <KeyboardControls containerRef={containerRef} />
         <SmartPlayButton />
 
-        <FullscreenButton
-          className="vjs-minimal-fullscreen"
-          render={(props, state) => (
-            <button {...props}>
-              {state.fullscreen ? (
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  width="20"
-                  height="20"
-                >
-                  <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
-                </svg>
-              ) : (
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  width="20"
-                  height="20"
-                >
-                  <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
-                </svg>
-              )}
-            </button>
-          )}
-        />
-      </Player.Container>
-
-      <style>{`
-        .vjs-minimal-container {
-          position: relative;
-          width: 100%;
-          aspect-ratio: 9/16;
-          background: #000;
-          border-radius: 12px;
-          overflow: hidden;
-        }
-
-        .vjs-minimal-container video {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-
-        .vjs-minimal-poster {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          pointer-events: none;
-          transition: opacity 0.3s;
-        }
-        .vjs-minimal-poster:not([data-visible]) { opacity: 0; }
-
-        /* Touch surface */
-        .vjs-touch-surface {
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-          touch-action: pan-y;
-        }
-
-        /* Seek hint */
-        .vjs-seek-hint {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-          color: white;
-          background: rgba(0,0,0,0.45);
-          backdrop-filter: blur(8px);
-          border-radius: 12px;
-          padding: 12px 16px;
-          pointer-events: none;
-          animation: vjs-hint-fade 0.8s ease forwards;
-        }
-        .vjs-seek-hint span { font-size: 13px; font-weight: 500; }
-        .vjs-seek-hint--backward { left: 20px; }
-        .vjs-seek-hint--forward  { right: 20px; }
-
-        @keyframes vjs-hint-fade {
-          0%   { opacity: 0; transform: translateY(-50%) scale(0.9); }
-          20%  { opacity: 1; transform: translateY(-50%) scale(1); }
-          70%  { opacity: 1; }
-          100% { opacity: 0; }
-        }
-
-        /* Keyboard hint — center top */
-        .vjs-key-hint {
-          position: absolute;
-          top: 16px;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 10;
-          color: white;
-          background: rgba(0,0,0,0.5);
-          backdrop-filter: blur(8px);
-          border-radius: 10px;
-          padding: 8px 16px;
-          font-size: 13px;
-          font-weight: 500;
-          white-space: nowrap;
-          pointer-events: none;
-          animation: vjs-hint-fade 0.8s ease forwards;
-        }
-
-        /* Play button — visibility driven by data-visible */
-        .vjs-minimal-play {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          z-index: 2;
-          transform: translate(-50%, -50%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 56px;
-          height: 56px;
-          border-radius: 50%;
-          background: rgba(0,0,0,0.4);
-          border: none;
-          color: white;
-          cursor: pointer;
-          backdrop-filter: blur(8px);
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.3s, transform 0.2s, background 0.2s;
-        }
-
-        /* Show when data-visible is set */
-        .vjs-minimal-play[data-visible] {
-          opacity: 1;
-          pointer-events: auto;
-        }
-
-        .vjs-minimal-play:hover {
-          background: rgba(0,0,0,0.6);
-          transform: translate(-50%, -50%) scale(1.08);
-        }
-
-        /* Fullscreen button */
-        .vjs-minimal-fullscreen {
-          position: absolute;
-          bottom: 12px;
-          right: 12px;
-          z-index: 2;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 36px;
-          height: 36px;
-          border-radius: 8px;
-          background: rgba(0,0,0,0.4);
-          border: none;
-          color: white;
-          cursor: pointer;
-          backdrop-filter: blur(8px);
-          opacity: 0;
-          transition: opacity 0.2s, background 0.2s;
-        }
-        .vjs-minimal-container:hover .vjs-minimal-fullscreen { opacity: 1; }
-        .vjs-minimal-fullscreen:hover { background: rgba(0,0,0,0.6); }
-        .vjs-minimal-fullscreen[data-availability="unsupported"] { display: none; }
-      `}</style>
-    </Player.Provider>
+        <div className="vjs-bottom">
+          <SeekBar containerRef={containerRef} />
+          <FullscreenButton
+            className="vjs-minimal-fullscreen"
+            render={(props, state) => (
+              <button {...props} aria-label={state.fullscreen ? "خروج از تمام‌صفحه" : "تمام‌صفحه"}>
+                {state.fullscreen ? (
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+                    <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20" aria-hidden="true">
+                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+                  </svg>
+                )}
+              </button>
+            )}
+          />
+        </div>
+      </Container>
+    </Player>
   )
 }

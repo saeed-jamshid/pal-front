@@ -1,432 +1,127 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { s } from "./styles/index"
 import Link from "next/link"
+import { fetchEvents, type PalEvent } from "@/lib/event-api"
+import EventArtwork from "@/components/event/EventArtwork"
 
-import LineMdCoffeeHalfEmptyTwotoneLoop from "./icons/LineMdCoffeeHalfEmptyTwotoneLoop"
-import GameIconsCoffeePot from "./icons/GameIconsCoffeePot"
-import PhCoffeeBeanFill from "./icons/PhCoffeeBeanFill"
-import StreamlineUltimateCoffeeEspressoMachineBold from "./icons/StreamlineUltimateCoffeeEspressoMachineBold"
-import MaterialSymbolsCalendarTodayOutline from "./icons/MaterialSymbolsCalendarTodayOutline"
-import MaterialSymbolsLightAlarmOutline from "./icons/MaterialSymbolsLightAlarmOutline"
-import MaterialSymbolsLocationOnRounded from "./icons/MaterialSymbolsLocationOnRounded"
-
-import GravityUiTerminalLine from "./icons/GravityUiTerminalLine"
-import { Badge } from "@/components/ui/badge"
-import Header from "@/components/layout/Header"
-import MinimalVideoPlayer from "@/components/player"
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-// import { loadCatalogProducts, type CatalogProduct } from "@/lib/catalog"
-
-const EVENT_START_DATE = new Date("2026-05-22T10:00:00+03:30")
-const EVENT_END_DATE = new Date("2026-05-22T14:00:00+03:30")
-
-function getTimeLeft(targetDate: Date) {
-  const now = new Date().getTime()
-  const distance = targetDate.getTime() - now
-
-  if (distance <= 0) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0 }
-  }
-
-  return {
-    days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((distance / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((distance / (1000 * 60)) % 60),
-    seconds: Math.floor((distance / 1000) % 60),
-  }
-}
-function TimeBox({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="flex items-center justify-center gap-2 rounded-lg px-1 py-2 text-xs sm:w-18 sm:justify-around sm:px-2">
-      <span className="grid h-5 w-5 place-items-center transition-all duration-300">
-        <span key={value} className="animate-pop">
-          {value.toString().padStart(2, "0")}
-        </span>
-      </span>
-      <span className="grid place-items-center text-sm opacity-70 sm:mr-auto sm:ml-2">
-        {label}
-      </span>
-    </div>
-  )
-}
-
-function VideoDialog() {
-  const [open, setOpen] = useState(false)
+export default function HomePage() {
+  const [events, setEvents] = useState<PalEvent[] | null>(null)
+  const [error, setError] = useState("")
+  useEffect(() => {
+    let alive = true
+    fetchEvents()
+      .then((events) => alive && setEvents(events))
+      .catch(() => alive && setError("دریافت رویدادها ممکن نشد."))
+    return () => {
+      alive = false
+    }
+  }, [])
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          className="group relative mx-auto mt-5 aspect-video w-full max-w-xl overflow-hidden rounded-xl focus-visible:ring-2 focus-visible:ring-(--crp-terracotta) focus-visible:ring-offset-2"
-          aria-label="پخش ویدیوی پَل"
+    <main className="min-h-screen bg-(--crp-cream) text-(--crp-espresso)">
+      <div className="ed-shell pt-24">
+        <section
+          aria-labelledby="event-title"
+          className="grid min-h-[calc(100svh-7rem)] items-center gap-8 border-b border-(--crp-sand) py-10 md:grid-cols-2 md:gap-12"
         >
-          <Image
-            src="/pal-coffee-poster.jpg"
-            alt=""
-            fill
-            sizes="(max-width: 640px) 100vw, 576px"
-            className="object-cover transition group-hover:scale-105"
-          />
-          <span className="absolute inset-0 grid place-items-center bg-black/20">
-            <span className="grid size-16 place-items-center rounded-full bg-black/55 text-2xl text-white backdrop-blur-sm">
-              ▶
-            </span>
-          </span>
-        </button>
-      </DialogTrigger>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-4xl overflow-hidden rounded-xl bg-black p-0 sm:max-w-4xl">
-        <DialogTitle className="sr-only">ویدیوی پَل</DialogTitle>
-        {open && (
-          <MinimalVideoPlayer
-            src="/pal-coffee.mp4"
-            poster="/pal-coffee-poster.jpg"
-            aspectRatio="16 / 9"
-          />
-        )}
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-function Countdown() {
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft(EVENT_START_DATE))
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft(getTimeLeft(EVENT_START_DATE))
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [])
-
-  return (
-    <div
-      dir="rtl"
-      className="flex w-full items-center justify-evenly gap-2 rounded-[8px] border px-2 text-center sm:w-84 sm:gap-4"
-    >
-      <TimeBox label="روز" value={timeLeft.days} />
-      <TimeBox label="ساعت" value={timeLeft.hours} />
-      <TimeBox label="دقیقه" value={timeLeft.minutes} />
-      <TimeBox label="ثانیه" value={timeLeft.seconds} />
-    </div>
-  )
-}
-
-export default function PalCoffeeEventForm() {
-  const [now, setNow] = useState(new Date())
-  // const [catalogProducts, setCatalogProducts] = useState<CatalogProduct[]>([])
-  const eventLive = now >= EVENT_START_DATE && now < EVENT_END_DATE
-  const signupClosed = now >= EVENT_START_DATE
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(new Date())
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [])
-
-  // useEffect(() => {
-  //   const syncCatalog = () => setCatalogProducts(loadCatalogProducts())
-  //   syncCatalog()
-  //   window.addEventListener("storage", syncCatalog)
-  //   window.addEventListener("catalog-products-updated", syncCatalog)
-  //   return () => {
-  //     window.removeEventListener("storage", syncCatalog)
-  //     window.removeEventListener("catalog-products-updated", syncCatalog)
-  //   }
-  // }, [])
-
-  //  const card1 = document.getElementById("main-card")
-  //  const card2 = document.getElementById("second-card")
-  //
-  //  const syncHeight = () => {
-  //    if (card1 && card2) card2.style.height = card1.offsetHeight + "px"
-  //  }
-  //  syncHeight()
-  //  window.addEventListener("resize", syncHeight)
-
-  return (
-    <main style={s.page} className="">
-      <Header />
-      <section className="pt-20">
-        <Image
-          src="/img/pal_cups.png"
-          className="boxShadowMain animate-scaleIn"
-          priority
-          quality={80}
-          width={"450"}
-          style={{
-            width: "100%",
-            height: "auto",
-          }}
-          height="400"
-          alt="pal_logo"
-        />
-        <div className="animate-fadeUp mt-8 mb-5 hidden w-full justify-center gap-2 px-2 text-xs delay-200 *:min-h-6 *:opacity-50 *:lg:text-base">
-          <Badge
-            variant="outline"
-            className="gap-1.5 rounded-full px-3 py-1.5 font-vazir font-normal lg:py-3"
-          >
-            <MaterialSymbolsCalendarTodayOutline />
-            جمعه ۱ خرداد
-          </Badge>
-          <Badge
-            variant="outline"
-            className="gap-1.5 rounded-full px-3 py-1.5 font-normal lg:py-3"
-          >
-            <MaterialSymbolsLightAlarmOutline />
-            ۱۰:۰۰ تا ۱۴:۰۰
-          </Badge>
-          <Badge
-            variant="outline"
-            onClick={() =>
-              window.open(
-                "https://neshan.org/maps/places/e3e384c27293cbcd49bde3c6a622dfde#c32.849-59.227-20z-0p",
-                "_blank",
-                "noopener,noreferrer"
-              )
-            }
-            className="cursor-pointer gap-1.5 rounded-full px-3 py-1.5 font-normal lg:py-3"
-          >
-            <MaterialSymbolsLocationOnRounded />
-            کافه نوفه
-          </Badge>
-        </div>
-        {eventLive && (
-          <div className="mx-auto mb-4 animate-[borderMove_8s_ease_infinite] rounded-xl bg-[linear-gradient(120deg,#9f3422,#cc8831,#73a89c,#9f3422)] bg-size-[250%_250%] p-0.5">
-            <div className="flex items-center justify-center gap-2 rounded-xl bg-(--crp-cream) px-4 py-3 text-center text-sm font-bold text-[var(--crp-dark)]">
-              ایونت در حال برگزاریه!
-            </div>
-          </div>
-        )}
-        <div className="animate-fadeUp mx-auto mt-4 flex flex-col-reverse items-center justify-center gap-2 px-2 delay-300 sm:flex-row sm:gap-2">
-          {signupClosed && eventLive ? (
-            <div className="party" title=":party:">
-              <a title=":party:">
-                <ul>
-                  <li></li>
-                  <li></li>
-                  <li></li>
-                  <li></li>
-                </ul>
-              </a>
-            </div>
-          ) : (
-            !eventLive && (
-              <Link
-                prefetch
-                href="/gallery"
-                className="mt-5 flex cursor-default flex-col items-center gap-2"
-              >
-                <Button variant="default" className="boxShadowMain text-base">
-                  گالری
-                  <LineMdCoffeeHalfEmptyTwotoneLoop />
-                </Button>
-              </Link>
-            )
-          )}
-
-          {!signupClosed && <Countdown />}
-        </div>
-      </section>
-
-      <h1 className="mt-10 w-full text-center font-eng text-3xl font-bold">
-        After Taste
-      </h1>
-      <VideoDialog />
-      {/* middle page */}
-      <section className="animate-fadeIn mt-2 flex w-full flex-col">
-        <article className="relative mx-auto mt-4 flex flex-col items-center justify-between gap-2">
-          <Image
-            src="/img/pal_people.png"
-            quality={80}
-            decoding="async"
-            className="lg:w-[70%]"
-            width="300"
-            priority
-            height="300"
-            alt="pal_logo"
-          />
-          <p className="mx-auto w-full max-w-2xl rounded-t-[8px] border border-b-0 p-2 py-2 text-justify text-xs leading-6 tracking-normal xs:px-4 sm:border-none lg:text-base">
-            این دورهمی یک بهونه‌ست برای باهم بودن، حرف زدن، چشیدن و تجربه کردن
-            یه حس تازه.
-            <br />
-            برای اینکه بدونیم قهوه‌ای که توی فنجونمونه، از کجا اومده، چه مسیری
-            رو طی کرده و چرا هرکدومش یه حس خاص داره.
-          </p>
-          <span className="absolute -bottom-px left-0 z-5 h-5 w-[3%] rounded-bl-[8px] border-b border-l sm:hidden"></span>
-          <span className="absolute -bottom-px left-0 z-4 h-5 w-[3%] border-b border-l border-transparent! bg-[#fff9f0] sm:hidden"></span>
-        </article>
-        <article className="mx-auto mb-4 flex flex-row-reverse items-center justify-between lg:justify-center">
-          <div className="relative h-60">
-            <span className="absolute top-0 -right-px z-3 h-5 w-full rounded-tr-[8px] border-t border-r sm:hidden"></span>
-            <span className="absolute -top-px -right-px z-2 size-4 border-t border-r border-transparent! bg-[#fff9f0] sm:hidden"></span>
-            <Image
-              src="/img/pal_lady.png"
-              width="200"
-              style={{
-                height: "auto",
-              }}
-              className="mr-2 h-60! object-contain lg:h-80!"
-              loading="lazy"
-              height="200"
-              alt="pal_logo"
-            />
-          </div>
-          <p className="my-auto h-60 w-full rounded-b-[8px] border border-t-0 px-2 py-0 text-justify text-xs leading-6 tracking-normal xs:w-[calc(100%-200px)] xs:p-4 sm:h-60 sm:border-none sm:py-2 lg:w-1/4 lg:text-base">
-            توی دنیایی که جنگ و تورم هر روز قیمت قهوه رو بالا می‌بره؛ ما ترجیح
-            می‌دیم به‌جای کم کردن کیفیت و فراموشی فرهنگ قهوه، دست به دست هم بدیم
-            تا با ساده درست کردن قهوه فرهنگ قهوه رو زنده نگه داریم
-            <br />
-          </p>
-        </article>
-        <div className="mx-auto my-6 flex w-full max-w-2xl items-center gap-3 lg:mt-20">
-          <div className="h-px flex-1 bg-border" />
-          <div className="h-1.5 w-1.5 rounded-full bg-accent opacity-60" />
-          <div className="h-px flex-1 bg-border" />
-        </div>
-        <article className="relative mx-auto mt-10 max-w-md py-6 text-center">
-          <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-5xl text-(--crp-sand)">
-            “
-          </span>
-          <p className="w-50 text-base leading-8 italic xs:w-80 xs:text-lg">
-            قهوه فقط یک نوشیدنی نیست؛ یک صنعت است، یک فرهنگ است، و برای بسیاری،
-            تمام زندگی‌شان…
-          </p>
-          <div className="mx-auto mt-4 h-0.5 w-12 rounded-full bg-(--crp-terracotta)"></div>
-        </article>
-      </section>
-
-      {/* <section id="catalog" className="mt-16 w-full max-w-5xl scroll-mt-24">
-        <div className="mb-6 flex flex-col items-center text-center">
-          <p className="font-eng text-sm text-(--crp-amber)">Pal Coffee Catalog</p>
-          <h2 className="mt-2 text-2xl font-bold">کاتالوگ قهوه‌ها</h2>
-          <p className="mt-3 max-w-xl text-sm leading-7 text-(--crp-dark)">
-            چند پیشنهاد از قهوه‌های پَل؛ روی هر کارت بزنید تا جزئیات، نت‌های
-            طعمی و پیشنهاد دم‌آوری را ببینید.
-          </p>
-        </div>
-
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {catalogProducts.map((product) => (
-            <Link
-              key={product.slug}
-              href={`/catalog/${product.slug}`}
-              className="boxShadowMain boxShadowMainH group overflow-hidden rounded-[8px] border bg-[#fff9f0] transition hover:-translate-y-1"
+          <div className="max-w-2xl">
+            <p className="mb-5 text-sm font-semibold text-(--crp-terracotta)">
+              پَل در بیرجند · قهوه و دورهمی
+            </p>
+            <h1
+              id="event-title"
+              className="text-[clamp(3rem,8vw,7rem)] leading-[1.2] font-bold"
             >
-              <div className="relative h-54 overflow-hidden">
-                <Image
-                  src={product.image}
-                  alt={product.title}
-                  width={500}
-                  height={360}
-                  loading="lazy"
-                  quality={75}
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                />
-                <Badge className="absolute top-3 right-3 rounded-full">
-                  {product.roast}
-                </Badge>
-              </div>
-              <div className="flex min-h-52 flex-col gap-3 p-4">
-                <div>
-                  <h3 className="text-lg font-bold">{product.title}</h3>
-                  <p className="mt-1 text-sm leading-6 text-(--crp-dark)">
-                    {product.subtitle}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {product.notes.map((note) => (
-                    <span
-                      key={note}
-                      className="rounded-full border px-2 py-1 text-xs text-(--crp-terracotta)"
-                    >
-                      {note}
-                    </span>
-                  ))}
-                </div>
-                <span className="mt-auto text-sm font-bold text-(--crp-terracotta)">
-                  مشاهده جزئیات ←
-                </span>
-              </div>
+              قهوه‌های پَل
+            </h1>
+            <p className="mt-6 max-w-lg text-lg leading-9">
+              قهوه برای خانه؛ دورهمی برای کنار هم بودن.
+            </p>
+            <Link
+              href="/catalog"
+              className="outline-action mt-6 inline-flex min-h-12 items-center px-8 font-semibold"
+            >
+              خرید قهوه
             </Link>
-          ))}
-        </div>
-      </section> */}
-
-      <h1 className="my-3 mt-10 font-bold">برنامه چیه؟!</h1>
-
-      <section className="flex flex-col items-center gap-6 pb-30 md:flex-row">
-        <article className="boxShadowMain boxShadowMainH relative flex flex-col overflow-hidden rounded-[8px] transition hover:scale-105">
+            <dl className="mt-8 grid max-w-lg grid-cols-2 gap-4 border-y border-(--crp-sand) py-5">
+              <div>
+                <dt className="text-sm text-(--crp-dark)">رویداد پیش رو</dt>
+                <dd className="font-semibold">
+                  {events?.[0]?.title ??
+                    (error || (events ? "به‌زودی" : "در حال دریافت…"))}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-sm text-(--crp-dark)">مکان</dt>
+                <dd className="font-semibold">
+                  اطلاعات هر رویداد در صفحه ثبت‌نام
+                </dd>
+              </div>
+            </dl>
+            <Link
+              href="/submit"
+              className="outline-action mt-9 inline-flex min-h-12 items-center justify-center rounded-[10px] px-8 font-semibold"
+            >
+              رویدادها و ثبت‌نام
+            </Link>
+          </div>
+          <EventArtwork variant="landing" className="max-w-2xl" />
+        </section>
+        <section
+          aria-labelledby="archive-title"
+          className="grid items-center gap-8 bg-(--crp-warm) px-4 py-14 md:grid-cols-2 md:px-8 md:py-20"
+        >
+          <div>
+            <p className="text-sm font-semibold text-(--crp-terracotta)">
+              آرشیو دورهمی‌های قبلی
+            </p>
+            <h2
+              id="archive-title"
+              className="mt-3 text-3xl leading-relaxed font-bold"
+            >
+              چند قاب از کنار هم بودن
+            </h2>
+            <p className="mt-4 leading-8">
+              این عکس‌ها از دورهمی‌های پیشین پَل هستند، نه رویدادهای آینده.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-6">
+              <Link
+                href="/gallery"
+                className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4"
+              >
+                دیدن گالری
+              </Link>
+              <Link
+                href="/about"
+                className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4"
+              >
+                دربارهٔ ما
+              </Link>
+            </div>
+          </div>
           <Image
-            src="/img/brew.jpeg"
-            quality={70}
-            loading="lazy"
-            width="250"
-            height="250"
-            alt="pal_logo"
+            src="/img/gallery/optimized/0.webp"
+            alt="عکسی از دورهمی قبلی پَل"
+            width={800}
+            height={560}
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="aspect-[4/3] w-full object-cover"
           />
-          <p className="absolute right-3 bottom-3 flex items-center gap-1 rounded-[8px] border bg-primary px-2 py-1 text-xs text-white">
-            قهوه دمی
-            <GameIconsCoffeePot />
-          </p>
-        </article>
-        <article className="boxShadowMain boxShadowMainH relative flex flex-col overflow-hidden rounded-[8px] transition hover:scale-105">
-          <Image
-            src="/img/beans.jpeg"
-            quality={70}
-            loading="lazy"
-            width="250"
-            height="250"
-            alt="pal_logo"
-            id="main-card"
-          />
-          <p className="absolute right-3 bottom-3 flex items-center gap-1 rounded-[8px] border bg-primary px-2 py-1 text-xs text-white">
-            حس خوب
-            <PhCoffeeBeanFill />
-          </p>
-        </article>
-        <article className="boxShadowMain boxShadowMainH relative flex flex-col overflow-hidden rounded-[8px] transition hover:scale-105">
-          <Image
-            src="/img/espersso.jpeg"
-            quality={70}
-            width="250"
-            loading="lazy"
-            id="second-card"
-            className="h-41.5! object-cover!"
-            height="250"
-            alt="pal_logo"
-          />
-          <p className="absolute right-3 bottom-3 flex items-center gap-1 rounded-[8px] border bg-primary px-2 py-1 text-xs text-white">
-            قهوه اسپرسو
-            <StreamlineUltimateCoffeeEspressoMachineBold />
-          </p>
-        </article>
-      </section>
-      <footer className="flex size-full flex-col justify-between gap-2 rounded-[8px] bg-[#280000] py-2 text-center text-xs text-[10px] text-[#fff9ef]">
-        <span className="mb-auto">
-          اردیبهشت ۱۴۰۵ — تمامی حقوق این رویداد محفوظ است ©
-        </span>
-        <span className="mx-auto flex flex-col items-center">
-          Made With Suffer
-          <span>Saeed && Jamshid</span>
-          <GravityUiTerminalLine />
-        </span>
-        <span className="flex flex-col items-center justify-center gap-1">
-          در صورت وجود مشکل در ثبت نام با این شماره تماس بگیرید
-          <a href="tel:+989393258985">
-            <Badge variant="destructive">09393258985</Badge>
+        </section>
+      </div>
+      <footer className="border-t border-(--crp-sand) bg-(--crp-warm) py-7 text-sm">
+        <div className="ed-shell flex flex-wrap justify-between gap-3">
+          <span>پَل · بیرجند</span>
+          <a
+            href="tel:+989393258985"
+            dir="ltr"
+            className="underline underline-offset-4"
+          >
+            ۰۹۳۹۳۲۵۸۹۸۵
           </a>
-        </span>
+        </div>
       </footer>
     </main>
   )

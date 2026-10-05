@@ -2,19 +2,16 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@font-face {
-  font-family: "Vazirmatn";
-  src: url("/fonts/Vazirmatn-VariableFont_wght.ttf");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+/* =============================================
+   Pal Coffee Press
+   Warm Persian editorial commerce, minimal event direction.
+   Single source of truth — see DESIGN.md
+   ============================================= */
 
 @font-face {
   font-family: "Vazirmatn";
-  src: url("/fonts/static/Vazirmatn-Bold.ttf");
-  font-weight: 400;
-  font-weight: 700;
+  src: url("/fonts/Vazirmatn-VariableFont_wght.ttf");
+  font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
@@ -23,12 +20,14 @@
   font-family: "Playwrite GB S";
   src: url("/fonts/PlaywriteGBS-VariableFont_wght.ttf");
   font-optical-sizing: auto;
+  font-display: swap;
 }
 
 @font-face {
   font-family: "A_Soraya";
   src: url("/fonts/A_Soraya.ttf");
   font-optical-sizing: auto;
+  font-display: swap;
 }
 
 @theme {
@@ -73,13 +72,115 @@
   --color-card: var(--card);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius));
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
+  --radius-2xl: 8px;
+  --radius-3xl: 8px;
+  --radius-4xl: 8px;
+}
+
+/* ── Single source of truth for all design tokens ── */
+:root {
+  /* Brand palette */
+  /* Foundation Café day palette; legacy names retain existing page bindings. */
+  --crp-cream: #f4efe8;
+  --crp-warm: #eae3d9;
+  --crp-sand: #d8cec1;
+  --crp-espresso: #2b1f19;
+  --crp-terracotta: #954f28;
+  --crp-sage: #4f6b45;
+  --crp-amber: #954f28;
+  --crp-dark: #6f6258;
+  --crp-surface: #fbf8f4;
+  --crp-on-ink: #fbf8f4;
+
+  /* Shop aliases keep existing pages wired to theme colors. */
+  --shop-bg: var(--crp-cream);
+  --shop-surface: var(--crp-warm);
+  --shop-card: var(--crp-surface);
+  --shop-border: var(--crp-sand);
+  --shop-fg: var(--crp-espresso);
+  --shop-muted: var(--crp-dark);
+  --shop-accent: var(--crp-terracotta);
+  --shop-accent-deep: var(--crp-dark);
+
+  /* Semantic aliases */
+  --background: var(--crp-cream);
+  --foreground: var(--crp-espresso);
+  --card: var(--crp-cream);
+  --card-foreground: var(--crp-espresso);
+  --popover: var(--crp-cream);
+  --popover-foreground: var(--crp-espresso);
+  --border: var(--crp-sand);
+  --input: var(--crp-warm);
+  --ring: var(--crp-terracotta);
+  --primary: var(--crp-espresso);
+  --primary-foreground: var(--crp-on-ink);
+  --secondary: var(--crp-warm);
+  --secondary-foreground: var(--crp-espresso);
+  --muted: var(--crp-warm);
+  --muted-foreground: var(--crp-dark);
+  --accent: var(--crp-sage);
+  --accent-foreground: var(--crp-espresso);
+  --destructive: #9f3422;
+
+  /* Editorial type scale */
+  --type-hero: clamp(2.75rem, 7vw, 6rem);
+  --type-display: clamp(2rem, 4.5vw, 3.75rem);
+  --type-h1: clamp(1.875rem, 3.5vw, 3rem);
+  --type-h2: clamp(1.5rem, 2.5vw, 2.25rem);
+  --type-body: clamp(1rem, 1.1vw, 1.125rem);
+  --type-label: 0.8125rem;
+
+  /* Grid */
+  --page-max: 1440px;
+  --page-gutter: clamp(1rem, 3vw, 3rem);
+  --grid-gap: 1px;
+  --section-space: clamp(4rem, 10vw, 9rem);
+
+  /* Shape */
+  --radius: 10px;
+  --shadow-hard: none;
+  --shadow-hard-lg: none;
+
+  /* Typography */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-mono: "DM Mono", "Courier New", monospace;
+
+  /* Sidebar */
+  --sidebar: var(--crp-warm);
+  --sidebar-foreground: var(--crp-espresso);
+  --sidebar-primary: var(--crp-terracotta);
+  --sidebar-primary-foreground: var(--crp-cream);
+  --sidebar-accent: var(--crp-warm);
+  --sidebar-accent-foreground: var(--crp-espresso);
+  --sidebar-border: var(--crp-sand);
+  --sidebar-ring: var(--crp-terracotta);
+}
+
+/* Foundation Café white variant, active by default through next-themes. */
+.white {
+  --crp-cream: #f8f3eb;
+  --crp-warm: #f9f5f0;
+  --crp-sand: #e7e1d9;
+  --crp-surface: #ffffff;
+  --crp-on-ink: #ffffff;
+}
+
+/* Existing next-themes dark toggle uses class="dark". */
+.dark {
+  --crp-cream: #1a1411;
+  --crp-warm: #2e2520;
+  --crp-sand: #3e332c;
+  --crp-espresso: #f1e9df;
+  --crp-terracotta: #d9895a;
+  --crp-sage: #9db58f;
+  --crp-amber: #d9895a;
+  --crp-dark: #b3a597;
+  --crp-surface: #231b17;
+  --crp-on-ink: #1a1411;
 }
 
 @layer base {
@@ -96,92 +197,129 @@
     @apply font-sans;
     scroll-behavior: smooth;
   }
+  /* Keyboard focus must stay visible everywhere — DESIGN.md §RTL and Accessibility */
+  :focus-visible {
+    outline: 2px solid var(--crp-terracotta);
+    outline-offset: 2px;
+  }
 }
 
-:root {
-  --background: oklch(0.98 0.02 85); /* #fff9f0 */
-  --foreground: oklch(0.18 0.03 20); /* #280000 */
-
-  --card: oklch(0.94 0.04 80); /* #f6e4cb */
-  --card-foreground: oklch(0.18 0.03 20);
-
-  --popover: oklch(0.98 0.02 85);
-  --popover-foreground: oklch(0.18 0.03 20);
-
-  --primary: oklch(0.45 0.14 30); /* #9f3422 */
-  --primary-foreground: oklch(0.98 0.02 85);
-
-  --secondary: oklch(0.92 0.03 80); /* soft beige */
-  --secondary-foreground: oklch(0.25 0.04 20);
-
-  --muted: oklch(0.92 0.02 80);
-  --muted-foreground: oklch(0.55 0.03 40);
-
-  --accent: oklch(0.65 0.08 180); /* #73a89c */
-  --accent-foreground: oklch(0.18 0.03 20);
-
-  --destructive: oklch(0.55 0.2 25); /* keep red-ish */
-
-  --border: oklch(0.88 0.03 75); /* #e0cdaf */
-  --input: oklch(0.88 0.03 75);
-  --ring: oklch(0.65 0.08 180); /* accent focus */
-
-  --radius: 0.75rem;
-
-  /* optional */
-  --sidebar: oklch(0.96 0.03 80);
-  --sidebar-foreground: oklch(0.18 0.03 20);
-  --sidebar-primary: oklch(0.45 0.14 30);
-  --sidebar-primary-foreground: oklch(0.98 0.02 85);
-  --sidebar-accent: oklch(0.92 0.03 80);
-  --sidebar-accent-foreground: oklch(0.25 0.04 20);
-  --sidebar-border: oklch(0.88 0.03 75);
-  --sidebar-ring: oklch(0.65 0.08 180);
+/* Subtle illustration motion; SVG remains complete when motion is disabled. */
+@keyframes anbar-breeze {
+  0%, 100% { transform: translateX(-8px); opacity: .4; }
+  50% { transform: translateX(8px); opacity: .85; }
+}
+@keyframes anbar-steam {
+  0%, 100% { transform: translate(0, 2px); opacity: .45; }
+  50% { transform: translate(5px, -7px); opacity: 1; }
+}
+.anbar-wind { animation: anbar-breeze 4s ease-in-out infinite; }
+.anbar-steam { animation: anbar-steam 3s ease-in-out infinite; }
+.anbar-steam-late { animation-delay: -1.5s; }
+@media (prefers-reduced-motion: reduce) {
+  .anbar-wind, .anbar-steam { animation: none; }
 }
 
-/* =============================================
-   Coffee Roastery Pal — Brand Theme
-   globals.css  (add to your existing globals.css)
-   ============================================= */
+/* Button treatment: transparent fill, readable border in both themes. */
+.outline-action {
+  background: transparent;
+  border: 1px solid var(--crp-espresso);
+  color: var(--crp-espresso);
+}
+.outline-action:hover { border-color: var(--crp-terracotta); color: var(--crp-terracotta); }
 
-/* @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Mono:wght@300;400&display=swap'); */
+/* ── Editorial primitives ── */
 
-/* ── Brand Tokens ── */
-:root {
-  /* Palette from brand swatches */
-  --crp-cream: #fff9f0;
-  --crp-warm: #f6e4cb;
-  --crp-sand: #e0cdaf;
-  --crp-espresso: #280000;
-  --crp-terracotta: #9f3422;
-  --crp-sage: #73a89c;
-  --crp-amber: #cc8831;
-  --crp-dark: #511e1d;
-
-  /* Semantic aliases */
-  --background: var(--crp-cream);
-  --foreground: var(--crp-espresso);
-  --card: var(--crp-cream);
-  --card-foreground: var(--crp-espresso);
-  --border: var(--crp-sand);
-  --input: var(--crp-warm);
-  --ring: var(--crp-terracotta);
-  --primary: var(--crp-terracotta);
-  --primary-foreground: var(--crp-cream);
-  --muted: var(--crp-warm);
-  --muted-foreground: var(--crp-dark);
-  --accent: var(--crp-sage);
-  --accent-foreground: var(--crp-cream);
-
-  /* Typography */
-  --font-display: "Playfair Display", Georgia, serif;
-  --font-mono: "DM Mono", "Courier New", monospace;
-
-  /* Spacing & radius */
-  --radius: 8px; /* Hard edges for outline style */
+/* Page shell: max width + responsive gutter */
+.ed-shell {
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--page-gutter);
 }
 
-/* ── Shadcn Input — Pal Coffee Override ── */
+@keyframes page-loading {
+  from { transform: translateX(0); opacity: .55; }
+  50% { transform: translateX(-1rem); opacity: 1; }
+  to { transform: translateX(0); opacity: .55; }
+}
+
+.page-loading-bar { animation: page-loading 1.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .page-loading-bar { animation: none; }
+}
+
+/* Hairline grid: children separated by 1px rules drawn with background */
+.ed-grid {
+  display: grid;
+  gap: var(--grid-gap);
+  background: var(--crp-sand);
+  border: 1px solid var(--crp-sand);
+}
+.ed-grid > * {
+  background: var(--crp-surface);
+}
+
+/* Type helpers */
+.t-hero {
+  font-size: var(--type-hero);
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.t-display {
+  font-size: var(--type-display);
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.t-h1 {
+  font-size: var(--type-h1);
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.t-h2 {
+  font-size: var(--type-h2);
+  line-height: 1.3;
+  font-weight: 600;
+}
+.t-body {
+  font-size: var(--type-body);
+  line-height: 1.9;
+}
+.t-label {
+  font-size: var(--type-label);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Sequence numerals on product tiles (01, 02, …) */
+.ed-seq {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--type-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hard-shadow press feedback */
+.ed-press {
+  box-shadow: var(--shadow-hard);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+.ed-press:hover { opacity: 0.9; }
+.ed-press:active { opacity: 0.8; }
+
+.boxShadowMain {
+  box-shadow: var(--shadow-hard);
+}
+.boxShadowMainH:hover {
+  box-shadow: var(--shadow-hard-lg);
+}
+
+/* ── Shadcn Input — Pal Coffee override ── */
 .pal-input {
   background: transparent !important;
   border: none !important;
@@ -202,15 +340,15 @@
   border-bottom-color: var(--crp-terracotta) !important;
   box-shadow: none !important;
   outline: none !important;
-  ring: none !important;
 }
 
 .pal-input::placeholder {
-  color: var(--crp-sand) !important;
+  /* sand is 1.48 on cream — too faint for placeholders */
+  color: color-mix(in srgb, var(--crp-dark) 55%, var(--crp-cream)) !important;
   opacity: 1;
 }
 
-/* ── Dialog — Pal Coffee Override ── */
+/* ── Dialog ── */
 [role="dialog"][data-state="open"],
 [data-radix-dialog-content][data-state="open"] {
   animation: pal-dialog-in 220ms ease forwards;
@@ -243,19 +381,11 @@
   }
 }
 
-/* Remove default shadcn dialog animations */
 .DialogContent {
   animation: none !important;
 }
 
-.boxShadowMain {
-  box-shadow: 8px 8px 0px rgb(224, 205, 175);
-}
-
-.boxShadowMainH:hover {
-  box-shadow: 14px 14px 0px rgb(224, 205, 175);
-}
-
+/* ── Date picker ── */
 .custom-calendar.rmdp-wrapper,
 .rmdp-container .custom-calendar.ep-arrow::after {
   @apply bg-background;
@@ -263,20 +393,26 @@
     @apply text-muted-foreground!;
   }
 }
-.rmdp-month-picker,.rmdp-year-picker{
-    background : var(--background) !important;
-    @apply text-muted-foreground!;
+.rmdp-month-picker,
+.rmdp-year-picker {
+  background: var(--background) !important;
+  @apply text-muted-foreground!;
 }
 
-
 .rmdp-container .custom-calendar.ep-arrow[direction="bottom"] {
-  border-top: 1px solid bisque;
+  border-top: 1px solid var(--crp-sand);
 }
 
 .rmdp-container .custom-calendar.ep-arrow[direction="top"] {
-  border-bottom: 1px solid bisque;
+  border-bottom: 1px solid var(--crp-sand);
 }
 
+/* Page content enters on client navigation; navbar stays steady. */
+main > :not(header):not(footer) {
+  animation: fadeIn 360ms ease-out both;
+}
+
+/* ── Motion ── */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -289,7 +425,7 @@
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.6s ease-out;
+  animation: fadeIn 0.45s ease-out;
 }
 
 @keyframes scaleIn {
@@ -304,7 +440,7 @@
 }
 
 .animate-scaleIn {
-  animation: scaleIn 0.7s ease-out;
+  animation: scaleIn 0.45s ease-out;
 }
 
 @keyframes fadeUp {
@@ -319,31 +455,7 @@
 }
 
 .animate-fadeUp {
-  animation: fadeUp 0.6s ease-out both;
-}
-
-.delay-200 {
-  animation-delay: 0.2s;
-}
-.delay-300 {
-  animation-delay: 0.3s;
-}
-.delay-400 {
-  animation-delay: 0.4s;
-}
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fadeUp {
-  animation: fadeUp 0.6s ease-out both;
+  animation: fadeUp 0.45s ease-out both;
 }
 
 .delay-200 {
@@ -383,137 +495,7 @@
   }
 }
 
-
-
-.party {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 48px;
-  height: 48px;
-}
-.party * {
-  animation-duration: 0.5s;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
-}
-.party:before {
-  content: "";
-  border-right: 24px solid transparent;
-  border-bottom: 24px solid #B4B4F3;
-  border-left: 24px solid transparent;
-  width: 48px;
-  height: 48px;
-  animation: party-body 0.5s linear infinite;
-}
-.party ul {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #7272E9;
-  position: absolute;
-  top: 0;
-  left: 8px;
-  animation-name: party-head;
-}
-.party ul li:nth-child(3) {
-  border-left: 4px solid transparent;
-  border-top: 16px solid #F5D875;
-  border-right: 4px solid transparent;
-  width: 0;
-  height: 0;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.party ul li:nth-child(2) {
-  background: #222;
-  border-radius: 50%;
-  width: 6px;
-  height: 6px;
-  position: absolute;
-  top: 8px;
-  left: 8px;
-}
-.party ul li:nth-child(1) {
-  background: #222;
-  border-radius: 50%;
-  width: 6px;
-  height: 6px;
-  position: absolute;
-  top: 8px;
-  right: 4px;
-}
-.party ul li:nth-child(4) {
-  border-top: 6px solid transparent;
-  border-left: 6px solid #3DF2C2;
-  border-bottom: 6px solid transparent;
-  width: 0;
-  height: 0;
-  position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translateY(-50%);
-  animation-name: party-plume;
-}
-
-@keyframes party-body {
-  0%, 100% {
-    border-right-width: 24px;
-    border-left-width: 24px;
-    border-bottom-color: #B4B4F3;
-  }
-  25% {
-    border-right-width: 44px;
-    border-left-width: 4px;
-    border-bottom-color: #70EEFA;
-  }
-  50% {
-    border-right-width: 24px;
-    border-left-width: 24px;
-    border-bottom-color: #A7F9E3;
-  }
-  75% {
-    border-right-width: 12px;
-    border-left-width: 36px;
-    border-bottom-color: #FF6270;
-  }
-}
-@keyframes party-head {
-  0%, 100% {
-    transform: translate(0%, 0%) rotate(0deg);
-    background: #7272E9;
-  }
-  25% {
-    transform: translate(-37.5%, 12.5%) rotate(22.5deg);
-    background: #51CFDB;
-  }
-  50% {
-    transform: translate(0%, 25%);
-    background: #3AD4AC;
-  }
-  75% {
-    transform: translate(25%, 12.5%) rotate(-11.25deg);
-    background: #E04351;
-  }
-}
-@keyframes party-plume {
-  0%, 100% {
-    border-left-color: #3DF2C2;
-  }
-  25% {
-    border-left-color: #7272E9;
-  }
-  50% {
-    border-left-color: #FF479E;
-  }
-  75% {
-    border-left-color: #FF8C62;
-  }
-}
-
+/* ── Party mascot (brand colors) ── */
 .party {
   position: absolute;
   top: 50%;
@@ -528,7 +510,6 @@
   animation-timing-function: linear;
 }
 
-/* BODY */
 .party:before {
   content: "";
   border-right: 24px solid transparent;
@@ -539,7 +520,6 @@
   animation: party-body 0.5s linear infinite;
 }
 
-/* HEAD */
 .party ul {
   width: 32px;
   height: 32px;
@@ -551,7 +531,6 @@
   animation-name: party-head;
 }
 
-/* HAT */
 .party ul li:nth-child(3) {
   border-left: 4px solid transparent;
   border-top: 16px solid var(--crp-amber);
@@ -564,7 +543,6 @@
   transform: translateY(-50%);
 }
 
-/* EYES */
 .party ul li:nth-child(2),
 .party ul li:nth-child(1) {
   background: var(--crp-espresso);
@@ -581,7 +559,6 @@
   right: 4px;
 }
 
-/* PLUME */
 .party ul li:nth-child(4) {
   border-top: 6px solid transparent;
   border-left: 6px solid var(--crp-sage);
@@ -595,10 +572,9 @@
   animation-name: party-plume;
 }
 
-/* ANIMATIONS */
-
 @keyframes party-body {
-  0%, 100% {
+  0%,
+  100% {
     border-right-width: 24px;
     border-left-width: 24px;
     border-bottom-color: var(--crp-warm);
@@ -621,7 +597,8 @@
 }
 
 @keyframes party-head {
-  0%, 100% {
+  0%,
+  100% {
     transform: translate(0%, 0%) rotate(0deg);
     background: var(--crp-sage);
   }
@@ -640,7 +617,8 @@
 }
 
 @keyframes party-plume {
-  0%, 100% {
+  0%,
+  100% {
     border-left-color: var(--crp-sage);
   }
   25% {
@@ -655,24 +633,251 @@
 }
 
 .pal-text {
-  font-size: clamp(6rem, 15vw, 16rem);
+  font-size: var(--type-hero);
   font-weight: 900;
   letter-spacing: -0.05em;
-
-  color: white;
-
-  /* fade the end */
+  color: var(--crp-espresso);
   -webkit-mask-image: linear-gradient(
     to right,
     black 0%,
     black 70%,
     transparent 100%
   );
-
-  mask-image: linear-gradient(
-    to right,
-    black 0%,
-    black 70%,
-    transparent 100%
-  );
+  mask-image: linear-gradient(to right, black 0%, black 70%, transparent 100%);
 }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Video player ──
+   Lives here rather than in a <style> tag inside the component: the previous
+   inline block was re-injected and re-parsed for every player instance. */
+.vjs-minimal-container {
+  position: relative;
+  width: 100%;
+  background: #000;
+  border-radius: 0;
+  overflow: hidden;
+}
+.vjs-minimal-container:focus-visible {
+  outline: 2px solid var(--crp-terracotta);
+  outline-offset: 2px;
+}
+.vjs-minimal-container video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.vjs-minimal-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.vjs-minimal-poster:not([data-visible]) {
+  opacity: 0;
+}
+
+.vjs-touch-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  touch-action: pan-y;
+}
+
+.vjs-seek-hint {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #fff;
+  background: rgb(0 0 0 / 0.45);
+  backdrop-filter: blur(8px);
+  padding: 12px 16px;
+  pointer-events: none;
+  animation: vjs-hint-fade 0.8s ease forwards;
+}
+.vjs-seek-hint span {
+  font-size: 13px;
+  font-weight: 500;
+}
+.vjs-seek-hint--backward { left: 20px; }
+.vjs-seek-hint--forward { right: 20px; }
+
+@keyframes vjs-hint-fade {
+  0% { opacity: 0; transform: translateY(-50%) scale(0.9); }
+  20% { opacity: 1; transform: translateY(-50%) scale(1); }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.vjs-key-hint {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  color: #fff;
+  background: rgb(0 0 0 / 0.5);
+  backdrop-filter: blur(8px);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: vjs-hint-fade 0.8s ease forwards;
+}
+
+.vjs-minimal-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.4);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.2s, background 0.2s;
+}
+.vjs-minimal-play[data-visible] {
+  opacity: 1;
+  pointer-events: auto;
+}
+.vjs-minimal-play:hover {
+  background: rgb(0 0 0 / 0.6);
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+/* Bottom control bar: seek + fullscreen */
+.vjs-bottom {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.65), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.vjs-minimal-container:hover .vjs-bottom,
+.vjs-minimal-container:focus-within .vjs-bottom {
+  opacity: 1;
+}
+/* Touch devices have no hover — keep controls visible */
+@media (hover: none) {
+  .vjs-bottom { opacity: 1; }
+}
+
+.vjs-seekbar {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+}
+.vjs-time {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  min-width: 34px;
+  text-align: center;
+}
+.vjs-track {
+  position: relative;
+  flex: 1;
+  height: 20px;
+  display: flex;
+  align-items: center;
+}
+.vjs-track-buffer,
+.vjs-track-fill {
+  position: absolute;
+  left: 0;
+  height: 3px;
+  pointer-events: none;
+}
+.vjs-track-buffer { background: rgb(255 255 255 / 0.35); }
+.vjs-track-fill { background: var(--crp-terracotta); }
+.vjs-track::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  height: 3px;
+  background: rgb(255 255 255 / 0.2);
+}
+/* Transparent native range on top for real a11y + dragging */
+.vjs-track input[type="range"] {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 20px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
+}
+.vjs-track input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--crp-cream);
+  border: 2px solid var(--crp-terracotta);
+}
+.vjs-track input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--crp-terracotta);
+  border-radius: 50%;
+  background: var(--crp-cream);
+}
+.vjs-track input[type="range"]:focus-visible {
+  outline: 2px solid var(--crp-cream);
+  outline-offset: 2px;
+}
+
+.vjs-minimal-fullscreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  background: rgb(0 0 0 / 0.4);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.2s;
+}
+.vjs-minimal-fullscreen:hover { background: rgb(0 0 0 / 0.6); }
+.vjs-minimal-fullscreen[data-availability="unsupported"] { display: none; }

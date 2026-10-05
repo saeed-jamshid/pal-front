@@ -1,153 +1,227 @@
 "use client"
 
-import Image from "next/image"
-import Link from "next/link"
-import { useEffect, useState } from "react"
-import { motion } from "framer-motion"
-import Header from "@/components/layout/Header"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { loadCatalogProducts, type CatalogProduct } from "@/lib/catalog"
+import { useEffect, useMemo, useRef, useState } from "react"
+import ProductCard from "@/components/shop/ProductCard"
+import {
+  fetchProducts,
+  fetchCategories,
+  type Category,
+  type CategorySlug,
+  type Product,
+} from "@/lib/shop"
+
+type SortKey = "featured" | "price-asc" | "price-desc" | "score-desc"
+
+const SORTS: { key: SortKey; label: string }[] = [
+  { key: "featured", label: "پیش‌فرض" },
+  { key: "price-asc", label: "ارزان‌ترین" },
+  { key: "price-desc", label: "گران‌ترین" },
+]
+
+const priceOf = (p: Product) => p.weights[0]?.price ?? Number.POSITIVE_INFINITY
 
 export default function CatalogPage() {
-  const [products, setProducts] = useState<CatalogProduct[]>([])
+  const [tab, setTab] = useState<CategorySlug>("" as CategorySlug)
+  const [categories, setCategories] = useState<Category[]>([])
+  const TABS = ["", ...categories.map((c) => c.slug)] as CategorySlug[]
+  const [sort, setSort] = useState<SortKey>("featured")
+  // null = loading for current tab; Error = failed
+  const [result, setResult] = useState<Product[] | Error | null>(null)
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   useEffect(() => {
-    const sync = () => setProducts(loadCatalogProducts())
-    sync()
-    window.addEventListener("storage", sync)
-    window.addEventListener("catalog-products-updated", sync)
+    let alive = true
+    Promise.all([fetchProducts(tab || undefined), fetchCategories()])
+      .then(([p, categories]) => {
+        if (alive) {
+          setResult(p)
+          setCategories(categories)
+        }
+      })
+      .catch(() => alive && setResult(new Error("ارتباط با سرور برقرار نشد.")))
     return () => {
-      window.removeEventListener("storage", sync)
-      window.removeEventListener("catalog-products-updated", sync)
+      alive = false
     }
-  }, [])
+  }, [tab])
+
+  const loading = result === null
+  const error = result instanceof Error ? result.message : ""
+  const products = useMemo(
+    () => (Array.isArray(result) ? result : []),
+    [result]
+  )
+
+  const sorted = useMemo(() => {
+    const list = [...products]
+    switch (sort) {
+      case "price-asc":
+        return list.sort((a, b) => priceOf(a) - priceOf(b))
+      case "price-desc":
+        return list.sort((a, b) => priceOf(b) - priceOf(a))
+      case "score-desc":
+        return list.sort(
+          (a, b) => (b.cuppingScore ?? 0) - (a.cuppingScore ?? 0)
+        )
+      default:
+        return list
+    }
+  }, [products, sort])
+
+  function selectTab(next: CategorySlug) {
+    setTab(next)
+    setResult(null)
+  }
+
+  // Roving focus: arrow keys move between tabs (WAI-ARIA tabs pattern)
+  function onTabKey(e: React.KeyboardEvent, i: number) {
+    const dir = e.key === "ArrowLeft" ? 1 : e.key === "ArrowRight" ? -1 : 0 // RTL
+    if (!dir) return
+    e.preventDefault()
+    const next = (i + dir + TABS.length) % TABS.length
+    tabRefs.current[next]?.focus()
+    selectTab(TABS[next])
+  }
+
+  const panelId = `panel-${tab}`
 
   return (
-    <main dir="rtl" className="min-h-screen overflow-hidden bg-(--crp-cream) text-(--crp-espresso)">
-      <Header back />
-
-      <section className="mx-auto px-4 pt-24 lg:max-w-6xl">
-        <div className="boxShadowMain overflow-hidden rounded-xl border bg-[#f8eee4] lg:grid lg:min-h-[620px] lg:grid-cols-3">
-          <BrochurePanel className="bg-[#f6e3e1] lg:order-3">
-            <p className="text-xs font-bold tracking-[0.25em] text-(--crp-terracotta)">PAL COFFEE</p>
-            <h1 className="mt-4 text-4xl leading-[1.15] font-black sm:text-5xl">
-              روزت رو با یک فنجان خوب شروع کن
-            </h1>
-            <Image
-              src="/img/pal_chair.png"
-              alt="دوست‌هایی که کنار هم قهوه می‌نوشند"
-              width={1200}
-              height={700}
-              priority
-              className="mt-auto h-64 w-full object-contain object-bottom"
-            />
-            <p className="rounded-2xl bg-(--crp-terracotta) px-5 py-4 text-sm leading-7 text-(--crp-cream)">
-              قهوه برای عجله نیست؛ برای مکث کردن، حرف زدن و ساختن یک لحظه خوبه.
-            </p>
-          </BrochurePanel>
-
-          <BrochurePanel className="bg-(--crp-cream) lg:order-2 lg:border-x">
-            <h2 className="text-3xl leading-tight font-black text-(--crp-dark)">
-              چیزی که ما به فنجان می‌آریم
-            </h2>
-            <p className="mt-5 text-justify text-sm leading-8 text-(--crp-dark)">
-              از انتخاب دانه تا برشته‌کاری و دم‌آوری، هر مرحله با حوصله انجام می‌شه.
-              نتیجه برای ما فقط یک نوشیدنی نیست؛ یک تجربه ساده، صمیمی و به‌یادموندنیه.
-            </p>
-            <Image
-              src="/img/pal_machine.png"
-              alt="فرآیند آماده‌سازی قهوه پَل"
-              width={1535}
-              height={619}
-              className="my-auto w-full object-contain"
-            />
-            <p className="font-eng text-center text-xl text-(--crp-terracotta)">Slow down. Sip better.</p>
-          </BrochurePanel>
-
-          <BrochurePanel className="bg-[#edf1e8] lg:order-1">
-            <Image
-              src="/img/pal_people2.png"
-              alt="کشاورزان و همراهان قهوه پَل"
-              width={1400}
-              height={960}
-              className="h-72 w-full object-contain object-bottom"
-            />
-            <div className="mt-auto">
-              <h2 className="text-3xl font-black text-(--crp-dark)">با ما در تماس باش</h2>
-              <div className="mt-5 flex flex-col gap-3 text-center text-sm">
-                <a className="rounded-full bg-(--crp-sage)/35 px-4 py-3" href="tel:+989393258985">
-                  ۰۹۳۹۳۲۵۸۹۸۵
-                </a>
-                <a className="rounded-full bg-(--crp-sage)/35 px-4 py-3" href="https://palcoffee.ir">
-                  palcoffee.ir
-                </a>
-              </div>
-            </div>
-          </BrochurePanel>
+    <main
+      dir="rtl"
+      className="min-h-screen bg-(--crp-cream) text-(--crp-espresso)"
+    >
+      {/* Compact masthead — product stays near the fold */}
+      <section className="ed-shell pt-24">
+        <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-b-2 border-(--crp-espresso) pb-5">
+          <div>
+            <h1 className="t-h2">قهوه‌های پَل</h1>
+          </div>
         </div>
       </section>
 
+      {/* Category tabs */}
+      <section className="ed-shell bg-(--crp-surface)">
+        <div
+          role="tablist"
+          aria-label="دسته‌بندی قهوه"
+          className="ed-grid grid-cols-2 border-t-0 md:grid-cols-4"
+        >
+          {TABS.map((t, i) => {
+            const active = tab === t
+            return (
+              <button
+                key={t}
+                ref={(el) => {
+                  tabRefs.current[i] = el
+                }}
+                role="tab"
+                id={`tab-${t}`}
+                aria-selected={active}
+                aria-controls={panelId}
+                tabIndex={active ? 0 : -1}
+                onClick={() => selectTab(t)}
+                onKeyDown={(e) => onTabKey(e, i)}
+                className={`min-h-14 cursor-pointer px-2 py-4 text-sm font-bold transition-colors duration-200 sm:text-base ${
+                  active
+                    ? "border-b-2 border-(--crp-espresso) text-(--crp-espresso)"
+                    : "hover:bg-(--crp-warm)!"
+                }`}
+              >
+                {t ? categories.find((c) => c.slug === t)?.name : "همه قهوه‌ها"}
+              </button>
+            )
+          })}
+        </div>
+      </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-24">
-        <div className="mb-10 flex flex-col items-center text-center">
-          <p className="font-eng text-sm text-(--crp-amber)">Choose your coffee</p>
-          <h2 className="mt-2 text-4xl font-black">قهوه‌های پَل</h2>
-          <p className="mt-4 max-w-xl leading-7 text-(--crp-dark)">
-            هر قهوه شخصیت خودش رو داره؛ نت‌های طعمی رو ببین و فنجان خودت رو پیدا کن.
+      {/* Toolbar: result count + sort */}
+      <section className="ed-shell bg-(--crp-warm)">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-x border-b border-(--crp-sand) px-4 py-3">
+          <p aria-live="polite" className="t-label text-(--crp-dark)">
+            {loading
+              ? "در حال بارگذاری…"
+              : error
+                ? ""
+                : `${sorted.length} محصول`}
           </p>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          {products.map((product, index) => (
-            <motion.article
-              key={product.slug}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ delay: index * 0.08 }}
-              className="group flex overflow-hidden rounded-2xl border bg-(--crp-cream) shadow-[8px_8px_0_var(--crp-sand)] transition hover:-translate-y-1"
+          <div className="flex items-center gap-2">
+            <label htmlFor="sort" className="t-label text-(--crp-dark)">
+              مرتب‌سازی
+            </label>
+            <select
+              id="sort"
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+              className="min-h-11 cursor-pointer border border-(--crp-sand) bg-(--crp-cream) px-3 text-sm font-bold"
             >
-              <Link href={`/catalog/${product.slug}`} className="flex w-full flex-col">
-                <div className="relative h-72 overflow-hidden">
-                  <Image
-                    src={product.image}
-                    alt={product.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover transition duration-700 group-hover:scale-105"
-                  />
-                  <Badge className="absolute top-4 right-4 rounded-full bg-(--crp-cream) text-(--crp-terracotta)">
-                    {product.roast}
-                  </Badge>
-                </div>
-                <div className="flex flex-1 flex-col p-5">
-                  <h3 className="text-xl font-black">{product.title}</h3>
-                  <p className="mt-2 text-sm leading-7 text-(--crp-dark)">{product.subtitle}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {product.notes.map((note) => (
-                      <span key={note} className="rounded-full bg-(--crp-warm) px-3 py-1 text-xs">
-                        {note}
-                      </span>
-                    ))}
-                  </div>
-                  <span className="mt-6 font-bold text-(--crp-terracotta)">دیدن جزئیات ←</span>
-                </div>
-              </Link>
-            </motion.article>
-          ))}
+              {SORTS.map((s) => (
+                <option key={s.key} value={s.key}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
+      </section>
 
-        <div className="mt-16 flex justify-center">
-          <a href="tel:+989393258985">
-            <Button size="lg" className="rounded-full px-8">مشاوره و سفارش</Button>
-          </a>
-        </div>
+      {/* Product grid — uniform rhythm, no arbitrary featured tile */}
+      <section
+        id={panelId}
+        role="tabpanel"
+        aria-labelledby={`tab-${tab}`}
+        tabIndex={-1}
+        className="ed-shell bg-(--crp-surface) pb-24"
+      >
+        {loading ? (
+          <div className="ed-grid grid-cols-2 border-t-0 md:grid-cols-3 lg:grid-cols-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-(--crp-cream)!">
+                <div className="h-64 animate-pulse bg-(--crp-warm)" />
+                <div className="flex flex-col gap-3 border-t border-(--crp-sand) p-5">
+                  <div className="h-3 w-20 animate-pulse bg-(--crp-warm)" />
+                  <div className="h-5 w-3/4 animate-pulse bg-(--crp-warm)" />
+                  <div className="h-3 w-1/2 animate-pulse bg-(--crp-warm)" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="border-x border-b border-(--crp-sand) py-20 text-center">
+            <p className="t-h2">{error}</p>
+            <button
+              onClick={() => {
+                setResult(null)
+                Promise.all([
+                  fetchProducts(tab || undefined),
+                  fetchCategories(),
+                ])
+                  .then(([p, c]) => {
+                    setResult(p)
+                    setCategories(c)
+                  })
+                  .catch(() =>
+                    setResult(new Error("ارتباط با سرور برقرار نشد."))
+                  )
+              }}
+              className="outline-action ed-press mt-6 min-h-12 cursor-pointer px-8 font-bold"
+            >
+              تلاش دوباره
+            </button>
+          </div>
+        ) : sorted.length === 0 ? (
+          <div className="border-x border-b border-(--crp-sand) py-20 text-center">
+            <p className="t-h2">فعلاً محصولی در این دسته نیست.</p>
+            <p className="t-body mt-3 text-(--crp-dark)">
+              دسته‌های دیگر را ببینید.
+            </p>
+          </div>
+        ) : (
+          <div className="ed-grid grid-cols-2 border-t-0 md:grid-cols-3 lg:grid-cols-4">
+            {sorted.map((p, i) => (
+              <ProductCard key={p.slug} product={p} seq={i + 1} />
+            ))}
+          </div>
+        )}
       </section>
     </main>
   )
-}
-
-function BrochurePanel({ className, children }: { className: string; children: React.ReactNode }) {
-  return <article className={`flex min-h-[560px] flex-col gap-5 p-7 ${className}`}>{children}</article>
 }

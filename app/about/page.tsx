@@ -1,0 +1,44 @@
+import Link from "next/link"
+import EventArtwork from "@/components/event/EventArtwork"
+
+export const metadata = { title: "دربارهٔ پَل | قهوه و دورهمی" }
+
+export default function AboutPage() {
+  return (
+    <main className="min-h-screen bg-(--crp-cream) text-(--crp-espresso)">
+      <div className="ed-shell max-w-6xl pt-28 pb-20">
+        <p className="mb-3 text-sm font-semibold text-(--crp-terracotta)">
+          پَل · بیرجند
+        </p>
+        <h1 className="t-h1 border-b border-(--crp-sand) pb-7">دربارهٔ ما</h1>
+        <div className="mt-8 grid items-center gap-10 md:grid-cols-2">
+          <div className="max-w-xl">
+            <p className="text-lg leading-9">
+              قهوه خوب، بهانه‌ای برای با هم بودن. پَل دورهمی قهوه و فرهنگ در
+              بیرجند است؛ جایی برای دیدن، گفت‌وگو و تجربه‌های تازه کنار هم.
+            </p>
+            <p className="mt-5 leading-8">
+              از دانه تا فنجان، دوست داریم قهوه راهی برای آشنایی و کنار هم بودن
+              باشد.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-6">
+              <Link
+                href="/gallery"
+                className="inline-flex min-h-11 items-center underline underline-offset-4"
+              >
+                عکس‌های دورهمی‌های قبل
+              </Link>
+              <Link
+                href="/submit"
+                className="inline-flex min-h-11 items-center underline underline-offset-4"
+              >
+                رویداد این جمعه
+              </Link>
+            </div>
+          </div>
+          <EventArtwork variant="about" />
+        </div>
+      </div>
+    </main>
+  )
+}

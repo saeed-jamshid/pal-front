@@ -1,0 +1,41 @@
+Creating test database for alias 'default'...
+Found 27 test(s).
+System check identified no issues (0 silenced).
+Bad Request: /api/v1/events/registrations/47f41d5e-cf37-43de-996e-eb77203f0ab5/decision/
+.Bad Request: /api/v1/events/registrations/
+Bad Request: /api/v1/events/registrations/
+.Bad Request: /api/v1/events/registrations/
+Bad Request: /api/v1/events/registrations/
+Bad Request: /api/v1/events/registrations/
+.Bad Request: /api/v1/auth/otp/verify/
+Bad Request: /api/v1/auth/otp/verify/
+Bad Request: /api/v1/auth/otp/verify/
+..Bad Request: /api/v1/events/registrations/
+Bad Request: /api/v1/events/registrations/
+Bad Request: /api/v1/events/registrations/
+.Not Found: /api/v1/events/registrations/afad565b-b430-4374-b8d5-afd79c161d10/
+Not Found: /api/v1/events/registrations/afad565b-b430-4374-b8d5-afd79c161d10/receipt/
+Forbidden: /api/v1/events/registrations/afad565b-b430-4374-b8d5-afd79c161d10/decision/
+Forbidden: /api/v1/events/manage/registrations/
+.Unauthorized: /api/v1/events/registrations/
+.Bad Request: /api/v1/events/registrations/2c6bb407-d898-49ac-91ab-77c3b87e1899/receipt/
+...Forbidden: /api/v1/payments/bale/webhook/wrong/
+..Not Found: /api/v1/payments/saman/start/C2113F8C2E6AD9FB/
+...Not Found: /api/v1/payments/card/4/receipt/download/
+Forbidden: /api/v1/payments/card/4/decision/
+.Bad Request: /api/v1/payments/saman/start/A2AA37A945DEBB6C/
+Bad Request: /api/v1/payments/card/start/A2AA37A945DEBB6C/
+Bad Request: /api/v1/payments/card/start/A2AA37A945DEBB6C/
+..Bad Request: /api/v1/cart/items/
+Bad Request: /api/v1/cart/items/
+..SMS to 09120000000: test
+Task notifications.tasks.send_sms[68af5f4d-7ab2-43a0-9a04-1dfed1a6d83d] succeeded in 0.010745266001322307s: None
+Task notifications.tasks.send_sms[5f0a9f57-cb80-47ee-8fe3-aa95b4419eb7] succeeded in 0.0008339460000570398s: None
+.Too Many Requests: /api/v1/auth/otp/request/
+...Not Found: /api/v1/orders/6E6D5D151BA72BBB/
+..
+----------------------------------------------------------------------
+Ran 27 tests in 3.362s
+
+OK
+Destroying test database for alias 'default'...
