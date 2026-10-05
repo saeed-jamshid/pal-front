@@ -49,4 +49,11 @@ fi
 if bash "$script" '../invalid' 3005 http://127.0.0.1:8091; then
   echo 'Invalid release accepted' >&2; exit 1
 fi
-echo 'Deployment, rollback, backend gate and input checks passed'
+fourth=$(printf 'd%.0s' {1..40})-4-1
+prepare "$fourth"
+FAIL_BACKEND=1 bash "$script" "$fourth" 3005 http://127.0.0.1:8091 false
+[[ $(readlink -f "$PAL_FRONT_ROOT/current") == "$PAL_FRONT_ROOT/releases/$fourth" ]]
+if bash "$script" "$fourth" 3005 http://127.0.0.1:8091 invalid; then
+  echo 'Invalid API policy accepted' >&2; exit 1
+fi
+echo 'Deployment, rollback, backend gate, frontend-only and input checks passed'

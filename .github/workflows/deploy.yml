@@ -42,6 +42,7 @@ jobs:
           cp -a .next/standalone/. release/
           cp -a .next/static release/.next/static
           cp -a public release/public
+          cp -a ops release/ops
           # Standalone tracing may copy env files; never ship them.
           find release -type f -name '.env*' -delete
           if grep -rl '^version https://git-lfs.github.com/spec/v1$' release/public; then
@@ -66,12 +67,14 @@ jobs:
           USER: ${{ vars.DEPLOY_USER }}
           SSH_PORT: ${{ vars.DEPLOY_PORT }}
           FRONTEND_PORT: ${{ vars.FRONTEND_PORT || '3005' }}
+          API_HEALTH_REQUIRED: ${{ vars.API_HEALTH_REQUIRED || 'true' }}
         run: |
           set -euo pipefail
           [[ "$HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
           [[ "$USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
           [[ "$SSH_PORT" =~ ^[0-9]+$ && "$FRONTEND_PORT" =~ ^[0-9]+$ ]]
           [[ "$PAL_BACKEND_URL" =~ ^http://127\.0\.0\.1:[0-9]+$ ]]
+          [[ "$API_HEALTH_REQUIRED" == true || "$API_HEALTH_REQUIRED" == false ]]
           [[ -n "$SSH_KEY" && -n "$KNOWN_HOSTS" ]]
           umask 077
           install -d -m 700 ~/.ssh
@@ -84,4 +87,4 @@ jobs:
           ssh "${opts[@]}" -p "$SSH_PORT" "$USER@$HOST" "install -d -m 700 '$incoming'"
           scp "${opts[@]}" -P "$SSH_PORT" front.tar.gz front.tar.gz.sha256 scripts/deploy-front.sh "$USER@$HOST:$incoming/"
           ssh "${opts[@]}" -p "$SSH_PORT" "$USER@$HOST" \
-            "bash '$incoming/deploy-front.sh' '$release' '$FRONTEND_PORT' '$PAL_BACKEND_URL'"
+            "bash '$incoming/deploy-front.sh' '$release' '$FRONTEND_PORT' '$PAL_BACKEND_URL' '$API_HEALTH_REQUIRED'"
