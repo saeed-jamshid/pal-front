@@ -3,7 +3,6 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useTheme } from "next-themes"
 import {
   Coffee,
   LayoutDashboard,
@@ -16,8 +15,6 @@ import {
   LogOut,
   Menu,
   RefreshCw,
-  Moon,
-  Sun,
 } from "lucide-react"
 import { ApiError, clearTokens } from "@/lib/api"
 import { fetchOverview, resources, type Overview } from "@/lib/admin"
@@ -46,7 +43,6 @@ export default function AdminShell({
 }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { resolvedTheme, setTheme } = useTheme()
   const [overview, setOverview] = useState<Overview | null>(null)
   const [error, setError] = useState("")
   const [reload, setReload] = useState(0)
@@ -184,23 +180,6 @@ export default function AdminShell({
                 مشاهده سایت
                 <ArrowUpRight size={16} aria-hidden="true" />
               </Link>
-              <button
-                className="admin-icon-button"
-                aria-label={
-                  resolvedTheme === "dark"
-                    ? "فعال کردن حالت روشن"
-                    : "فعال کردن حالت تیره"
-                }
-                onClick={() =>
-                  setTheme(resolvedTheme === "dark" ? "white" : "dark")
-                }
-              >
-                {resolvedTheme === "dark" ? (
-                  <Sun size={17} aria-hidden="true" />
-                ) : (
-                  <Moon size={17} aria-hidden="true" />
-                )}
-              </button>
               <button
                 className="admin-icon-button"
                 aria-label="بازخوانی نمای کلی"

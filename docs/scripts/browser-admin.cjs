@@ -193,10 +193,9 @@ const check = (name, value = true) => { assert.ok(value, name); checks.push(name
     await page.setViewportSize({ width: 768, height: 1024 }); await shot('products-tablet')
     check('tablet no horizontal page overflow', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
     await page.setViewportSize({ width: 1440, height: 1000 })
-    await page.getByRole('button', { name: 'فعال کردن حالت تیره', exact: true }).click()
-    await page.waitForFunction(() => document.documentElement.classList.contains('dark'))
-    await shot('products-night')
-    check('real theme control switches persisted dark mode')
+    await page.keyboard.press('d')
+    check('light-only theme ignores dark shortcut', await page.evaluate(() => document.documentElement.classList.contains('white') && !document.documentElement.classList.contains('dark')))
+    check('dark theme toggle removed', await page.getByRole('button', { name: 'فعال کردن حالت تیره', exact: true }).count() === 0)
     const paging = []
     for (let i = 0; i < 22; i++) {
       const response = await staffApi('POST', '/manage/categories/', { name: `دسته صفحه ${nonce} ${String(i).padStart(2, '0')}`, slug: `admin-page-${nonce}-${i}` })

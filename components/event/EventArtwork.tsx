@@ -31,6 +31,17 @@ export default function EventArtwork({
   className?: string
 }) {
   const { src, alt, height } = artwork[variant]
+  if (variant === "landing")
+    return (
+      <iframe
+        src="/pal-design/landing-animated.html"
+        title="تصویر متحرک آب‌انبار و قهوهٔ پَل؛ با انتخاب تصویر دوباره پخش می‌شود"
+        sandbox="allow-scripts"
+        className={`aspect-[8/5] w-full border-0 ${className}`}
+        width={800}
+        height={500}
+      />
+    )
   return (
     <Image
       src={src}
@@ -38,7 +49,7 @@ export default function EventArtwork({
       width={800}
       height={height}
       unoptimized
-      loading={variant === "landing" ? "eager" : "lazy"}
+      loading="lazy"
       className={`h-auto w-full ${className}`}
     />
   )

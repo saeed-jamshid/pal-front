@@ -1,0 +1,20 @@
+{
+  "checks": [
+    "saved/system dark theme ignored",
+    "dark keyboard shortcut disabled",
+    "artwork sandbox allows scripts only",
+    "generated coffee plants present",
+    "flag animates",
+    "keyboard pause freezes animation",
+    "keyboard replay restarts intro",
+    "store and event links unchanged",
+    "offscreen animation paused",
+    "mobile no page overflow",
+    "reduced-motion pause control hidden",
+    "reduced-motion scene has no running animation",
+    "reduced-motion drawing complete",
+    "no runtime errors"
+  ],
+  "errors": [],
+  "pass": 14
+}

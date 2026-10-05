@@ -1,5 +1,11 @@
 # Pal Coffee Design System
 
+## Landing animation and light-only theme — approved (2026-10-05)
+
+User approved reuse of `~/Downloads/PAL · آبانبار.html` on landing. `EventArtwork` embeds the same SVG/CSS/JS scene from `public/pal-design/landing-animated.html` in a scripts-only sandbox; no canvas or new dependency. Preserve 8:5 geometry, artwork colors, existing responsive hero and store/event links. Replay is a keyboard-accessible button; a separate pause/resume control stops motion. Reduced-motion renders the finished scene; continuous animation pauses offscreen and in hidden tabs. Other page artwork remains static. Verify desktop/mobile, keyboard replay/pause, sandbox, reduced motion and hero links.
+
+User also requested light theme only across public pages and admin. Force existing `white` palette; remove dark toggle and `d` shortcut, ignore saved/system dark preferences. Historical dark-mode trials below are superseded; retain CSS tokens without exposing theme switching.
+
 ## Frontend admin — approved implementation (2026-10-05)
 
 User approved `/admin` operational panel and required staff-only backend APIs. [Admin scope/design/testing](docs/admin.md). UI/UX Pro Max verified Data-Dense Dashboard + confirmation/responsive-table/success-feedback guidance; consumer hero/palette search results rejected as poor fit. Preserve PAL warm tokens/Vazirmatn; right desktop sidebar, compact overview/searchable paginated lists, existing accessible Radix editors, native fields, explicit IRR money, private receipt review. Scoped admin CSS; public visual redesign remains unapproved. No fake charts/metrics or provider credential editing. Test mobile375/tablet768/desktop1440, keyboard, light/dark, reduced motion and server permission boundaries.

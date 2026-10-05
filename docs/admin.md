@@ -27,7 +27,7 @@ Every `/api/v1/manage/` route requires Django `IsAdminUser`; frontend redirects 
 
 UI/UX Pro Max guided the operational layout: right desktop sidebar, searchable paginated tables, restrained PAL colors and Vazirmatn, existing Radix dialogs, native fields. No new UI dependency, chart or public-site redesign.
 
-Controls are at least 44px. Tables scroll within their container on small screens; forms become one column. Dialogs handle Escape, focus return and unsaved changes. Form errors focus the summary and link to affected fields. Light/dark modes reuse the existing theme provider; reduced motion is supported.
+Controls are at least 44px. Tables scroll within their container on small screens; forms become one column. Dialogs handle Escape, focus return and unsaved changes. Form errors focus the summary and link to affected fields. Light theme is forced across public pages and admin, per the latest user request. Dark toggle and keyboard shortcut are removed. Reduced motion is supported.
 
 User-facing copy follows `.pi/skills/human-writing/SKILL.md`, as requested. Use direct Persian, say what happened, add a next step when useful. Keep financial warnings explicit. Avoid promises of security, automatic approval or delivery that the backend cannot establish. API field names, routes and status codes do not change for wording edits. Login shows actual API errors rather than calling every connection failure an invalid code. Unknown API failures no longer expose raw endpoint paths.
 
