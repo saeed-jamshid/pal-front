@@ -16,7 +16,7 @@ GitHub environment `production`:
 | DEPLOY_ENABLED | Variable | Must be exactly `true` to activate VPS deployment |
 | API_HEALTH_REQUIRED | Variable | Defaults `true`; temporary `false` permits frontend-only activation |
 
-Frontend-only rollout uses `DEPLOY_ENABLED=true`, `API_HEALTH_REQUIRED=false`, frontend port 3005 and reserved backend port 8091. Pages deploy independently; real shop/login/event API flows remain unavailable until backend exists. Restore `API_HEALTH_REQUIRED=true` after backend deployment. This changes readiness checks only, not authentication or permissions.
+Current rollout: DEPLOY_ENABLED=true, API_HEALTH_REQUIRED=true, frontend3005 and backend8091. Backend is running; host API and Next API proxy verified. Initial frontend-only rollout used false temporarily. Public OTP stays blocked until SMS acceptance; no real payment or production content/admin acceptance claimed.
 
 CI installs Bun 1.4.2 with frozen `bun.lock`, runs tests/lint/typecheck/deployment self-check, then builds Next standalone on Node 22. The older npm lockfile is not used by this pipeline. Git LFS must hydrate video files; package rejects pointer-only assets. Env files are excluded from release archives.
 
@@ -30,19 +30,32 @@ Full activation requires backend `/health/` first. PM2 reload is followed by loc
 - Node 22, PM2, curl, tar, SHA256 utilities, flock.
 - Backend reachable on chosen free loopback port.
 - PM2 startup service configured for deploy (requires root), so saved app survives reboot.
-- Public domain: `palcoffee.ir`. Verify DNS/CDN origin and configure Nginx/TLS before declaring public rollout complete. App can run on loopback before proxy setup.
+- Public domain: `palcoffee.ir`. CDN terminates visitor HTTPS and connects to host Nginx via HTTP80. Canonical full host config is `ops/palcoffee.conf` in Pal-Back repo (also in infrastructure workspace). Require visitor HTTPS and restrict origin to CDN IPs; origin HTTP is unencrypted.
 - PM2 replacement can briefly interrupt requests; zero-downtime deployment is not claimed.
 
 Manual recovery: read previous successful release from CI/deploy logs; set `current` to it, regenerate PM2 config using the same release path/port structure in `scripts/deploy-front.sh`, then `pm2 startOrReload /opt/pal/front/ecosystem.config.json --update-env`, verify both health URLs and `pm2 save`. Do not delete persistent data. Failed rollback needs operator intervention.
 
-## Root commands after first successful loopback deploy
+## Current host proxy and PM2
 
-Do not replace an existing PAL site without reviewing it first. Initial frontend-only config is packaged in each release:
+Public HTTPS returns200. Origin config listens on80 without TLS or redirect; CDN visitor HTTPS is mandatory. Old frontend-only ops/setup-front.sh and Certbot config remain historical bootstrap artifacts; do not run them against current full PAL proxy. Update the full config from Pal-Back ops/palcoffee.conf instead. App CI does not overwrite host Nginx.
+
+PM2-deploy systemd service is enabled/active. Initial manual PM2 daemon caused a missing-PID service failure; adoption was fixed by saving and stopping it before starting the unit:
 
 ```bash
-sudo bash /opt/pal/front/current/ops/setup-front.sh --tls
+# Only needed to recover the manual-daemon/systemd conflict; briefly interrupts apps.
+pm2 save
+pm2 kill
+sudo systemctl reset-failed pm2-deploy
+sudo systemctl start pm2-deploy
 ```
 
-Omit `--tls` only if TLS is handled elsewhere and origin HTTP is intentional. Script requires a healthy localhost frontend, refuses duplicate/unrecognized site config, validates before reload, rolls back newly created files on invalid config, and preserves existing Certbot changes on re-run. Run `pm2 save` as deploy after app activation (CI already does this). If DNS is proxied through CDN, verify its origin points to this VPS and ACME challenges reach it. Existing TLS elsewhere does not establish TLS on this origin. Preserve Certbot-managed site changes on later app deployments; workflow does not overwrite Nginx.
+Normal app reload:
+
+```bash
+pm2 startOrReload /opt/pal/front/ecosystem.config.json --update-env
+pm2 save
+```
+
+Latest deployed frontend81047a3, successful CI/CD run37351058232 attempt2. Local setup clone under ~/.local/state/vinext-pal-setup/pal-front-release is not a production dependency. Scripts are versioned in this repo and copied to VPS releases; original dirty checkout was not overwritten.
 
 Run isolated deployment checks with `bash scripts/test-deploy-front.sh`; no live services are touched.
