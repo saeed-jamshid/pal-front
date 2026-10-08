@@ -153,8 +153,18 @@ export async function verifyOtp(phone: string, code: string) {
       code: normalizePhone(code),
     }
   )
+  return saveTokens(data)
+}
+
+function saveTokens(data: { access: string; refresh: string }) {
   localStorage.setItem(ACCESS_KEY, data.access)
   localStorage.setItem(REFRESH_KEY, data.refresh)
   if (typeof window !== "undefined") window.dispatchEvent(new Event(AUTH_EVENT))
   return data
+}
+
+export async function loginStaff(phone: string, password: string) {
+  return saveTokens(await api.post<{ access: string; refresh: string }>(
+    "/auth/staff/login/", { phone_number: normalizePhone(phone), password }
+  ))
 }

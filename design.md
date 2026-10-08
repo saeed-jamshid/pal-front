@@ -13,5 +13,7 @@ DESIGN-light.md remains the token and visual baseline. These user-requested over
 - Gallery keeps 24 existing photos and near-viewport optimized thumbnails. Only the opened photo loads its full-resolution JPEG, with immediate preview, loading/error/retry, an original-file link, circular next/previous, keyboard arrows and horizontal touch swipes. Reuse the installed Radix dialog, restore opener focus, support pinch/vertical gestures and hide navigation behind the viewer.
 - Catalog loads all coffees once and filters tabs locally; tab switches use native View Transitions (cards glide, others fade, ~250ms) with a plain swap for reduced motion or unsupported browsers.
 - Keep light-only, logical RTL CSS, 44px minimum controls and existing OTP/event status/admin functionality.
+- Staff login reuses PAL fields/buttons, labelled phone + password inputs, password-manager autocomplete and paste support, inline generic errors and disabled submitting state. `/manage` login defaults to password; customer OTP is unchanged.
+- Footer includes the user-provided live Enamad seal (id 8054802). Preserve its URLs, code and origin referrer; reserve image dimensions, label the verification link, and never fabricate a local seal if the provider fails.
 
 Verify typecheck, tests, lint and build. Inspect phone screenshots and iframe crops, label bounds, navigation touch/keyboard behavior, finite motion and horizontal overflow. No deployment or production data changes.

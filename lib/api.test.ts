@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { api, ApiError, safeNextPath, requestOtp, verifyOtp } from "./api"
+import { api, ApiError, safeNextPath, requestOtp, verifyOtp, loginStaff } from "./api"
 
 test("login redirect accepts local path, rejects external or script URLs", () => {
   assert.equal(safeNextPath("/orders/123"), "/orders/123")
@@ -48,6 +48,31 @@ test("OTP wire contract and DRF field errors", async () => {
     )
     await verifyOtp("۰۹۱۲٣٤٥٦٧٨٩", "۱۲۳۴۵۶")
     assert.equal(tokens.get("pal_access_token"), "access")
+  } finally {
+    globalThis.fetch = original
+    if (storage) Object.defineProperty(globalThis, "localStorage", storage)
+    else Reflect.deleteProperty(globalThis, "localStorage")
+  }
+})
+
+test("staff login preserves password and saves tokens only after success", async () => {
+  const original = globalThis.fetch
+  const storage = Object.getOwnPropertyDescriptor(globalThis, "localStorage")
+  const tokens = new Map<string, string>()
+  Object.defineProperty(globalThis, "localStorage", { configurable: true, value: { setItem: (k: string, v: string) => tokens.set(k, v) } })
+  let fail = true
+  globalThis.fetch = async (url, init) => {
+    assert.ok(String(url).endsWith("/auth/staff/login/"))
+    assert.deepEqual(JSON.parse(String(init?.body)), { phone_number: "09123456789", password: " password " })
+    return new Response(JSON.stringify(fail ? { detail: "رد شد" } : { access: "staff", refresh: "refresh" }), { status: fail ? 401 : 200 })
+  }
+  try {
+    await assert.rejects(loginStaff("۰۹۱۲۳۴۵۶۷۸۹", " password "), ApiError)
+    assert.equal(tokens.size, 0)
+    fail = false
+    await loginStaff("۰۹۱۲۳۴۵۶۷۸۹", " password ")
+    assert.equal(tokens.get("pal_access_token"), "staff")
+    assert.equal(tokens.get("pal_refresh_token"), "refresh")
   } finally {
     globalThis.fetch = original
     if (storage) Object.defineProperty(globalThis, "localStorage", storage)

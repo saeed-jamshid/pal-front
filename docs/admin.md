@@ -4,7 +4,7 @@ User approved the panel and staff-only backend APIs on 2026-10-05. Public-site v
 
 ## Open the panel
 
-Visit `http://localhost:3005/manage` (production: `https://palcoffee.ir/manage`). Sign in with the existing SMS-code login using a staff account. Local SMS uses the console provider; no real SMS or money transfer is required for tests. Django Admin stays at `/admin/` (local `http://127.0.0.1:8081/admin/`, production `https://palcoffee.ir/admin/`); the two panels never share a path.
+Visit `http://localhost:3005/manage` (production: `https://palcoffee.ir/manage`). Staff sign in with their Django phone number and password at `/login?next=/manage` (nested panel links preserve their destination). Customer SMS-code login remains available. Password login uses `/api/v1/auth/staff/login/`, accepts active staff only, returns existing access/refresh tokens, and limits attempts by IP and normalized phone number (5/min each). Credentials are not stored by the frontend. Local SMS uses the console provider; no real SMS or money transfer is required for tests. Django Admin stays at `/admin/` (local `http://127.0.0.1:8081/admin/`, production `https://palcoffee.ir/admin/`); the two panels never share a path.
 
 The panel covers products/categories/images, bundle components, order fulfillment, payment receipt review, gateway history, events/time slots/registration review, blog articles/categories, destination cards, customer profiles and SMS status. The overview uses current backend counts and paid-order totals, not sample analytics.
 

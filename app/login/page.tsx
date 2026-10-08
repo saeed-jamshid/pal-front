@@ -6,6 +6,7 @@ import {
   ApiError,
   requestOtp,
   verifyOtp,
+  loginStaff,
   safeNextPath,
   normalizePhone,
 } from "@/lib/api"
@@ -13,6 +14,8 @@ import {
 function LoginForm() {
   const router = useRouter()
   const next = safeNextPath(useSearchParams().get("next"))
+  const [staff, setStaff] = useState(next === "/manage" || next.startsWith("/manage/"))
+  const [password, setPassword] = useState("")
   const [phone, setPhone] = useState("")
   const [code, setCode] = useState("")
   const [step, setStep] = useState<"phone" | "code">("phone")
@@ -56,20 +59,57 @@ function LoginForm() {
     }
   }
 
+  async function passwordLogin(e: React.FormEvent) {
+    e.preventDefault()
+    if (busy) return
+    setBusy(true)
+    setError("")
+    try {
+      await loginStaff(phone, password)
+      setPassword("")
+      router.replace(next === "/manage" || next.startsWith("/manage/") ? next : "/manage")
+    } catch (error) {
+      setError(error instanceof ApiError ? error.message : "ورود ممکن نشد؛ دوباره تلاش کنید.")
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <div className="ed-shell max-w-xl pt-28 pb-24">
       <p className="latin-name text-sm text-(--brick)">PAL Coffee</p>
-      <h1 className="fa-h1 mt-3">ورود یا ساخت حساب</h1>
+      <h1 className="fa-h1 mt-3">{staff ? "ورود مدیریت پَل" : "ورود یا ساخت حساب"}</h1>
       <p className="lead mt-4 border-b border-(--outline) pb-6">
-        {step === "phone"
+        {staff ? "با شمارهٔ موبایل و رمز عبور حساب مدیریت وارد شوید." : step === "phone"
           ? "شمارهٔ موبایل خود را وارد کنید تا کد ورود برایتان پیامک شود."
           : `کد پیامک‌شده به ${phone} را وارد کنید.`}
       </p>
-      <p className="mt-3 text-sm text-(--ink-muted)">
+      {!staff && <p className="mt-3 text-sm text-(--ink-muted)">
         اگر اولین بار است، با تأیید کد حساب شما ساخته می‌شود.
-      </p>
+      </p>}
+      <button type="button" disabled={busy} className="mt-3 min-h-11 cursor-pointer text-sm font-bold text-(--cistern) underline"
+        onClick={() => { setStaff(!staff); setPassword(""); setError(""); setStep("phone") }}>
+        {staff ? "ورود با کد پیامکی" : "ورود مدیریت با رمز عبور"}
+      </button>
 
-      {step === "phone" ? (
+      {staff ? (
+        <form onSubmit={passwordLogin} className="mt-6 grid max-w-sm gap-5">
+          <div>
+            <label htmlFor="staff-phone" className="mb-2 block text-sm font-bold">شماره موبایل مدیریت</label>
+            <input id="staff-phone" type="tel" dir="ltr" autoComplete="username" inputMode="tel" pattern="09[0-9]{9}" maxLength={11}
+              required value={phone} onChange={e => setPhone(normalizePhone(e.target.value))} className="field mt-0 text-center"
+              aria-invalid={!!error} aria-describedby={error ? "staff-error" : undefined} />
+          </div>
+          <div>
+            <label htmlFor="staff-password" className="mb-2 block text-sm font-bold">رمز عبور</label>
+            <input id="staff-password" type="password" dir="ltr" autoComplete="current-password" required maxLength={256}
+              value={password} onChange={e => setPassword(e.target.value)} className="field mt-0"
+              aria-invalid={!!error} aria-describedby={error ? "staff-error" : undefined} />
+          </div>
+          {error && <p id="staff-error" role="alert" className="text-sm font-bold text-(--brick)">{error}</p>}
+          <button type="submit" disabled={busy} className="btn btn--primary">{busy ? "در حال ورود…" : "ورود به مدیریت"}</button>
+        </form>
+      ) : step === "phone" ? (
         <form onSubmit={sendCode} className="mt-8 flex max-w-sm flex-col gap-5">
           <div>
             <label

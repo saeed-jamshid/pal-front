@@ -37,7 +37,17 @@ export default function Footer() {
             ))}
           </ul>
         </div>
-        <small className="border-t border-(--on-roast)/20 pt-3 opacity-80">© پَل · همهٔ حقوق محفوظ است.</small>
+        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-(--on-roast)/20 pt-3">
+          <small className="opacity-80">© پَل · همهٔ حقوق محفوظ است.</small>
+          <a referrerPolicy="origin" target="_blank" rel="noopener"
+            href="https://trustseal.enamad.ir/?id=8054802&Code=TBHSRCM6WIwIhBy88yaDKGyR66p06qAj"
+            aria-label="بررسی نماد اعتماد الکترونیکی پَل" className="inline-flex rounded-(--radius-sm) bg-white p-2 text-(--ink)">
+            {/* eslint-disable-next-line @next/next/no-img-element -- Enamad requires its own live seal URL and origin referrer. */}
+            <img referrerPolicy="origin" src="https://trustseal.enamad.ir/logo.aspx?id=8054802&Code=TBHSRCM6WIwIhBy88yaDKGyR66p06qAj"
+              alt="نماد اعتماد الکترونیکی پَل" width={125} height={136} loading="lazy" style={{ cursor: "pointer" }}
+              {...{ code: "TBHSRCM6WIwIhBy88yaDKGyR66p06qAj" }} />
+          </a>
+        </div>
       </div>
     </footer>
   )
