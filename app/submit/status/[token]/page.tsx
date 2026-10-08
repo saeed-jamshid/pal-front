@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { api, ApiError, isAuthed } from "@/lib/api"
 import {
+  faTime,
   fetchRegistration,
   resubmitReceipt,
   type Registration,
@@ -61,43 +62,47 @@ export default function RegistrationStatusPage() {
     }
   }
   return (
-    <main
-      dir="rtl"
-      className="min-h-screen w-full bg-(--crp-cream) text-(--crp-espresso)"
-    >
-      <div className="ed-shell max-w-3xl pt-28 pb-20">
-        <h1 className="t-h1 border-b border-(--crp-sand) pb-7">
+    <main className="min-h-screen w-full bg-(--surface-100) pt-24 text-(--ink)">
+      <div className="ed-shell section max-w-3xl">
+        <h1 className="fa-h1 border-b border-(--outline) pb-6">
           پیگیری ثبت‌نام
         </h1>
         {error && (
-          <p role="alert" className="mt-6">
+          <p role="alert" className="mt-6 rounded-(--radius-md) border border-(--brick) bg-(--surface-200) p-4 font-semibold text-(--brick)">
             {error}
           </p>
         )}
         {data ? (
           <div className="mt-8 space-y-4 leading-8" role="status">
-            <h2 className="text-xl font-bold">{data.event_title}</h2>
+            <h2 className="fa-h2">{data.event_title}</h2>
             <p>نام: {data.full_name}</p>
-            <p>
-              وضعیت: <strong>{data.status_display}</strong>
+            <p className="flex items-center gap-3">
+              وضعیت:
+              <span className={`status-badge status-badge--${data.status}`}>
+                {data.status_display}
+              </span>
             </p>
             <p>
               {data.status === "pending"
-                ? "رسید در انتظار بررسی است؛ هنوز تأیید نشده‌اید."
+                ? "ثبت‌نام شما در انتظار بررسی است و هنوز تأیید نشده."
                 : data.status === "confirmed"
                   ? "ثبت‌نام شما تأیید شد."
                   : "رسید رد شد؛ در صورت باز بودن رویداد و ظرفیت، رسید جدید ارسال کنید."}
             </p>
-            {data.admin_note && <p>یادداشت بررسی: {data.admin_note}</p>}
+            {data.admin_note && (
+              <p className="rounded-(--radius-md) bg-(--surface-200) p-4">
+                یادداشت بررسی: {data.admin_note}
+              </p>
+            )}
             {data.time_slot && (
               <p>
-                زمان حضور: {data.time_slot.start_time.slice(0, 5)} تا{" "}
-                {data.time_slot.end_time.slice(0, 5)}
+                زمان حضور: {faTime(data.time_slot.start_time)} تا{" "}
+                {faTime(data.time_slot.end_time)}
               </p>
             )}
             {data.receipt_url && (
               <button
-                className="min-h-12 underline"
+                className="btn btn--secondary"
                 onClick={() => void download()}
               >
                 دانلود خصوصی رسید
@@ -108,7 +113,7 @@ export default function RegistrationStatusPage() {
                 <label className="block">
                   رسید جدید
                   <input
-                    className="block min-h-12 w-full"
+                    className="field py-2"
                     type="file"
                     name="payment_receipt"
                     required
@@ -119,7 +124,7 @@ export default function RegistrationStatusPage() {
                 <label className="block">
                   شماره مرجع (اختیاری)
                   <input
-                    className="block min-h-12 w-full border px-3"
+                    className="field"
                     name="reference_number"
                     maxLength={50}
                     disabled={busy}
@@ -127,7 +132,7 @@ export default function RegistrationStatusPage() {
                 </label>
                 <button
                   disabled={busy}
-                  className="outline-action min-h-12 px-5"
+                  className="btn btn--primary"
                 >
                   {busy ? "در حال ارسال…" : "ارسال مجدد رسید"}
                 </button>
@@ -143,12 +148,12 @@ export default function RegistrationStatusPage() {
             </p>
           )
         )}
-        <p className="mt-8 text-sm">
+        <p className="mt-8 text-sm text-(--ink-muted)">
           نمایش وضعیت و رسید فقط با ورود صاحب حساب یا مدیر ممکن است.
         </p>
         <Link
           href="/submit"
-          className="mt-4 inline-flex min-h-12 items-center underline"
+          className="mt-4 inline-flex min-h-12 items-center font-bold text-(--cistern) underline underline-offset-4"
         >
           رویدادها و ثبت‌نام‌های من
         </Link>

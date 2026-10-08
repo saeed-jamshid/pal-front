@@ -5,6 +5,9 @@ import Link from "next/link"
 import EventArtwork from "@/components/event/EventArtwork"
 import { ApiError, fetchProfile, isAuthed, updateProfile } from "@/lib/api"
 import {
+  faDate,
+  faDigits,
+  faTime,
   fetchEvents,
   fetchRegistrations,
   registerEvent,
@@ -14,8 +17,9 @@ import {
 import { fetchCards, type BankCard } from "@/lib/payments"
 import { formatPrice } from "@/lib/shop"
 
-const field =
-  "mt-2 min-h-12 w-full border border-(--crp-sand) bg-transparent px-4"
+const field = "field"
+const badge = (status: Registration["status"]) =>
+  `status-badge status-badge--${status}`
 
 export default function Submit() {
   const [events, setEvents] = useState<PalEvent[]>([])
@@ -112,12 +116,9 @@ export default function Submit() {
   }
 
   return (
-    <main
-      dir="rtl"
-      className="min-h-screen w-full bg-(--crp-cream) text-(--crp-espresso)"
-    >
-      <div className="ed-shell max-w-6xl pt-28 pb-20">
-        <h1 className="t-h1 border-b border-(--crp-sand) pb-7">
+    <main className="min-h-screen w-full bg-(--surface-100) pt-24 text-(--ink)">
+      <div className="ed-shell section">
+        <h1 className="fa-h1 border-b border-(--outline) pb-6">
           ثبت‌نام رویدادهای پَل
         </h1>
         {loading && (
@@ -126,35 +127,42 @@ export default function Submit() {
           </p>
         )}
         {error && (
-          <p role="alert" className="mt-6 border-r-2 border-red-700 p-4">
+          <p role="alert" className="mt-6 rounded-(--radius-md) border border-(--brick) bg-(--surface-200) p-4 font-semibold text-(--brick)">
             {error}
           </p>
         )}
         {result ? (
-          <div className="mt-8 grid gap-8 md:grid-cols-2">
-            <div role="status">
-              <h2 className="text-2xl font-bold">درخواست ثبت شد</h2>
-              <p className="mt-4">
-                {result.status_display} —{" "}
+          <div className="mt-8 grid items-start gap-8 min-[1001px]:grid-cols-2">
+            <div role="status" className="grid justify-items-start gap-4">
+              <h2 className="fa-h2">درخواست شما ثبت شد</h2>
+              <span className={badge(result.status)}>{result.status_display}</span>
+              <p className="leading-8">
                 {result.status === "pending"
-                  ? "ارسال رسید به معنی تأیید پرداخت نیست."
-                  : "ثبت‌نام رایگان تأیید شد."}
+                  ? "ثبت‌نام شما در انتظار بررسی است. ارسال رسید به معنی تأیید پرداخت نیست؛ پس از بررسی، وضعیت در صفحهٔ پیگیری به‌روز می‌شود."
+                  : result.status === "confirmed"
+                    ? "ثبت‌نام شما تأیید شد."
+                    : "ثبت‌نام شما رد شد. جزئیات را در صفحهٔ پیگیری ببینید."}
               </p>
               <Link
-                className="mt-6 inline-flex min-h-12 items-center underline"
+                className="btn btn--secondary"
                 href={`/submit/status/${result.registration_token}`}
               >
                 پیگیری ثبت‌نام
               </Link>
+              <p className="text-sm text-(--ink-muted)">
+                برای دیدن وضعیت، با همین شماره وارد شوید.
+              </p>
             </div>
-            <EventArtwork variant="success" />
+            <div className="order-first min-[1001px]:order-last">
+              <EventArtwork variant="success" />
+            </div>
           </div>
         ) : (
           !loading && (
-            <div className="mt-8 grid gap-8 md:grid-cols-2">
+            <div className="mt-8 grid items-start gap-8 min-[1001px]:grid-cols-2">
               <div>
                 {!events.length ? (
-                  <p>فعلاً رویدادی برای ثبت‌نام اعلام نشده است.</p>
+                  <p className="lead">رویداد بعدی به‌زودی اعلام می‌شود.</p>
                 ) : (
                   <>
                     <label>
@@ -174,14 +182,9 @@ export default function Submit() {
                     </label>
                     {selected && (
                       <div className="my-6 space-y-3">
-                        <p>{selected.description}</p>
-                        {selected.date && (
-                          <p>
-                            {new Date(
-                              `${selected.date}T12:00:00`
-                            ).toLocaleDateString("fa-IR")}
-                          </p>
-                        )}
+                        <h2 className="fa-h2">{selected.title}</h2>
+                        {selected.description && <p className="leading-8">{selected.description}</p>}
+                        {selected.date && <p className="font-bold">{faDate(selected.date)}</p>}
                         <p>
                           هزینه:{" "}
                           {selected.price_rial
@@ -191,17 +194,20 @@ export default function Submit() {
                       </div>
                     )}
                     {!authed ? (
-                      <Link
-                        className="outline-action inline-flex min-h-12 items-center px-6"
-                        href="/login?next=/submit"
-                      >
-                        ورود برای ثبت‌نام
-                      </Link>
+                      <div className="grid justify-items-start gap-2">
+                        <Link className="btn btn--primary" href="/login?next=/submit">
+                          ورود یا ساخت حساب برای ثبت‌نام
+                        </Link>
+                        <p className="text-sm text-(--ink-muted)">
+                          با شمارهٔ موبایل و کد پیامکی وارد می‌شوید؛ بار اول حساب شما ساخته می‌شود.
+                        </p>
+                      </div>
                     ) : existing ? (
-                      <p role="status">
-                        قبلاً ثبت‌نام کرده‌اید.{" "}
+                      <p role="status" className="flex flex-wrap items-center gap-3">
+                        برای این رویداد ثبت‌نام کرده‌اید.
+                        <span className={badge(existing.status)}>{existing.status_display}</span>
                         <Link
-                          className="underline"
+                          className="btn btn--secondary"
                           href={`/submit/status/${existing.registration_token}`}
                         >
                           پیگیری وضعیت
@@ -245,9 +251,10 @@ export default function Submit() {
                                     value={s.id}
                                     disabled={s.remaining_capacity <= 0}
                                   >
-                                    {s.start_time.slice(0, 5)} تا{" "}
-                                    {s.end_time.slice(0, 5)} —{" "}
-                                    {s.remaining_capacity} جای خالی
+                                    {faTime(s.start_time)} تا {faTime(s.end_time)} —{" "}
+                                    {s.remaining_capacity > 0
+                                      ? `${faDigits(s.remaining_capacity)} جای خالی`
+                                      : "تکمیل"}
                                   </option>
                                 ))}
                               </select>
@@ -303,7 +310,7 @@ export default function Submit() {
                               </>
                             )}
                             <button
-                              className="outline-action min-h-12 w-full disabled:opacity-60"
+                              className="btn btn--primary w-full"
                               disabled={
                                 busy ||
                                 !selected.time_slots.some(
@@ -321,17 +328,17 @@ export default function Submit() {
                   </>
                 )}
                 {authed && (
-                  <div className="mt-8">
+                  <div id="my-registrations" className="mt-10 scroll-mt-28">
                     <h2 className="text-xl font-bold">ثبت‌نام‌های من</h2>
                     {registrations.length ? (
                       registrations.map((r) => (
                         <Link
                           key={r.id}
-                          className="flex min-h-12 items-center justify-between border-b border-(--crp-sand)"
+                          className="flex min-h-14 items-center justify-between gap-3 border-b border-(--hairline) transition-colors hover:bg-(--surface-200)"
                           href={`/submit/status/${r.registration_token}`}
                         >
-                          <span>{r.event_title}</span>
-                          <span>{r.status_display}</span>
+                          <span className="font-semibold">{r.event_title}</span>
+                          <span className={badge(r.status)}>{r.status_display}</span>
                         </Link>
                       ))
                     ) : (
@@ -340,7 +347,9 @@ export default function Submit() {
                   </div>
                 )}
               </div>
-              <EventArtwork variant="registration" className="self-start" />
+              <div className="order-first min-[1001px]:order-last">
+                <EventArtwork variant="registration" />
+              </div>
             </div>
           )
         )}

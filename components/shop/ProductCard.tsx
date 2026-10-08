@@ -1,89 +1,61 @@
 import Image from "next/image"
 import Link from "next/link"
-import { formatPrice, CATEGORY_LABELS, type Product } from "@/lib/shop"
+import CoffeeArt from "@/components/shop/CoffeeArt"
+import { ROAST_LABELS, type Product } from "@/lib/shop"
 
-export default function ProductCard({
-  product,
-  seq,
-}: {
-  product: Product
-  seq?: number
-}) {
-  const from = product.weights[0]
-  const isSO = product.category === "single-origin"
+// Latin names are stored as "Origin Name / process": two lines on the card.
+export function nameLines(title: string) {
+  return title.split(" / ").map((part) => part.trim())
+}
 
-  // One metadata line, same slot for every category — keeps the column scannable
-  const meta = isSO
-    ? [product.process, product.roastLevel].filter(Boolean).join(" · ")
-    : product.arabicaPercent != null
-      ? `عربیکا ${product.arabicaPercent}٪ / روبوستا ${100 - product.arabicaPercent}٪`
-      : ""
+export default function ProductCard({ product }: { product: Product }) {
+  const [first, second] = nameLines(product.title)
+  const notes = product.tastingNotes?.slice(0, 3).join(" · ")
+  const meta = [
+    product.region,
+    product.roastLevel && ROAST_LABELS[product.roastLevel],
+  ]
+    .filter(Boolean)
+    .join(" · ")
 
   return (
     <Link
       href={`/catalog/${product.slug}`}
-      className="group flex h-full flex-col bg-(--crp-cream) transition-colors duration-200 hover:bg-(--crp-warm) focus-visible:bg-(--crp-warm)"
+      aria-label={product.title}
+      className="pcard"
+      // Stable name lets catalog filter changes glide each card to its new slot.
+      style={{ viewTransitionName: `pcard-${product.slug}` }}
     >
-      <div className="relative aspect-[4/5] overflow-hidden bg-(--crp-warm)">
-        <Image
-          src={product.image}
-          alt={product.title}
-          fill
-          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
-        />
-        {seq != null && (
-          <span className="ed-seq absolute top-0 right-0 bg-(--crp-espresso) px-2.5 py-1.5 text-(--crp-cream)">
-            {String(seq).padStart(2, "0")}
-          </span>
-        )}
-        {isSO && product.cuppingScore != null && (
-          <span className="ed-seq absolute top-0 left-0 bg-(--crp-terracotta) px-2.5 py-1.5 text-(--crp-cream)">
-            {product.cuppingScore}
-          </span>
+      <div className="pcard__media">
+        {product.image ? (
+          <Image
+            src={product.image}
+            alt=""
+            fill
+            sizes="(max-width: 1000px) 50vw, 33vw"
+            className="object-contain p-[18%]"
+          />
+        ) : (
+          <CoffeeArt
+            product={product}
+            className="w-full"
+          />
         )}
       </div>
-
-      <div className="flex flex-1 flex-col p-3 sm:p-5">
-        {/* Title block */}
-        <h3 className="text-lg leading-relaxed font-semibold">
-          {product.title}
-        </h3>
-        <p className="t-label mt-1.5 text-(--crp-dark)">
-          {product.region}
-          {" · "}
-          {product.categoryName || CATEGORY_LABELS[product.category]}
-        </p>
-
-        {/* Tasting notes — the actual reason someone picks a coffee */}
-        {product.tastingNotes && product.tastingNotes.length > 0 && (
-          <p className="mt-3 line-clamp-2 text-sm leading-6 text-(--crp-dark)">
-            {product.tastingNotes.slice(0, 3).join(" · ")}
-          </p>
-        )}
-
-        {meta && <p className="t-label mt-2 text-(--crp-dark)">{meta}</p>}
-
-        {/* Price row pinned to the bottom so the column aligns across cards */}
-        <div className="mt-auto flex flex-wrap items-end justify-between gap-2 border-t border-(--crp-sand) pt-4">
-          {from ? (
-            <p className="flex items-baseline gap-1.5">
-              <span className="text-lg font-semibold text-(--crp-terracotta)">
-                {formatPrice(from.price)}
-              </span>
-              {from.grams > 0 && (
-                <span className="t-label font-normal text-(--crp-dark)">
-                  / {from.grams} گرم
-                </span>
-              )}
-            </p>
-          ) : (
-            <span className="t-label text-(--crp-dark)">ناموجود</span>
-          )}
-          <span className="t-label text-(--crp-terracotta) transition-transform duration-200 group-hover:-translate-x-1">
-            مشاهده ←
-          </span>
+      <div className="pcard__info">
+        <div>
+          <h3 className="pcard__name latin-name">
+            {first}
+            {second && (
+              <>
+                <br />
+                <span className="font-semibold normal-case">{second}</span>
+              </>
+            )}
+          </h3>
+          {notes && <p className="pcard__notes mt-2">{notes}</p>}
         </div>
+        {meta && <p className="pcard__meta">{meta}</p>}
       </div>
     </Link>
   )

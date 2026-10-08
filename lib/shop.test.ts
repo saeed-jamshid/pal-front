@@ -1,6 +1,12 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { toProduct, toCartItem, toOrder, formatPrice, fetchPages } from "./shop"
+import { CATEGORY_LABELS, inCategory, toProduct, toCartItem, toOrder, formatPrice, fetchPages, splitDescription } from "./shop"
+
+test("category labels change without moving existing groups or URLs", () => {
+  assert.deepEqual(Object.entries(CATEGORY_LABELS), [
+    ["single-origin", "تک خاستگاه"], ["commercial", "تخصصی"], ["blends", "تجاری"],
+  ])
+})
 
 test("backend fields mapped without invented weight, price or status", () => {
   const p = toProduct(
@@ -83,4 +89,25 @@ test("pagination follows all backend pages, never forwards token to supplied hos
   } finally {
     globalThis.fetch = original
   }
+})
+
+test("splitDescription separates label: value specs from prose", () => {
+  const { specs, paragraphs } = splitDescription(
+    "فرآوری: نچرال\nقهوه‌ای شیرین برای صبح.\nارتفاع : ۱۸۰۰ تا ۲۲۰۰ متر"
+  )
+  assert.deepEqual(specs, [
+    ["فرآوری", "نچرال"],
+    ["ارتفاع", "۱۸۰۰ تا ۲۲۰۰ متر"],
+  ])
+  assert.deepEqual(paragraphs, ["قهوه‌ای شیرین برای صبح."])
+})
+
+test("تخصصی also lists Drugar and Yirgacheffe without moving them", () => {
+  const drugar = { slug: "drugar-natural", category: "single-origin" }
+  assert.ok(inCategory(drugar, "commercial"))
+  assert.ok(inCategory(drugar, "single-origin"))
+  assert.ok(inCategory(drugar, ""))
+  assert.ok(!inCategory(drugar, "blends"))
+  assert.ok(inCategory({ slug: "ethiopia-yirgacheffe", category: "single-origin" }, "commercial"))
+  assert.ok(!inCategory({ slug: "bugisu-aa", category: "single-origin" }, "commercial"))
 })

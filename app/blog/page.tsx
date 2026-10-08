@@ -69,7 +69,7 @@ export default function BlogPage() {
                           ? "(max-width: 768px) 100vw, 66vw"
                           : "(max-width: 768px) 100vw, 33vw"
                       }
-                      className="object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                      className="object-cover"
                     />
                   </div>
                 )}

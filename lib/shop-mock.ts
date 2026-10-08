@@ -1,7 +1,7 @@
 import type { BlogPost, Product } from "./shop"
 
 // Historical visual fixtures only; live fetchers never fall back to these.
-export const MOCK_PRODUCTS: Omit<Product, "allowedGrinds" | "availableStock" | "categoryName">[] = [
+export const MOCK_PRODUCTS: Omit<Product, "allowedGrinds" | "availableStock" | "categoryName" | "shortDescription" | "featured" | "tasteProfile">[] = [
   {
     id: 1,
     slug: "ethiopia-yirgacheffe",

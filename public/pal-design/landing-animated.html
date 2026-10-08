@@ -6,87 +6,71 @@
 <title>PAL · آب‌انبار</title>
 <style>
 :root{
-  --paper:#f8f3eb;
+  --paper:#efe3cf;
   color-scheme:light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --paper:#f8f3eb; } }
-:root[data-theme="dark"]{ --paper:#f8f3eb; }
 html{ scroll-padding-top:env(safe-area-inset-top,0px); }
 *,*::before,*::after{ box-sizing:inherit; }
 html,body{ margin:0; height:100%; }
 body{ background:var(--paper); display:grid; place-items:center; padding:0; }
-.controls{ position:fixed; bottom:6px; left:6px; }
-.controls button{ min-height:44px; border:1px solid #dcc8a4; border-radius:6px; background:var(--paper); color:#54201c; padding:6px 12px; cursor:pointer; font:14px system-ui; }
-button:focus-visible{ outline:2px solid #a23a24; outline-offset:-3px; }
-.paused *, .paused{ animation-play-state:paused !important; }
+button:focus-visible{ outline:2px solid #2a6461; outline-offset:-3px; }
 .card{ width:100%; background:var(--paper); border:0; padding:0; cursor:pointer; overflow:hidden; }
-svg{ display:block; width:100%; height:auto; visibility:hidden; }
-svg.ready{ visibility:visible; }
+svg{ display:block; width:100%; height:auto; shape-rendering:geometricPrecision; }
 
 /* intro */
 .play .df{ stroke-dasharray:1 1; stroke-dashoffset:1;
-  animation:draw var(--dur,1.1s) cubic-bezier(.6,0,.35,1) var(--d,0s) forwards; }
-.play .fade{ opacity:0; animation:fadein .9s ease var(--d,0s) forwards; }
-.play .grow{ transform:scale(0); animation:grow .9s cubic-bezier(.3,1.5,.5,1) var(--d,1s) forwards; }
-.play .hop{ opacity:0; animation:hop .9s cubic-bezier(.3,1.6,.5,1) var(--d,2.4s) forwards; }
+  animation:draw var(--dur,1.1s) cubic-bezier(.6,0,.35,1) calc(var(--d,0s) * .1) forwards; }
+.play .fade{ opacity:0; animation:fadein .9s ease calc(var(--d,0s) * .1) forwards; }
+.play .grow{ transform:scale(0); animation:grow .9s cubic-bezier(.3,1.5,.5,1) calc(var(--d,1s) * .1) forwards; }
+.play .hop{ opacity:0; animation:hop .9s cubic-bezier(.3,1.6,.5,1) calc(var(--d,2.4s) * .1) forwards; }
 @keyframes draw{ to{ stroke-dashoffset:0; } }
 @keyframes fadein{ to{ opacity:1; } }
 @keyframes grow{ to{ transform:scale(1); } }
 @keyframes hop{ 0%{ opacity:0; transform:translateY(10px); } 100%{ opacity:1; transform:none; } }
 .grow{ transform-origin:0 0; }
 
-/* loops */
-.steam{ stroke-dasharray:.45 1.3; stroke-dashoffset:.45; opacity:0;
-  animation:steam 3.6s linear infinite; animation-delay:calc(2.6s + var(--s,0s)); }
-@keyframes steam{ 0%{ stroke-dashoffset:.45; opacity:0; } 18%{ opacity:1; } 75%{ opacity:.9; } 100%{ stroke-dashoffset:-1; opacity:0; } }
+/* Entrance is one-shot; illustration details keep moving until paused or reduced motion. */
+.steam{ stroke-dasharray:.45 1.3; stroke-dashoffset:.45; opacity:0; animation:steam 3.6s linear infinite; animation-delay:calc(.25s + var(--s,0s) * .2); }
+@keyframes steam{ 0%{stroke-dashoffset:.45;opacity:0} 18%{opacity:1} 75%{opacity:.9} 100%{stroke-dashoffset:-1;opacity:0} }
 .sway{ animation:sway 3.8s ease-in-out infinite alternate; }
-@keyframes sway{ from{ transform:translateX(-1.5px); } to{ transform:translateX(2px); } }
-.wind{ stroke-dasharray:.6 1.6; stroke-dashoffset:.6;
-  animation:wind var(--wd,7s) cubic-bezier(.45,0,.4,1) infinite; animation-delay:calc(2.2s + var(--w,0s)); }
-@keyframes wind{ 0%{ stroke-dashoffset:.6; } 55%,100%{ stroke-dashoffset:-1; } }
+@keyframes sway{ from{transform:translateX(-1.5px)} to{transform:translateX(2px)} }
+.wind{ stroke-dasharray:.6 1.6; stroke-dashoffset:.6; animation:wind var(--wd,7s) cubic-bezier(.45,0,.4,1) infinite; animation-delay:calc(.25s + var(--w,0s) * .2); }
+@keyframes wind{ 0%{stroke-dashoffset:.6} 55%,100%{stroke-dashoffset:-1} }
 .ripple{ animation:ripple var(--rd,4s) ease-in-out infinite alternate; animation-delay:var(--r,0s); }
-@keyframes ripple{ from{ transform:translateX(-5px); opacity:.55; } to{ transform:translateX(5px); opacity:1; } }
+@keyframes ripple{ from{transform:translateX(-5px);opacity:.55} to{transform:translateX(5px);opacity:1} }
 .sun{ transform-box:fill-box; transform-origin:center; animation:sun 6s ease-in-out infinite alternate; }
-@keyframes sun{ from{ transform:scale(.96) rotate(-3deg); } to{ transform:scale(1.05) rotate(3deg); } }
+@keyframes sun{ from{transform:scale(.96) rotate(-3deg)} to{transform:scale(1.05) rotate(3deg)} }
 .swirl{ transform-origin:0 0; animation:spin 9s linear infinite; }
-@keyframes spin{ to{ transform:rotate(360deg); } }
-.bird{ animation:fly 17s linear infinite; animation-delay:var(--b,3s); opacity:0; }
-@keyframes fly{ 0%{ transform:translate(-60px,0); opacity:1; } 50%{ transform:translate(390px,-14px); } 100%{ transform:translate(880px,-30px); opacity:1; } }
-.wing{ transform-box:fill-box; transform-origin:center; animation:flap .55s ease-in-out infinite alternate; }
-@keyframes flap{ from{ transform:scaleY(1); } to{ transform:scaleY(-.5); } }
+@keyframes spin{ to{transform:rotate(360deg)} }
 .glow{ animation:flicker 3.2s steps(1,end) infinite; }
-@keyframes flicker{ 0%{opacity:.95} 12%{opacity:.8} 14%{opacity:1} 38%{opacity:.88} 40%{opacity:.97} 71%{opacity:.84} 73%{opacity:1} 100%{opacity:.95} }
+@keyframes flicker{ 0%,100%{opacity:.95} 12%{opacity:.8} 14%{opacity:1} 38%{opacity:.88} 40%{opacity:.97} 71%{opacity:.84} 73%{opacity:1} }
 .lantern{ transform-box:fill-box; transform-origin:50% 0%; animation:swing 4.2s ease-in-out infinite alternate; }
-@keyframes swing{ from{ transform:rotate(-4deg); } to{ transform:rotate(4deg); } }
+@keyframes swing{ from{transform:rotate(-4deg)} to{transform:rotate(4deg)} }
 .plant{ transform-box:fill-box; transform-origin:50% 100%; animation:lean 5.5s ease-in-out infinite alternate; }
 .plant.b{ animation-duration:6.4s; animation-delay:-2s; }
-@keyframes lean{ from{ transform:rotate(-1.2deg); } to{ transform:rotate(1.6deg); } }
+@keyframes lean{ from{transform:rotate(-1.2deg)} to{transform:rotate(1.6deg)} }
 .leaf{ transform-origin:0 0; animation:leaf var(--ld,3.4s) ease-in-out infinite alternate; animation-delay:var(--lo,0s); }
-@keyframes leaf{ from{ transform:rotate(-4deg); } to{ transform:rotate(4deg); } }
+@keyframes leaf{ from{transform:rotate(-4deg)} to{transform:rotate(4deg)} }
 .tail{ transform-box:fill-box; transform-origin:0% 100%; animation:tail 2.8s ease-in-out infinite alternate; }
-@keyframes tail{ 0%{ transform:rotate(-10deg); } 60%{ transform:rotate(14deg); } 100%{ transform:rotate(4deg); } }
+@keyframes tail{ 0%{transform:rotate(-10deg)} 60%{transform:rotate(14deg)} 100%{transform:rotate(4deg)} }
 .ear{ transform-box:fill-box; transform-origin:50% 100%; animation:twitch 7s ease-in-out infinite; }
-@keyframes twitch{ 0%,88%,100%{ transform:rotate(0); } 91%{ transform:rotate(-14deg); } 94%{ transform:rotate(6deg); } }
+@keyframes twitch{ 0%,88%,100%{transform:rotate(0)} 91%{transform:rotate(-14deg)} 94%{transform:rotate(6deg)} }
 .eye{ transform-box:fill-box; transform-origin:center; animation:blink 5.2s ease-in-out infinite; }
-@keyframes blink{ 0%,90%,100%{ transform:scaleY(1); } 94%{ transform:scaleY(-1); } }
+@keyframes blink{ 0%,90%,100%{transform:scaleY(1)} 94%{transform:scaleY(.1)} }
 .breath{ transform-box:fill-box; transform-origin:50% 100%; animation:breath 3.4s ease-in-out infinite; }
-@keyframes breath{ 0%,100%{ transform:scale(1,1); } 50%{ transform:scale(1.02,1.035); } }
+@keyframes breath{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.02,1.035)} }
 
-.layer{ transition:transform .6s cubic-bezier(.2,.7,.2,1);
-  transform:translate(calc(var(--mx,0) * var(--k) * 1px), calc(var(--my,0) * var(--k) * .5px)); }
 
+body.motion-static *, body.motion-paused *{ animation-play-state:paused !important; }
 @media (prefers-reduced-motion: reduce){
+  *{ animation-play-state:paused !important; }
   .play .df{ animation:none; stroke-dashoffset:0; }
   .play .fade,.play .hop{ animation:none; opacity:1; }
   .play .grow{ animation:none; transform:none; }
-  .steam{ animation:none; stroke-dasharray:none; opacity:1; }
-  .wind{ animation:none; stroke-dasharray:none; stroke-dashoffset:0; }
-  .ripple,.sun,.swirl,.sway,.wing,.glow,.lantern,.plant,.leaf,.tail,.ear,.eye,.breath{ animation:none; }
-  .bird{ display:none; }
-  .layer{ transition:none; }
+  .steam,.wind{ animation:none; stroke-dasharray:none; stroke-dashoffset:0; opacity:.8; }
 }
 </style>
 </head>
@@ -109,7 +93,7 @@ svg.ready{ visibility:visible; }
   </defs>
 
   <!-- ===== sky ===== -->
-  <g class="layer" style="--k:-7">
+  <g>
     <g class="sun">
       <circle class="fade" style="--d:1.9s" cx="606" cy="124" r="26" fill="#ff8030" opacity=".88"/>
       <path class="ink df" stroke="#1c1512" stroke-width="2" style="--d:1.6s;--dur:1.2s" pathLength="1" d="M598 92 C616 92 626 106 626 120 C626 136 612 146 598 146 C582 146 572 132 572 118 C572 104 582 94 596 94 C590 98 592 104 598 102"/>
@@ -122,10 +106,6 @@ svg.ready{ visibility:visible; }
       <path class="ink wind" style="--w:4.1s;--wd:9s" pathLength="1" d="M660 206 H740 C750 206 754 198 748 194 C744 192 740 196 744 199"/>
     </g>
 
-    <g stroke="#1c1512" stroke-width="1.8">
-      <g class="bird" style="--b:3.5s"><g transform="translate(0 92)"><path class="wing" d="M0 0 q6 -6 12 0 q6 -6 12 0"/></g></g>
-      <g class="bird" style="--b:4.3s"><g transform="translate(-26 104) scale(.75)"><path class="wing" d="M0 0 q6 -6 12 0 q6 -6 12 0"/></g></g>
-    </g>
   </g>
 
   <!-- ===== ground: one continuous line ===== -->
@@ -133,7 +113,7 @@ svg.ready{ visibility:visible; }
     d="M28 424 C26 414 40 412 42 422 C43 430 50 432 58 432 C74 432 84 424 80 415 C76 407 64 411 68 420 C71 429 82 432 98 432 L700 432 C716 432 728 422 724 413 C720 405 708 409 712 419 C715 428 726 432 742 432 C756 432 766 426 764 418 C762 411 753 412 754 419"/>
 
   <!-- ===== the Ab Anbar ===== -->
-  <g class="layer" style="--k:-3">
+  <g>
     <!-- coffee plants (built by script) -->
     <g class="plant" id="plantL"></g>
     <g class="plant b" id="plantR"></g>
@@ -229,7 +209,7 @@ svg.ready{ visibility:visible; }
   </g>
 
   <!-- ===== the cup ===== -->
-  <g class="layer" style="--k:5">
+  <g>
     <!-- plate -->
     <ellipse class="fade" style="--d:1.9s" cx="562" cy="458" rx="66" ry="5" fill="rgba(60,30,20,.10)"/>
     <g class="fade" style="--d:1.9s">
@@ -281,14 +261,12 @@ svg.ready{ visibility:visible; }
   </g>
 </svg>
 </button>
-<div class="controls"><button type="button" id="pause" aria-pressed="false">توقف حرکت</button></div>
 
 <script>
 (function(){
   const NS='http://www.w3.org/2000/svg';
   const art=document.getElementById('art');
   const card=document.getElementById('card');
-  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   const C={ ink:'#1c1512', terra:'#a23a24', orange:'#ff8030', maroon:'#54201c', olive:'#6b6532', sage:'#bebd8e', stone:'#c7bcad', sand:'#dcc8a4' };
 
   function el(tag,attrs,parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
@@ -337,80 +315,23 @@ svg.ready{ visibility:visible; }
   plant('plantL',128,432,190,74,.6);
   plant('plantR',686,432,122,52,.8);
 
-  /* ---------- hand-drawn double line ---------- */
-  function rough(p,amp,seed){
-    const hadLen=p.getAttribute('pathLength'); if(hadLen) p.removeAttribute('pathLength');
-    const L=p.getTotalLength(); const n=Math.max(4,Math.ceil(L/3));
-    seedState=seed; const ph=[rnd()*6.28,rnd()*6.28,rnd()*6.28], f=[.03+rnd()*.02,.09+rnd()*.05,.25+rnd()*.1];
-    let d='';
-    for(let i=0;i<=n;i++){
-      const s=L*i/n, P=p.getPointAtLength(s), A=p.getPointAtLength(Math.max(0,s-.5)), B=p.getPointAtLength(Math.min(L,s+.5));
-      let tx=B.x-A.x, ty=B.y-A.y; const l=Math.hypot(tx,ty)||1;
-      const o=amp*(.6*Math.sin(s*f[0]+ph[0])+.3*Math.sin(s*f[1]+ph[1])+.15*Math.sin(s*f[2]+ph[2]));
-      d+=(i?'L':'M')+(P.x-ty/l*o).toFixed(1)+' '+(P.y+tx/l*o).toFixed(1);
-    }
-    if(hadLen) p.setAttribute('pathLength',hadLen);
-    return d;
-  }
-  let sd=11;
-  document.querySelectorAll('#art .ink').forEach(p=>{
-    const L=(p.removeAttribute('data-x'),p.getTotalLength());
-    const base=p.hasAttribute('data-amp')?parseFloat(p.getAttribute('data-amp')):Math.min(1.5,L/60+.3);
-    if(p.hasAttribute('data-single')){ p.setAttribute('d',rough(p,base*.6,sd+=7)); return; }
-    const second=p.cloneNode(true);
-    const sw=parseFloat(p.getAttribute('stroke-width')||getComputedStyle(p).strokeWidth)||2;
-    const d1=rough(p,base,sd+=7), d2=rough(p,base,sd+=13);
-    p.setAttribute('d',d1); p.setAttribute('stroke-width',(sw*.85).toFixed(2));
-    second.setAttribute('d',d2); second.setAttribute('stroke-width',(sw*.55).toFixed(2)); second.setAttribute('opacity','.85');
-    p.parentNode.insertBefore(second,p.nextSibling);
-  });
-
-  /* ---------- flag ---------- */
   const flagA=document.getElementById('flagA'), flagB=document.getElementById('flagB');
-  function flagPath(t,dy){
-    let d='';
-    for(let x=0;x<=46;x+=2){
-      const y=Math.sin(x*.16-t*4)*2.8*(x/46)-x*.05+dy;
-      d+=(x?'L':'M')+(402+x).toFixed(1)+' '+(167+y).toFixed(1);
-    }
-    return d+' c5 -3 9 2 5 6 c-3 2 -6 -2 -3 -4';
-  }
-  let last=performance.now(), elapsed=0, frame=0, visible=true, paused=false;
-  const pause=document.getElementById('pause');
-  function tick(now){
-    elapsed+=now-last; last=now;
-    const t=reduce?0:elapsed/1000;
-    flagA.setAttribute('d',flagPath(t,0)); flagB.setAttribute('d',flagPath(t+.08,1.2));
-    if(!reduce) frame=requestAnimationFrame(tick);
-  }
-  function sync(){
-    cancelAnimationFrame(frame);
-    const stopped=reduce||paused||!visible||document.hidden;
-    art.classList.toggle('paused',stopped);
-    if(!stopped){ last=performance.now(); frame=requestAnimationFrame(tick); }
-  }
-  flagA.setAttribute('d',flagPath(0,0)); flagB.setAttribute('d',flagPath(.08,1.2));
-  pause.hidden=reduce;
-  pause.addEventListener('click',()=>{
-    paused=!paused;
-    pause.setAttribute('aria-pressed',String(paused));
-    pause.textContent=paused?'ادامهٔ حرکت':'توقف حرکت';
-    sync();
-  });
-  document.addEventListener('visibilitychange',sync);
-  new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;sync();}).observe(card);
-  sync();
-
-  art.classList.add('play','ready');
-
-  card.addEventListener('click',()=>{ art.classList.remove('play'); void art.getBoundingClientRect(); art.classList.add('play'); });
-
-  if(reduce) return;
-  let raf=0;
-  function setPointer(x,y){ cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{ art.style.setProperty('--mx',x.toFixed(3)); art.style.setProperty('--my',y.toFixed(3)); }); }
-  card.addEventListener('pointermove',e=>{ if(paused||e.pointerType!=='mouse') return; const r=card.getBoundingClientRect(); setPointer(((e.clientX-r.left)/r.width-.5)*2,((e.clientY-r.top)/r.height-.5)*2); },{passive:true});
-  card.addEventListener('pointerleave',()=>setPointer(0,0));
+  const flagPath=t=>{let d='';for(let x=0;x<=46;x+=2){const y=Math.sin(x*.16-t*4)*2.8*(x/46)-x*.05;d+=(x?'L':'M')+(402+x).toFixed(1)+' '+(167+y).toFixed(1);}return d+' c5 -3 9 2 5 6 c-3 2 -6 -2 -3 -4';};
+  const wide=matchMedia('(min-aspect-ratio: 33/20)');
+  const frameArt=()=>art.setAttribute('viewBox',wide.matches?'56 72 688 404':'0 0 800 500');
+  frameArt();wide.addEventListener('change',frameArt);
+  const motion=matchMedia('(prefers-reduced-motion: reduce)');
+  let frame=0,elapsed=0,last=0,visible=true;
+  function stop(){cancelAnimationFrame(frame);frame=0;last=0;}
+  function tick(now){if(!visible||document.hidden||motion.matches){stop();return;}frame=requestAnimationFrame(tick);if(last&&now-last<33)return;if(last)elapsed+=(now-last)/1000;last=now;flagA.setAttribute('d',flagPath(elapsed));flagB.setAttribute('d',flagPath(elapsed+.08));}
+  function sync(){document.body.classList.toggle('motion-static',motion.matches);document.body.classList.toggle('motion-paused',!visible||document.hidden);if(motion.matches||document.hidden||!visible){stop();return;}if(!frame)frame=requestAnimationFrame(tick);}
+  flagA.setAttribute('d',flagPath(0));flagB.setAttribute('d',flagPath(.08));art.classList.add('play');
+  card.setAttribute('aria-label','بازپخش حرکت تصویر آب‌انبار و قهوهٔ پَل');
+  card.addEventListener('click',()=>{art.classList.remove('play');void art.getBoundingClientRect();art.classList.add('play');});
+  motion.addEventListener('change',sync);document.addEventListener('visibilitychange',sync);
+  new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;sync();}).observe(card);sync();
 })();
 </script>
 </body>
 </html>
+

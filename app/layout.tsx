@@ -4,11 +4,12 @@ import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
 import type { Metadata } from "next"
 import ShopHeader from "@/components/shop/ShopHeader"
+import Footer from "@/components/layout/Footer"
 
 export const metadata: Metadata = {
-  title: "پَل | فروشگاه قهوه و رویدادها",
+  title: "پَل | قهوه و رویدادها",
   description:
-    "خرید قهوه‌های پَل و ثبت‌نام دورهمی‌ها و رویدادهای پَل در بیرجند.",
+    "قهوه‌های پَل و ثبت‌نام دورهمی‌ها و رویدادهای پَل در بیرجند.",
 }
 
 export default function RootLayout({
@@ -27,6 +28,7 @@ export default function RootLayout({
         <ThemeProvider>
           <ShopHeader />
           {children}
+          <Footer />
           <Toaster position="top-center" closeButton />
         </ThemeProvider>
       </body>

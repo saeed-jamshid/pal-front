@@ -1,14 +1,34 @@
 import { api } from "./api"
 
+// ponytail: show-only store. Flip to true to restore prices, cart and orders
+// (also remove the /cart and /orders redirects in next.config.mjs).
+export const SHOP_SALES_ENABLED = false
+
+export type TasteProfile = "fruity" | "chocolate" | "balanced"
+export const ROAST_LABELS: Record<string, string> = {
+  light: "روشن",
+  medium: "مدیوم",
+  dark: "تیره",
+}
+
 // ─── Types (see docs/api.md) ────────────────────────────────────────
 
 export type CategorySlug = string
 
 export const CATEGORY_LABELS: Record<CategorySlug, string> = {
-  "single-origin": "تک‌خاستگاه",
-  specialty: "تخصصی",
-  commercial: "تجاری",
+  "single-origin": "تک خاستگاه",
+  // User-approved label-only rename; preserve existing slugs and membership.
+  commercial: "تخصصی",
+  blends: "تجاری",
 }
+
+// User-chosen extra listing: these also appear under تخصصی while keeping their backend category.
+// ponytail: frontend list, move to a backend M2M if staff need to edit it.
+const ALSO_IN: Record<CategorySlug, string[]> = {
+  commercial: ["drugar-natural", "ethiopia-yirgacheffe"],
+}
+export const inCategory = (p: Pick<Product, "slug" | "category">, slug: CategorySlug) =>
+  !slug || p.category === slug || (ALSO_IN[slug] ?? []).includes(p.slug)
 
 export type GrindType =
   "" | "beans" | "espresso" | "moka_pot" | "french_press" | "v60"
@@ -60,6 +80,9 @@ export interface Product {
   allowedGrinds: GrindType[]
   availableStock: number
   categoryName: string
+  shortDescription: string
+  featured: boolean
+  tasteProfile: TasteProfile
   // sensory 0–10
   acidity: number
   sweetness: number
@@ -138,7 +161,13 @@ export function toProduct(r: any, categories: Category[] = []): Product {
     availableStock: num(r.available_stock),
     region: r.origin ?? "",
     description: r.description ?? "",
-    image: r.images?.[0]?.image || "/img/brew.jpeg",
+    // Empty when no photo was uploaded; UI draws CoffeeArt instead.
+    image: r.images?.[0]?.image || "",
+    shortDescription: r.short_description ?? "",
+    featured: !!r.is_featured,
+    tasteProfile: (["fruity", "chocolate"].includes(r.taste_profile)
+      ? r.taste_profile
+      : "balanced") as TasteProfile,
     weights: [{ grams: 0, price: num(r.price) }],
     acidity: num(r.acidity),
     sweetness: num(r.sweetness),
@@ -346,4 +375,17 @@ export const PAYMENT_STATUS_LABELS = {
   paid: "پرداخت‌شده",
   failed: "ناموفق",
   refunded: "بازگشت وجه",
+}
+
+// Descriptions hold "label: value" lines (see Pal-Back seed_pal_coffees).
+// ponytail: parsed from text instead of model fields; add fields if admin needs filtering.
+export function splitDescription(text: string) {
+  const specs: [string, string][] = []
+  const paragraphs: string[] = []
+  for (const line of text.split("\n").map((l) => l.trim()).filter(Boolean)) {
+    const m = line.match(/^([^:：]{1,30}?)\s*[:：]\s*(.+)$/)
+    if (m) specs.push([m[1], m[2]])
+    else paragraphs.push(line)
+  }
+  return { specs, paragraphs }
 }

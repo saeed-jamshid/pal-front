@@ -5,6 +5,8 @@ import {
   normalizePhone,
   registerEvent,
   fetchRegistration,
+  faDate,
+  faTime,
 } from "./event-api"
 
 test("normalize Persian/Arabic phone; CSV neutralizes formula", () => {
@@ -36,4 +38,10 @@ test("event registration uses unified multipart route; status requires JWT", asy
   } finally {
     globalThis.fetch = original
   }
+})
+
+test("Persian time and date formatting", () => {
+  assert.equal(faTime("10:30:00"), "۱۰:۳۰")
+  assert.match(faDate("2026-10-16"), /جمعه/)
+  assert.match(faDate("2026-10-16"), /۲۴ مهر ۱۴۰۵/)
 })

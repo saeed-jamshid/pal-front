@@ -1,26 +1,22 @@
 /* Admin scope only; preserve storefront palette and layout. */
-body:has([data-pal-admin]) > header {
+body:has([data-pal-admin]) > header,
+body:has([data-pal-admin]) > .site-footer {
   display: none;
 }
 .admin-root,
 .admin-dialog {
-  --adm-bg: var(--crp-cream);
-  --adm-surface: var(--crp-surface, #fff);
-  --adm-well: var(--crp-warm);
+  --adm-bg: var(--surface-200);
+  --adm-surface: var(--surface-100);
+  --adm-well: var(--surface-200);
   --adm-text: var(--crp-espresso);
   --adm-muted: var(--crp-dark);
   --adm-line: var(--crp-sand);
   --adm-accent: var(--crp-terracotta);
-  --adm-good: #246347;
-  --adm-danger: #a12626;
+  --adm-good: var(--cistern);
+  --adm-danger: var(--brick);
   color: var(--adm-text);
   font-size: 16px;
   line-height: 1.7;
-}
-.dark .admin-root,
-.dark .admin-dialog {
-  --adm-good: #9acdac;
-  --adm-danger: #ffb4ab;
 }
 .admin-root {
   min-height: 100dvh;
@@ -114,7 +110,7 @@ body:has([data-pal-admin]) > header {
   background: var(--adm-well);
   color: var(--adm-accent);
   font-weight: 700;
-  box-shadow: inset -3px 0 var(--adm-accent);
+  border-inline-start: 3px solid var(--adm-accent);
 }
 .admin-nav-group {
   margin-top: 20px;

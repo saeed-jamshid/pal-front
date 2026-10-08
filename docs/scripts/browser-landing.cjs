@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- standalone browser check */
 // Uses existing Playwright; verifies landing animation and light-only theme.
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright-core')
 const assert = require('node:assert/strict')

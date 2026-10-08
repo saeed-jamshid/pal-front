@@ -9,6 +9,10 @@ const nextConfig = {
     const backend = process.env.PAL_BACKEND_URL ?? (process.env.NODE_ENV === "development" ? "http://127.0.0.1:8081" : "")
     return backend ? [{ source: "/api/:path*", destination: `${backend.replace(/\/$/, "")}/api/:path*/` }] : []
   },
+  // Show-only store (SHOP_SALES_ENABLED=false in lib/shop.ts): no cart or orders.
+  async redirects() {
+    return ["/cart", "/orders", "/orders/:path*"].map((source) => ({ source, destination: "/catalog", permanent: false }))
+  },
   async headers() {
     return [
       { source: "/submit/status/:token", headers: [{ key: "Referrer-Policy", value: "no-referrer" }, { key: "Cache-Control", value: "private, no-store" }] },

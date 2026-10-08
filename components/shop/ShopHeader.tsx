@@ -1,100 +1,102 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
-import { IconArrowRight, IconMenu2, IconX } from "@tabler/icons-react"
+import { usePathname, useRouter } from "next/navigation"
+import { Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react"
+import { IconHome, IconCoffee, IconInfoCircle, IconPhoto, IconLogout, IconLogin, IconUser, IconMenu2, IconX } from "@tabler/icons-react"
+import { clearTokens, isAuthed, subscribeAuth } from "@/lib/api"
 
 const NAV = [
-  { href: "/", label: "خانه" },
-  { href: "/catalog", label: "فروشگاه" },
-  { href: "/submit", label: "رویدادها" },
-  { href: "/about", label: "دربارهٔ ما" },
-  { href: "/gallery", label: "گالری" },
+  { href: "/", label: "خانه", icon: IconHome },
+  { href: "/catalog", label: "قهوه‌ها", icon: IconCoffee },
+  { href: "/about", label: "دربارهٔ ما", icon: IconInfoCircle },
+  { href: "/gallery", label: "گالری", icon: IconPhoto },
 ]
 
+// Pathname is runtime data: prerender the bar without the current-page mark, stream it in.
 export default function ShopHeader() {
+  return <Suspense fallback={<Header path="" />}><CurrentHeader /></Suspense>
+}
+
+function CurrentHeader() {
+  return <Header path={usePathname()} />
+}
+
+function Header({ path }: { path: string }) {
+  const menu = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
+  const authed = useSyncExternalStore(subscribeAuth, isAuthed, () => false)
+  const router = useRouter()
+  const current = (href: string) => (href === "/" ? path === "/" : path.startsWith(href)) ? "page" : undefined
+  const close = () => menu.current?.hidePopover()
+  const logout = () => {
+    clearTokens()
+    close()
+    router.refresh()
+  }
+  const account = (e: React.MouseEvent) => {
+    close()
+    if (!authed) {
+      e.preventDefault()
+      router.push(`/login?next=${encodeURIComponent(location.pathname)}`)
+    }
+  }
+  const accountHref = authed ? "/submit#my-registrations" : "/login"
+  const accountLabel = authed ? "حساب من" : "ورود"
+
+  useEffect(() => {
+    const desktop = matchMedia("(min-width: 1001px)")
+    const closeOnDesktop = () => { if (desktop.matches) menu.current?.hidePopover() }
+    desktop.addEventListener("change", closeOnDesktop)
+    return () => desktop.removeEventListener("change", closeOnDesktop)
+  }, [])
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-50 border-b border-(--crp-sand) bg-(--crp-cream)">
-      <div className="ed-shell grid w-full grid-cols-[1fr_auto] items-center gap-3 py-3 lg:grid-cols-[1fr_auto_1fr]">
-        <div className="flex min-w-0 items-center gap-3">
-          <Link
-            href="/"
-            className="flex items-center gap-2 whitespace-nowrap text-(--crp-espresso)"
-          >
-            <Image
-              src="/img/pal_logo.png"
-              width={44}
-              height={18}
-              priority
-              alt=""
-            />
-            <span className="text-sm font-semibold sm:text-base">پَل</span>
-          </Link>
-        </div>
-
-        {/* Desktop nav — plain text links, underline active */}
-        <nav
-          aria-label="ناوبری اصلی"
-          className="hidden items-center justify-center gap-2 whitespace-nowrap lg:flex xl:gap-5"
-        >
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="t-label flex min-h-11 items-center border-b-2 border-transparent px-2 text-(--crp-espresso) transition-colors duration-200 hover:border-(--crp-espresso)"
-            >
-              {item.label}
-            </Link>
-          ))}
+    <header className="public-navigation">
+      <div className="navigation-shell ed-shell">
+        <Link href="/" className="nav-brand" aria-label="پَل، خانه" dir="ltr">PAL</Link>
+        <nav className="desktop-nav" aria-label="ناوبری دسکتاپ">
+          {NAV.map(({ href, label }) => <Link key={href} href={href} aria-current={current(href)}>{label}</Link>)}
         </nav>
-
-        <div className="flex items-center justify-end gap-2">
-          <Link
-            href="/orders"
-            className="inline-flex min-h-11 items-center px-2 text-sm"
-          >
-            سفارش‌ها
-          </Link>
-          <Link
-            href="/cart"
-            className="inline-flex min-h-11 items-center px-2 text-sm"
-          >
-            سبد خرید
-          </Link>
+        <div className="navigation-actions">
+          <Link href="/submit" className="nav-cta btn btn--primary" aria-current={current("/submit")}>ثبت‌نام رویداد</Link>
+          <Link href={accountHref} className="desktop-account btn btn--secondary" onClick={account}>{accountLabel}</Link>
+          {authed && <button type="button" className="desktop-logout" onClick={logout}>خروج</button>}
           <button
             type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-label={open ? "بستن منو" : "باز کردن منو"}
+            className="navigation-trigger"
+            popoverTarget="public-menu"
+            aria-controls="public-menu"
             aria-expanded={open}
-            className="grid size-11 cursor-pointer place-items-center border border-(--crp-sand) transition hover:border-(--crp-espresso) lg:hidden"
+            aria-label={open ? "بستن منو" : "باز کردن منو"}
           >
-            {open ? <IconX size={19} /> : <IconMenu2 size={19} />}
+            {open ? <IconX size={24} aria-hidden /> : <IconMenu2 size={24} aria-hidden />}
           </button>
         </div>
       </div>
-
-      {/* Mobile menu — full-width editorial rows, 44px+ targets */}
-      {open && (
-        <nav
-          aria-label="ناوبری موبایل"
-          className="border-t border-(--crp-sand) lg:hidden"
-        >
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setOpen(false)}
-              className="ed-shell flex min-h-14 items-center justify-between border-b border-(--crp-sand) text-lg font-bold transition hover:text-(--crp-terracotta)"
-            >
-              {item.label}
-              <IconArrowRight size={18} className="rotate-180" />
+      <div
+        ref={menu}
+        id="public-menu"
+        popover="auto"
+        className="navigation-panel"
+        onToggle={(e) => setOpen(e.currentTarget.matches(":popover-open"))}
+      >
+        <nav aria-label="ناوبری اصلی">
+          {NAV.map(({ href, label, icon: Icon }) => (
+            <Link key={href} href={href} onClick={close} aria-current={current(href)}>
+              <Icon size={18} aria-hidden />{label}
             </Link>
           ))}
+          <Link href={accountHref} onClick={account}>
+            {authed ? <IconUser size={18} aria-hidden /> : <IconLogin size={18} aria-hidden />}{accountLabel}
+          </Link>
+          {authed && (
+            <button type="button" onClick={logout}>
+              <IconLogout size={18} aria-hidden />خروج
+            </button>
+          )}
         </nav>
-      )}
+      </div>
     </header>
   )
 }

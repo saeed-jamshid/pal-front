@@ -33,6 +33,17 @@ export function safeNextPath(next: string | null) {
 export function clearTokens() {
   localStorage.removeItem(ACCESS_KEY)
   localStorage.removeItem(REFRESH_KEY)
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(AUTH_EVENT))
+}
+// Same-tab auth changes (storage events only fire in other tabs).
+export const AUTH_EVENT = "pal-auth"
+export function subscribeAuth(onChange: () => void) {
+  window.addEventListener(AUTH_EVENT, onChange)
+  window.addEventListener("storage", onChange)
+  return () => {
+    window.removeEventListener(AUTH_EVENT, onChange)
+    window.removeEventListener("storage", onChange)
+  }
 }
 
 async function rawFetch<T>(
@@ -144,5 +155,6 @@ export async function verifyOtp(phone: string, code: string) {
   )
   localStorage.setItem(ACCESS_KEY, data.access)
   localStorage.setItem(REFRESH_KEY, data.refresh)
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(AUTH_EVENT))
   return data
 }

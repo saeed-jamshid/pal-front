@@ -58,16 +58,15 @@ function LoginForm() {
 
   return (
     <div className="ed-shell max-w-xl pt-28 pb-24">
-      <p className="t-label font-eng text-(--crp-terracotta)">PAL Coffee</p>
-      <h1 className="t-h1 mt-4">
-        پَل یعنی
-        <br />
-        <span className="text-(--crp-terracotta)">دوستی</span>
-      </h1>
-      <p className="t-body mt-6 border-b border-(--crp-espresso) pb-8 text-(--crp-dark)">
+      <p className="latin-name text-sm text-(--brick)">PAL Coffee</p>
+      <h1 className="fa-h1 mt-3">ورود یا ساخت حساب</h1>
+      <p className="lead mt-4 border-b border-(--outline) pb-6">
         {step === "phone"
-          ? "برای ورود، شماره موبایل خود را وارد کنید."
+          ? "شمارهٔ موبایل خود را وارد کنید تا کد ورود برایتان پیامک شود."
           : `کد پیامک‌شده به ${phone} را وارد کنید.`}
+      </p>
+      <p className="mt-3 text-sm text-(--ink-muted)">
+        اگر اولین بار است، با تأیید کد حساب شما ساخته می‌شود.
       </p>
 
       {step === "phone" ? (
@@ -75,7 +74,7 @@ function LoginForm() {
           <div>
             <label
               htmlFor="phone"
-              className="t-label mb-2 block text-(--crp-dark)"
+              className="mb-2 block text-sm font-bold"
             >
               شماره موبایل
             </label>
@@ -91,15 +90,15 @@ function LoginForm() {
               onChange={(e) => setPhone(normalizePhone(e.target.value))}
               aria-invalid={!!error}
               aria-describedby={error ? "login-error" : undefined}
-              className={`min-h-12 w-full border bg-(--crp-cream) px-4 text-center text-lg ${
-                error ? "border-(--crp-terracotta)" : "border-(--crp-sand)"
+              className={`min-h-12 w-full border rounded-(--radius-sm) bg-(--surface-200) px-4 text-center text-lg ${
+                error ? "border-(--brick)" : "border-(--border-input)"
               }`}
               required
             />
             {error && (
               <p
                 id="login-error"
-                className="mt-2 text-sm font-bold text-(--crp-terracotta)"
+                className="mt-2 text-sm font-bold text-(--brick)"
               >
                 {error}
               </p>
@@ -107,7 +106,7 @@ function LoginForm() {
           </div>
           <button
             disabled={busy}
-            className="outline-action ed-press min-h-12 cursor-pointer font-bold disabled:opacity-50"
+            className="btn btn--primary"
           >
             {busy ? "در حال ارسال…" : "دریافت کد"}
           </button>
@@ -117,7 +116,7 @@ function LoginForm() {
           <div>
             <label
               htmlFor="code"
-              className="t-label mb-2 block text-(--crp-dark)"
+              className="mb-2 block text-sm font-bold"
             >
               کد تأیید
             </label>
@@ -133,15 +132,15 @@ function LoginForm() {
               onChange={(e) => setCode(normalizePhone(e.target.value))}
               aria-invalid={!!error}
               aria-describedby={error ? "login-error" : undefined}
-              className={`min-h-12 w-full border bg-(--crp-cream) px-4 text-center text-xl tracking-[0.5em] ${
-                error ? "border-(--crp-terracotta)" : "border-(--crp-sand)"
+              className={`min-h-12 w-full border rounded-(--radius-sm) bg-(--surface-200) px-4 text-center text-xl tracking-[0.5em] ${
+                error ? "border-(--brick)" : "border-(--border-input)"
               }`}
               required
             />
             {error && (
               <p
                 id="login-error"
-                className="mt-2 text-sm font-bold text-(--crp-terracotta)"
+                className="mt-2 text-sm font-bold text-(--brick)"
               >
                 {error}
               </p>
@@ -149,7 +148,7 @@ function LoginForm() {
           </div>
           <button
             disabled={busy}
-            className="outline-action ed-press min-h-12 cursor-pointer font-bold disabled:opacity-50"
+            className="btn btn--primary"
           >
             {busy ? "در حال بررسی…" : "ورود"}
           </button>
@@ -159,7 +158,7 @@ function LoginForm() {
               setStep("phone")
               setError("")
             }}
-            className="min-h-11 cursor-pointer text-sm font-bold text-(--crp-dark) underline"
+            className="min-h-11 cursor-pointer text-sm font-bold text-(--cistern) underline"
           >
             تغییر شماره
           </button>
@@ -171,10 +170,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main
-      dir="rtl"
-      className="min-h-screen bg-(--crp-cream) text-(--crp-espresso)"
-    >
+    <main className="min-h-screen bg-(--surface-100) text-(--ink)">
       <Suspense>
         <LoginForm />
       </Suspense>

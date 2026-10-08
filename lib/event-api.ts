@@ -54,3 +54,21 @@ export function csvCell(value: string | number | null) {
     .replace(/^[\s\u0000-\u001f]*[=+@\-]/, "'$&")
     .replaceAll('"', '""')}"`
 }
+
+const FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹"
+export const faDigits = (value: string | number) =>
+  String(value).replace(/\d/g, (d) => FA_DIGITS[Number(d)])
+// "10:00:00" → "۱۰:۰۰"
+export const faTime = (time: string) => faDigits(time.slice(0, 5))
+// "2026-10-16" → "جمعه ۲۴ مهر ۱۴۰۵"; parts keep word order stable across ICU builds.
+// Noon avoids timezone day shifts.
+export function faDate(date: string) {
+  const parts = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).formatToParts(new Date(`${date}T12:00:00`))
+  const part = (type: string) => parts.find((p) => p.type === type)?.value ?? ""
+  return `${part("weekday")} ${part("day")} ${part("month")} ${part("year")}`
+}

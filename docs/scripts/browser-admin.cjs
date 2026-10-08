@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- standalone browser check */
 // Local-only admin acceptance. Reuses existing Playwright; no dependency added.
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright-core')
 const { execFileSync } = require('node:child_process')
@@ -33,7 +34,7 @@ const check = (name, value = true) => { assert.ok(value, name); checks.push(name
       const input = dialog.locator(`#admin-field-${field}`)
       const tag = await input.evaluate((el) => el.tagName)
       if (tag === 'SELECT') await input.selectOption(String(value))
-      else if (typeof value === 'boolean') value ? await input.check() : await input.uncheck()
+      else if (typeof value === 'boolean') await input.setChecked(value)
       else await input.fill(String(value))
     }
     const res = page.waitForResponse((r) => r.url().includes(`/manage/${key}/`) && r.request().method() === 'POST')

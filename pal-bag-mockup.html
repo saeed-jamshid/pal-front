@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PAL Coffee Lineup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Vazirmatn:wght@400;500;600;700;800&display=swap">
+<style>
+/* Product lineup: five PAL pouches, each with its own composition of bold circles, a thin line orbit and a coffee branch. Light only. */
+:root{
+  --bg:#efe6d6; --surface:#f7f1e6; --ink:#2a1a0f; --ink-muted:#654c37;
+  --brick:#8a3a1c; --on-brick:#f8efe0; --cistern:#2a6461; --saffron:#c98a2b; --roast:#3a2214;
+  --outline:#2a1a0f; --radius-md:12px; --radius-arch:999px;
+  --font-display:"Archivo",system-ui,sans-serif; --font-body:"Vazirmatn","Archivo",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.75 var(--font-body)}
+.wrap{max-width:1200px;margin-inline:auto;padding-inline:max(16px,4vw);padding-block:24px 48px;display:grid;gap:20px}
+header{display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--outline);padding-bottom:12px}
+.mark{font:800 26px/1 var(--font-display);letter-spacing:.06em;direction:ltr}
+header p{margin:0;color:var(--ink-muted);font-size:14px}
+.stage{border:1px solid var(--outline);border-radius:var(--radius-md);overflow:hidden;background:var(--bg)}
+.stage svg{display:block;width:100%;height:auto}
+.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.btn{all:unset;cursor:pointer;background:var(--brick);color:var(--on-brick);border-radius:var(--radius-md);padding:10px 22px;font:700 15px/1.4 var(--font-body)}
+.btn:hover{background:var(--ink)}
+.btn--ghost{background:transparent;color:var(--ink);border:1px solid var(--outline)}
+.btn--ghost:hover{background:#e3d2b6;color:var(--ink)}
+.btn:focus-visible{outline:2px solid var(--cistern);outline-offset:2px}
+h2{margin:8px 0 0;font:800 22px/1.3 var(--font-body)}
+.lib{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tile{border:1px solid var(--outline);border-radius:var(--radius-md);background:var(--surface);overflow:hidden;display:grid}
+.tile svg{width:100%;height:auto;display:block;aspect-ratio:1/1;max-width:100%}
+.tile p{margin:0;padding:8px 12px;border-top:1px solid var(--outline);font:600 14px/1.5 var(--font-body)}
+.tile small{display:block;color:var(--ink-muted);font-weight:500}
+@media (max-width:760px){.lib{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><span class="mark">PAL</span><p>ماکاپ بسته‌های قهوه برای ویترین</p></header>
+
+  <div class="stage">
+    <svg id="scene" viewBox="0 0 1200 860" role="img" aria-label="پنج بسته‌ی قهوه‌ی پال با برچسب‌های رنگی و الگوهای دایره و برگ"></svg>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="shuffle">چیدمان تازه‌ی الگوها</button>
+    <button class="btn btn--ghost" id="reset">برگشت به چیدمان اصلی</button>
+  </div>
+
+  <h2>اجزای الگو</h2>
+  <div class="lib" id="lib"></div>
+</div>
+
+<script>
+const C={brick:"#8a3a1c",saffron:"#c98a2b",cistern:"#2a6461",roast:"#3a2214",ink:"#2a1a0f",
+  peach:"#e07d50",sun:"#e9b04f",sage:"#7f9c86",bag:"#f7f1e6"};
+
+// five coffees: each owns a label tint and a two-colour circle pair
+const COFFEES=[
+  {en:"ETHIOPIA",fa:"اتیوپی · گوجی",notes:"زردآلو · یاس · کاکائو",roast:"رست روشن",tint:"#f4e0b4",a:"sun",b:"peach",leaf:"cistern",layout:0},
+  {en:"COLOMBIA",fa:"کلمبیا · هوئیلا",notes:"سیب قرمز · کارامل · فندق",roast:"رست مدیوم",tint:"#cfe2dc",a:"cistern",b:"sun",leaf:"roast",layout:1},
+  {en:"KENYA",fa:"کنیا · نیری",notes:"توت سیاه · گریپ‌فروت",roast:"رست روشن",tint:"#f0cdbb",a:"peach",b:"brick",leaf:"cistern",layout:2},
+  {en:"BRAZIL",fa:"برزیل · سرادو",notes:"شکلات شیری · بادام",roast:"رست مدیوم",tint:"#e2d2bf",a:"saffron",b:"roast",leaf:"sage",layout:3},
+  {en:"HOUSE BLEND",fa:"ترکیب پال",notes:"خرما · دارچین · کاکائو",roast:"رست تیره",tint:"#d9e0cf",a:"brick",b:"saffron",leaf:"cistern",layout:4}
+];
+const fresh=()=>COFFEES.map(c=>({...c}));
+let coffees=fresh();
+
+const W=250,H=340;
+const POUCH=`M16 0 H${W-16} Q${W} 0 ${W} 16 V${H-14} Q${W} ${H} ${W-14} ${H} H14 Q0 ${H} 0 ${H-14} V16 Q0 0 16 0 Z`;
+
+// motifs -------------------------------------------------------------------
+const leaf=(x,y,rot,s,fill)=>`<g transform="translate(${x} ${y}) rotate(${rot}) scale(${s})">
+  <path d="M0 0 C18 -26 58 -32 84 -8 C58 10 22 12 0 0 Z" fill="${fill}"/>
+  <path d="M4 -1 C30 -10 54 -12 78 -8" fill="none" stroke="${C.bag}" stroke-opacity=".55" stroke-width="1.6"/>
+  ${[20,36,52].map(t=>`<path d="M${t} -6 l10 -9 M${t} -6 l9 6" stroke="${C.bag}" stroke-opacity=".45" stroke-width="1.1" fill="none"/>`).join("")}
+</g>`;
+const cherry=(x,y,r,fill)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}"/><circle cx="${x-r*.35}" cy="${y-r*.35}" r="${r*.28}" fill="#fff" fill-opacity=".35"/>`;
+const branch=(x,y,flip,leafCol)=>{
+  const t=flip?`translate(${x} ${y}) scale(-1 1)`:`translate(${x} ${y})`;
+  return `<g transform="${t}">
+    <path d="M0 0 C18 -30 40 -52 76 -70" fill="none" stroke="${C.roast}" stroke-width="2.2" stroke-linecap="round"/>
+    ${leaf(6,-6,-62,1.05,C[leafCol])}
+    ${leaf(30,-36,-18,.9,C[leafCol])}
+    ${leaf(46,-50,-92,.62,C.sage)}
+    <path d="M50 -50 l-4 18 M56 -54 l6 16" stroke="${C.roast}" stroke-width="1.4"/>
+    ${cherry(44,-28,9,C.brick)}${cherry(63,-34,8,C.brick)}
+  </g>`;
+};
+const orbit=(cx,cy,r)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${C.ink}" stroke-width="1.2" stroke-opacity=".7"/>`;
+const halfMoon=(cx,cy,r,fill,rot)=>`<path transform="rotate(${rot} ${cx} ${cy})" d="M${cx-r} ${cy} A${r} ${r} 0 0 1 ${cx+r} ${cy} Z" fill="${fill}"/>`;
+const dots=(x,y,col)=>[0,1,2].map(i=>[0,1,2].map(j=>`<circle cx="${x+i*11}" cy="${y+j*11}" r="2.2" fill="${col}"/>`).join("")).join("");
+
+// five compositions, all built from the same parts
+const LAYOUTS=[
+  c=>`<circle cx="22" cy="58" r="64" fill="${C[c.a]}"/><circle cx="${W+6}" cy="196" r="58" fill="${C[c.b]}"/>${orbit(58,40,52)}`,
+  c=>`<circle cx="${W-10}" cy="40" r="70" fill="${C[c.a]}"/>${halfMoon(-4,230,54,C[c.b],90)}${orbit(W-60,62,46)}${dots(26,64,C.roast)}`,
+  c=>`<circle cx="-6" cy="150" r="60" fill="${C[c.a]}"/><circle cx="34" cy="122" r="34" fill="${C[c.b]}"/><circle cx="${W-20}" cy="30" r="40" fill="${C.sun}"/>${orbit(14,150,78)}`,
+  c=>`${halfMoon(W/2,-2,96,C[c.a],180)}<circle cx="${W+10}" cy="250" r="52" fill="${C[c.b]}"/>${orbit(W/2+40,30,60)}${dots(W-48,118,C.brick)}`,
+  c=>`<circle cx="30" cy="34" r="46" fill="${C[c.a]}"/><circle cx="74" cy="40" r="30" fill="${C[c.b]}"/><circle cx="${W+4}" cy="170" r="44" fill="${C.cistern}"/>${orbit(W-10,170,62)}`
+];
+
+const FLIP=[false,true,true,false,false];
+function pouchSVG(c,i){
+  const bx=FLIP[c.layout]?W+6:-6;
+  return `<defs><clipPath id="clip${i}"><path d="${POUCH}"/></clipPath>
+    <linearGradient id="sh${i}" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#000" stop-opacity=".07"/><stop offset=".15" stop-color="#000" stop-opacity="0"/>
+      <stop offset=".75" stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#000" stop-opacity=".06"/></linearGradient></defs>
+  <path d="${POUCH}" fill="${C.bag}"/>
+  <g clip-path="url(#clip${i})">
+    ${LAYOUTS[c.layout](c)}
+    <rect width="${W}" height="30" fill="#000" opacity=".035"/>
+    <line x1="10" y1="40" x2="${W-10}" y2="40" stroke="#000" stroke-opacity=".12" stroke-width="2"/>
+    <text x="${W/2}" y="86" text-anchor="middle" fill="${C.ink}" style="font:800 30px Archivo,sans-serif;letter-spacing:6px">PAL</text>
+    <text x="${W/2}" y="102" text-anchor="middle" fill="${C.ink}" style="font:500 8px Archivo,sans-serif;letter-spacing:3px">COFFEE ROASTERS</text>
+    <rect x="62" y="120" width="126" height="150" fill="${c.tint}"/>
+    <text x="${W/2}" y="142" text-anchor="middle" fill="${C.ink}" style="font:600 8px Archivo,sans-serif;letter-spacing:2px">${c.en.includes("BLEND")?"HOUSE BLEND · 01":"SINGLE ORIGIN"}</text>
+    <text x="${W/2}" y="196" text-anchor="middle" fill="${C.ink}" style="font:800 ${c.en.length>8?16:21}px Archivo,sans-serif;letter-spacing:1px">${c.en}</text>
+    <text x="${W/2}" y="216" text-anchor="middle" fill="${C.ink}" style="font:700 11px Vazirmatn,sans-serif" direction="rtl">${c.fa}</text>
+    <text x="${W/2}" y="236" text-anchor="middle" fill="#4d3a2a" style="font:500 9px Vazirmatn,sans-serif" direction="rtl">${c.notes}</text>
+    <text x="${W/2}" y="254" text-anchor="middle" fill="#4d3a2a" style="font:500 9px Vazirmatn,sans-serif" direction="rtl">۲۵۰ گرم · ${c.roast}</text>
+    <g transform="translate(${bx} ${H+8}) scale(1.1) translate(${-bx} ${-(H+8)})">${branch(bx,H+8,FLIP[c.layout],c.leaf)}</g>
+    <rect width="${W}" height="${H}" fill="url(#sh${i})"/>
+  </g>
+  <path d="M0 22 l7 3 l-7 3 Z M${W} 22 l-7 3 l7 3 Z" fill="${'#efe6d6'}"/>`;
+}
+
+const bean=(x,y,rot,s)=>`<g transform="translate(${x} ${y}) rotate(${rot}) scale(${s})">
+  <ellipse rx="11" ry="15" fill="${C.roast}"/><path d="M0 -13 C-5 -4 5 4 0 13" stroke="#1a0f08" stroke-width="2" fill="none"/></g>`;
+
+const SPOTS=[[110,40,-4],[475,22,2],[840,48,5],[290,420,3],[660,436,-3]];
+
+function render(){
+  const s=document.getElementById("scene");
+  let out=`<defs><filter id="blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="12"/></filter></defs>
+    <rect width="1200" height="860" fill="#efe6d6"/>`;
+  // scattered beans
+  [[60,520,20,1],[92,560,-30,.9],[48,600,60,1.1],[1110,300,15,1],[1140,340,-40,.9],[1080,360,70,1],[1120,720,10,1.1],[1150,770,-20,.9],[520,800,40,1],[560,820,-10,.9]]
+    .forEach(b=>out+=bean(...b));
+  // a kraft card behind
+  out+=`<g transform="translate(30 660) rotate(-6)"><rect width="230" height="150" rx="6" fill="#fbf7ef"/>
+     <circle cx="200" cy="30" r="40" fill="${C.sun}" opacity=".9"/><text direction="ltr" x="24" y="92" style="font:800 26px Archivo,sans-serif;letter-spacing:5px" fill="${C.ink}">PAL</text>
+     <text direction="ltr" x="24" y="114" style="font:500 9px Archivo,sans-serif;letter-spacing:2px" fill="${C.ink}">TASTING SET · 5 COFFEES</text></g>`;
+  coffees.forEach((c,i)=>{
+    const [x,y,r]=SPOTS[i];
+    out+=`<ellipse cx="${x+W/2+8}" cy="${y+H+6}" rx="${W/2}" ry="16" fill="#000" opacity=".22" filter="url(#blur)"/>
+      <g transform="translate(${x} ${y}) rotate(${r} ${W/2} ${H/2})">${pouchSVG(c,i)}</g>`;
+  });
+  s.innerHTML=out;
+}
+
+function renderLib(){
+  const parts=[
+    ["دایره‌های پررنگ","دو دایره‌ی هم‌پوشان در گوشه‌ها، نیمه بیرون از لبه",`<circle cx="60" cy="70" r="56" fill="${C.sun}"/><circle cx="104" cy="96" r="40" fill="${C.peach}"/>`],
+    ["مدار خطی","یک حلقه‌ی نازک جوهری که از روی دایره‌ها رد می‌شود",`<circle cx="70" cy="80" r="44" fill="${C.cistern}"/>${orbit(98,64,50)}`],
+    ["شاخه‌ی قهوه","برگ‌ها و گیلاس‌های قهوه در گوشه‌ی پایین",branch(30,150,false,"cistern")],
+    ["نیم‌ماه و نقطه‌ها","برای تنوع در بسته‌های بعدی",`${halfMoon(80,20,60,C.brick,180)}${dots(50,110,C.roast)}`]
+  ];
+  document.getElementById("lib").innerHTML=parts.map(([t,d,g])=>`<div class="tile"><svg viewBox="0 0 160 160" aria-hidden="true"><rect width="160" height="160" fill="${C.bag}"/>${g}</svg><p>${t}<small>${d}</small></p></div>`).join("");
+}
+
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+document.getElementById("shuffle").addEventListener("click",()=>{
+  const lay=shuffle([0,1,2,3,4]);const pairs=["sun","peach","brick","saffron","cistern","roast"];
+  coffees=coffees.map((c,i)=>{const p=shuffle(pairs.slice());return {...c,layout:lay[i],a:p[0],b:p[1]}});render();
+});
+document.getElementById("reset").addEventListener("click",()=>{coffees=fresh();render()});
+render();renderLib();
+</script>
+</body>
+</html>

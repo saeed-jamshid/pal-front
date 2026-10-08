@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- standalone browser check */
 // Run with PLAYWRIGHT_MODULE pointing to existing playwright-core installation.
 // Requires isolated seed-demo.py fixtures. Never point this script at production.
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright-core')
