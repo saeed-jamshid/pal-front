@@ -74,13 +74,13 @@ export default function AdminShell({
       alive = false
     }
   }, [reload, router, pathname])
-  const current = resources.find((r) => pathname === `/admin/${r.key}`)
+  const current = resources.find((r) => pathname === `/manage/${r.key}`)
   const nav = (
     <>
       <Link
-        href="/admin"
-        className={`admin-nav-link ${pathname === "/admin" ? "is-current" : ""}`}
-        aria-current={pathname === "/admin" ? "page" : undefined}
+        href="/manage"
+        className={`admin-nav-link ${pathname === "/manage" ? "is-current" : ""}`}
+        aria-current={pathname === "/manage" ? "page" : undefined}
         onClick={() => setMenu(false)}
       >
         <LayoutDashboard size={18} aria-hidden="true" />
@@ -97,7 +97,7 @@ export default function AdminShell({
             .map((r) => (
               <Link
                 key={r.key}
-                href={`/admin/${r.key}`}
+                href={`/manage/${r.key}`}
                 className={`admin-nav-link ${current?.key === r.key ? "is-current" : ""}`}
                 aria-current={current?.key === r.key ? "page" : undefined}
                 onClick={() => setMenu(false)}
@@ -143,7 +143,7 @@ export default function AdminShell({
           رفتن به محتوا
         </a>
         <aside className="admin-sidebar">
-          <Link href="/admin" className="admin-brand">
+          <Link href="/manage" className="admin-brand">
             <span className="admin-brand-mark">
               <Coffee size={22} aria-hidden="true" />
             </span>
@@ -193,7 +193,7 @@ export default function AdminShell({
                 onClick={() => {
                   clearTokens()
                   setOverview(null)
-                  router.replace("/login?next=/admin")
+                  router.replace("/login?next=/manage")
                 }}
               >
                 <LogOut size={17} aria-hidden="true" />

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports -- standalone browser check */
 // Real-touch checks for the gallery viewer: pinch, pan, clamp, double tap, swipe. PAL_ORIGIN / O = server.
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright-core')
 const assert = require('node:assert/strict')

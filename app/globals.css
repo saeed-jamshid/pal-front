@@ -1134,3 +1134,11 @@ body:has(.gallery-viewer) [data-slot="dialog-overlay"] { z-index: 70; backdrop-f
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* 404 and error pages */
+.status-page { min-height: 100dvh; display: grid; place-content: center; justify-items: center; gap: 12px; text-align: center; padding-block: 96px 64px; }
+.status-cat { width: min(220px, 60vw); height: auto; }
+.status-code { font: 800 14px/1 var(--font-display); letter-spacing: .2em; color: var(--brick); }
+.status-page .lead { max-width: 42ch; }
+.status-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 12px; }
+.status-digest { flex-basis: 100%; font-size: 13px; color: var(--ink-muted); }

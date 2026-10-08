@@ -24,7 +24,7 @@ const check = (name, value = true) => { assert.ok(value, name); checks.push(name
   let access
   const staffApi = (method, resource, data) => context.request.fetch(`${origin}/api/v1${resource}`, { method, headers: { Authorization: `Bearer ${access}` }, ...(data ? { data } : {}) })
   const customerApi = (method, resource, data, multipart) => context.request.fetch(`${origin}/api/v1${resource}`, { method, headers: { Authorization: `Bearer ${demo.other.access}` }, ...(data ? { data } : {}), ...(multipart ? { multipart } : {}) })
-  async function section(key) { await page.goto(`${origin}/admin/${key}`); await page.locator('.admin-main h1').waitFor(); await page.locator('.admin-table-loading').waitFor({ state: 'hidden' }) }
+  async function section(key) { await page.goto(`${origin}/manage/${key}`); await page.locator('.admin-main h1').waitFor(); await page.locator('.admin-table-loading').waitFor({ state: 'hidden' }) }
   async function create(key, values) {
     await section(key)
     await page.getByRole('button', { name: /^افزودن / }).click()
@@ -64,7 +64,7 @@ const check = (name, value = true) => { assert.ok(value, name); checks.push(name
   const shot = (name) => page.screenshot({ path: path.join(dir, `${name}.png`), fullPage: true, animations: 'disabled' })
   try {
     check('guest manage API denied', (await context.request.get(`${origin}/api/v1/manage/products/`)).status() === 401)
-    await page.goto(`${origin}/admin`)
+    await page.goto(`${origin}/manage`)
     await page.waitForURL((url) => url.pathname === '/login', { waitUntil: 'domcontentloaded' })
     check('guest panel redirects to shared OTP login')
     await page.locator('#phone').fill(credentials.phone_number)
@@ -79,7 +79,7 @@ const check = (name, value = true) => { assert.ok(value, name); checks.push(name
     }
     assert.ok(code, 'console OTP delivered')
     await page.locator('#code').fill(code); await page.locator('#code').press('Enter')
-    await page.waitForURL((url) => url.pathname === '/admin', { waitUntil: 'domcontentloaded' })
+    await page.waitForURL((url) => url.pathname === '/manage', { waitUntil: 'domcontentloaded' })
     await page.getByRole('heading', { name: /خوش آمدید/ }).waitFor()
     access = await page.evaluate(() => localStorage.getItem('pal_access_token'))
     check('real staff OTP login opens protected overview')
@@ -179,13 +179,13 @@ const check = (name, value = true) => { assert.ok(value, name); checks.push(name
     await page.keyboard.press('Escape'); await dialog.waitFor({ state: 'hidden' })
     await page.waitForFunction((label) => document.activeElement?.getAttribute('aria-label') === label, `ویرایش ${product.name}`)
     check('clean dialog Escape restores editor trigger focus')
-    await page.goto(`${origin}/admin`); await page.getByRole('heading', { name: /خوش آمدید/ }).waitFor()
+    await page.goto(`${origin}/manage`); await page.getByRole('heading', { name: /خوش آمدید/ }).waitFor()
     await page.setViewportSize({ width: 375, height: 812 }); await shot('overview-mobile')
     check('mobile overview no horizontal page overflow', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
     await page.getByRole('button', { name: 'باز کردن منوی مدیریت', exact: true }).focus(); await page.keyboard.press('Enter')
     const mobileNav = page.getByRole('navigation', { name: 'مدیریت پَل در موبایل', exact: true })
     await mobileNav.getByRole('link', { name: 'محصولات', exact: true }).focus(); await page.keyboard.press('Enter')
-    await page.waitForURL((url) => url.pathname === '/admin/products', { waitUntil: 'domcontentloaded' })
+    await page.waitForURL((url) => url.pathname === '/manage/products', { waitUntil: 'domcontentloaded' })
     await page.locator('.admin-table-loading').waitFor({ state: 'hidden' }); await shot('products-mobile')
     check('keyboard mobile navigation and contained table scroll', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
     await page.getByRole('button', { name: `ویرایش ${product.name}`, exact: true }).click(); await page.getByRole('dialog').locator('form').waitFor(); await shot('product-editor-mobile')
@@ -229,7 +229,7 @@ const check = (name, value = true) => { assert.ok(value, name); checks.push(name
     assert.equal((await staffApi('PATCH', `/manage/posts/${post.id}/`, { status: 'draft' })).status(), 200)
     const customerContext = await browser.newContext()
     await customerContext.addInitScript((tokens) => { localStorage.setItem('pal_access_token', tokens.access); localStorage.setItem('pal_refresh_token', tokens.refresh) }, demo.other)
-    const customerPage = await customerContext.newPage(); await customerPage.goto(`${origin}/admin/products`)
+    const customerPage = await customerContext.newPage(); await customerPage.goto(`${origin}/manage/products`)
     await customerPage.getByText('این بخش فقط برای کارکنان مجاز است.', { exact: true }).waitFor()
     check('customer panel shows forbidden state, no editor')
     check('no browser runtime errors', errors.length === 0)

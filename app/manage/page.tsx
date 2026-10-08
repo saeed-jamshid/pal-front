@@ -21,25 +21,25 @@ export default function AdminOverview() {
       label: "محصول فعال",
       value: overview.products,
       Icon: Package,
-      href: "/admin/products",
+      href: "/manage/products",
     },
     {
       label: "کل سفارش‌ها",
       value: overview.orders,
       Icon: ShoppingBag,
-      href: "/admin/orders",
+      href: "/manage/orders",
     },
     {
       label: "سفارش آماده پردازش",
       value: overview.unfulfilled,
       Icon: Truck,
-      href: "/admin/orders",
+      href: "/manage/orders",
     },
     {
       label: "مشتری",
       value: overview.customers,
       Icon: Users,
-      href: "/admin/customers",
+      href: "/manage/customers",
     },
   ]
   const reviews = [
@@ -48,14 +48,14 @@ export default function AdminOverview() {
       text: "پرداخت‌های منتظر تأیید؛ ابتدا رسید و حساب مقصد را بررسی کنید.",
       value: overview.receipts_pending,
       Icon: Receipt,
-      href: "/admin/payments",
+      href: "/manage/payments",
     },
     {
       title: "ثبت‌نام رویدادها",
       text: "درخواست‌های در انتظار بررسی؛ تأیید هر درخواست، وضعیت حضور را نهایی می‌کند.",
       value: overview.registrations_pending,
       Icon: CalendarDays,
-      href: "/admin/registrations",
+      href: "/manage/registrations",
     },
   ]
   return (
@@ -66,7 +66,7 @@ export default function AdminOverview() {
           <h1>{overview.user.full_name || "مدیر پَل"}، خوش آمدید</h1>
           <p>سفارش‌ها و ثبت‌نام‌های پَل را اینجا مدیریت کنید.</p>
         </div>
-        <Link className="admin-button" href="/admin/products">
+        <Link className="admin-button" href="/manage/products">
           مدیریت محصولات
           <ArrowUpLeft size={18} aria-hidden="true" />
         </Link>
@@ -119,7 +119,7 @@ export default function AdminOverview() {
           <p>
             مجموع سفارش‌های پرداخت‌شده؛ فروش خالص یا گزارش تسویه بانکی نیست.
           </p>
-          <Link className="admin-link" href="/admin/orders">
+          <Link className="admin-link" href="/manage/orders">
             بررسی سفارش‌ها
             <ArrowUpLeft size={16} aria-hidden="true" />
           </Link>
@@ -131,7 +131,7 @@ export default function AdminOverview() {
             موارد دارای سابقه سفارش یا ثبت‌نام را حذف نکنید. دسترسی کارکنان در
             Django Admin مدیریت می‌شود. تنظیمات درگاه و پیامک در سرور هستند.
           </p>
-          <Link className="admin-link" href="/admin/cards">
+          <Link className="admin-link" href="/manage/cards">
             مدیریت کارت‌های مقصد
             <ArrowUpLeft size={16} aria-hidden="true" />
           </Link>

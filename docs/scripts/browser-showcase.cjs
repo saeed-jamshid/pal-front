@@ -82,7 +82,7 @@ async function register(browser, phone, name) {
   const errors = []
   const staff = await apiLogin(staffPhone)
 
-  // Test event setup (same management API the /admin panel uses).
+  // Test event setup (same management API the /manage panel uses).
   const events = await api('GET', '/manage/events/?search=' + encodeURIComponent('قصه و قهوه'), null, staff)
   let event = events.results.find((e) => e.date === '2026-10-16')
   if (!event) {
@@ -118,19 +118,19 @@ async function register(browser, phone, name) {
   await a.page.locator('.status-badge--pending').waitFor()
   check('new user registered, status pending via token', true)
 
-  // Staff approves in /admin UI
+  // Staff approves in /manage UI
   const admin = await browser.newPage({ viewport: { width: 1440, height: 900 } })
   await admin.goto(origin)
   await admin.evaluate(token => localStorage.setItem('pal_access_token', token), staff)
-  await admin.goto(`${origin}/admin/registrations`)
-  await admin.waitForURL(/\/admin\/registrations/)
+  await admin.goto(`${origin}/manage/registrations`)
+  await admin.waitForURL(/\/manage\/registrations/)
   admin.on('dialog', (d) => d.accept())
   await admin.getByRole('button', { name: /جزئیات مهمان آزمایشی یک/ }).first().click()
   await admin.getByRole('button', { name: 'تأیید', exact: true }).click()
   await sleep(1500)
   await a.page.reload()
   await a.page.locator('.status-badge--confirmed').waitFor()
-  check('staff approval in /admin → user sees confirmed', true)
+  check('staff approval in /manage → user sees confirmed', true)
   await admin.screenshot({ path: path.join(out, 'admin-1440.png') })
 
   // Reject → resubmit
