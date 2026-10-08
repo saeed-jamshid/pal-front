@@ -634,6 +634,16 @@ body:has([data-pal-admin]) > .site-footer {
   font-size: 14px;
   margin-top: 8px;
 }
+.admin-product-guide { margin-top: 16px; padding: 16px; border: 1px solid var(--adm-line); border-radius: 6px; background: var(--adm-well); }
+.admin-mode-switch { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.admin-mode-switch button { min-height: 44px; padding: 8px 18px; border: 1px solid var(--adm-line); border-radius: 5px; background: var(--adm-surface); font-weight: 600; }
+.admin-mode-switch button[aria-pressed="true"] { background: var(--adm-accent); border-color: var(--adm-accent); color: var(--adm-bg); }
+.admin-product-guide p, .admin-product-guide li { font-size: 14px; line-height: 1.8; }
+.admin-product-guide details { margin-top: 8px; }
+.admin-product-guide summary { min-height: 44px; padding-block: 8px; cursor: pointer; color: var(--adm-accent); font-weight: 600; }
+.admin-product-guide ol { list-style: decimal; padding-inline-start: 24px; }
+.admin-product-guide li + li { margin-top: 6px; }
+.admin-field[hidden] { display: none; }
 .admin-form-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

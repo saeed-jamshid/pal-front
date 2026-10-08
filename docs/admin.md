@@ -10,6 +10,12 @@ The panel covers products/categories/images, bundle components, order fulfillmen
 
 Staff roles stay in Django Admin. Gateway and SMS credentials stay in server configuration, not editable forms. Address snapshots and order items are visible in order details. Financial histories cannot be created or deleted through generic CRUD.
 
+## Product editor modes
+
+Products open in **حالت ساده**: name, category, rial price, stock, short intro, origin, roast, tasting notes and visibility. New products get unique editable URL/SKU identifiers and start with zero price/stock. **حالت پیشرفته** exposes the remaining existing fields. Inputs stay mounted: switching modes preserves values, and saving an existing product in Easy mode retains its advanced settings. Field errors in hidden settings reveal Advanced mode automatically.
+
+Inline hints and **راهنمای افزودن محصول** explain rial/toman, unknown coffee facts, visibility and adding photos through **تصاویر محصولات** after saving. Other editors are unchanged. Run `docs/scripts/browser-product-modes.cjs` with installed Playwright for mocked create/edit, mode-switch and validation checks; it writes no real product data.
+
 ## Rules that protect records
 
 Every `/api/v1/manage/` route requires Django `IsAdminUser`; frontend redirects alone do not grant access. Customers and guests cannot read or modify these endpoints. Shared JWT refresh is reused.

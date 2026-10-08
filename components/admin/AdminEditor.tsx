@@ -18,6 +18,23 @@ import {
   type Resource,
 } from "@/lib/admin"
 
+const EASY_PRODUCT_FIELDS = new Set([
+  "name", "category", "price", "stock", "short_description", "origin", "roast_level", "tasting_notes", "is_active",
+])
+const PRODUCT_HELP: Record<string, string> = {
+  name: "نامی که مشتری روی کارت قهوه می‌بیند؛ مانند Uganda Drugar / natural.",
+  category: "دسته‌ای که محصول در آن نمایش داده می‌شود. دسته‌ها از بخش «دسته‌بندی محصولات» قابل مدیریت‌اند.",
+  sku: "کد داخلی و یکتای محصول؛ در حالت ساده خودکار ساخته می‌شود.",
+  slug: "بخش پایانی نشانی صفحه محصول؛ خودکار ساخته می‌شود. تغییر آن، لینک قبلی محصول را عوض می‌کند.",
+  price: "مبلغ به ریال است: برای ۱۰۰٬۰۰۰ تومان، ۱٬۰۰۰٬۰۰۰ وارد کنید. قیمت فعلاً روی سایت نمایش داده نمی‌شود.",
+  stock: "تعداد موجود؛ صفر یعنی موجودی ثبت نشده. این عدد مشخصات طعمی یا وزن محصول نیست.",
+  short_description: "یک جمله کوتاه درباره قهوه؛ توضیح مفصل را در حالت پیشرفته وارد کنید.",
+  origin: "کشور یا منطقه خاستگاه؛ مانند اوگاندا. اگر مشخص نیست، خالی بگذارید.",
+  roast_level: "فقط اگر درجه رست معلوم است انتخاب کنید؛ در غیر این صورت «نامشخص» بماند.",
+  tasting_notes: "طعم‌یادها را با «،» جدا کنید؛ مانند شکلات، کارامل، میوه‌های استوایی.",
+  is_active: "خاموش کردن این گزینه، محصول را از فهرست عمومی سایت پنهان می‌کند؛ محصول حذف نمی‌شود.",
+}
+
 export default function AdminEditor({
   resource,
   record,
@@ -29,6 +46,13 @@ export default function AdminEditor({
   onClose: () => void
   onSaved: () => void
 }) {
+  const product = resource.key === "products"
+  const [advanced, setAdvanced] = useState(false)
+  const [productDefaults] = useState<Record<string, unknown>>(() => {
+    if (!product || record) return {}
+    const id = crypto.randomUUID()
+    return { slug: `coffee-${id}`, sku: `PAL-${id}`, price: 0, stock: 0 }
+  })
   const [choices, setChoices] = useState<Record<string, AdminRow[]>>({})
   const [loading, setLoading] = useState(
     !!resource.fields?.some((f) => f.source)
@@ -164,7 +188,10 @@ export default function AdminEditor({
       onSaved()
     } catch (e) {
       setError(e instanceof Error ? e.message : "ذخیره انجام نشد.")
-      if (e instanceof ApiError) setErrors(e.fields)
+      if (e instanceof ApiError) {
+        setErrors(e.fields)
+        if (product && Object.keys(e.fields).some(key => !EASY_PRODUCT_FIELDS.has(key))) setAdvanced(true)
+      }
     } finally {
       setBusy(false)
     }
@@ -193,14 +220,15 @@ export default function AdminEditor({
   }
   function input(field: Field) {
     const id = `admin-field-${field.key}`
-    const value = record?.[field.key] ?? field.default ?? ""
+    const value = record?.[field.key] ?? productDefaults[field.key] ?? field.default ?? ""
+    const hint = product ? PRODUCT_HELP[field.key] ?? field.hint : field.hint
     const common = {
       id,
       name: field.key,
       "aria-invalid": !!errors[field.key],
       "aria-describedby": errors[field.key]
         ? `${id}-error`
-        : field.hint
+        : hint
           ? `${id}-hint`
           : undefined,
     }
@@ -435,7 +463,34 @@ export default function AdminEditor({
               ref={formRef}
               onSubmit={submit}
               onChange={() => setDirty(true)}
+              onInvalidCapture={event => {
+                const field = event.target as HTMLInputElement
+                if (product && field.closest("[hidden]")) {
+                  event.preventDefault()
+                  setAdvanced(true)
+                  requestAnimationFrame(() => field.focus())
+                }
+              }}
             >
+              {product && <div className="admin-product-guide">
+                <div className="admin-mode-switch" role="group" aria-label="حالت فرم محصول">
+                  <button type="button" aria-pressed={!advanced} disabled={busy} onClick={() => setAdvanced(false)}>حالت ساده</button>
+                  <button type="button" aria-pressed={advanced} disabled={busy} onClick={() => setAdvanced(true)}>حالت پیشرفته</button>
+                </div>
+                <p>{advanced ? "همه مشخصات محصول در دسترس است. تغییر حالت، اطلاعات واردشده را پاک نمی‌کند." : record
+                  ? "مشخصات اصلی را ویرایش کنید؛ تنظیمات دیگر بدون تغییر باقی می‌مانند."
+                  : "برای شروع، نام و دسته را وارد کنید. شناسه‌ها خودکار ساخته می‌شوند؛ قیمت و موجودی از صفر شروع می‌کنند."}</p>
+                <details>
+                  <summary>راهنمای افزودن محصول</summary>
+                  <ol>
+                    <li>نام و دسته ضروری‌اند؛ جزئیات نامعلوم قهوه را خالی بگذارید.</li>
+                    <li>مبالغ به ریال ذخیره می‌شوند، نه تومان. فروش آنلاین فعلاً غیرفعال است.</li>
+                    <li>با گزینه «فعال / قابل نمایش» مشخص کنید محصول در سایت دیده شود یا نه.</li>
+                    <li>پس از ذخیره، تصویر را از بخش «تصاویر محصولات» اضافه کنید. محصول بدون عکس با طرح بسته‌بندی پَل نمایش داده می‌شود.</li>
+                    <li>برای توضیحات مفصل، تاریخ رست، تنظیمات آسیاب یا تغییر شناسه‌ها، حالت پیشرفته را باز کنید.</li>
+                  </ol>
+                </details>
+              </div>}
               <fieldset
                 disabled={
                   busy || (resource.key === "customers" && !!record?.is_staff)
@@ -445,15 +500,16 @@ export default function AdminEditor({
                 {resource.fields?.map((field) => (
                   <div
                     key={field.key}
+                    hidden={product && !advanced && !EASY_PRODUCT_FIELDS.has(field.key)}
                     className={`admin-field ${["textarea", "multi"].includes(field.type ?? "") ? "wide" : ""}`}
                   >
                     {input(field)}
-                    {field.hint && (
+                    {(product ? PRODUCT_HELP[field.key] ?? field.hint : field.hint) && (
                       <p
                         id={`admin-field-${field.key}-hint`}
                         className="admin-field-hint"
                       >
-                        {field.hint}
+                        {product ? PRODUCT_HELP[field.key] ?? field.hint : field.hint}
                       </p>
                     )}
                     {errors[field.key] && (
