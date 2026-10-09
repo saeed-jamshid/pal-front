@@ -1015,6 +1015,49 @@ body { background: var(--surface-100); color: var(--ink); }
 .footer-links a, .footer-contact a { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; text-underline-offset: 4px; }
 .footer-links a:hover, .footer-contact a:hover { text-decoration: underline; }
 .footer-contact { display: grid; }
+
+/* Vira credit stays secondary to PAL; dialog shares the Kahgel palette. */
+.vira-credit { display: inline-flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 14px; border: 1px solid color-mix(in srgb, var(--on-roast) 24%, transparent); border-radius: 8px; text-align: start; transition: background 180ms, border-color 180ms; }
+.vira-credit:hover { background: color-mix(in srgb, var(--on-roast) 8%, transparent); border-color: var(--saffron); }
+.vira-credit small, .vira-credit strong { display: block; }
+.vira-credit small { font-size: 12px; color: var(--on-roast); opacity: .8; }
+.vira-credit strong { font-size: 14px; font-weight: 600; }
+.vira-credit > svg { color: var(--saffron); }
+.vira-mark { display: block; width: 44px; height: 32px; background: var(--on-roast); mask: url('/brand/vira-mark.png') center / contain no-repeat; }
+.vira-credit:focus-visible { outline: 2px solid var(--saffron); outline-offset: 4px; }
+.vira-overlay[data-slot="dialog-overlay"] { z-index: 80; background: color-mix(in srgb, var(--roast) 65%, transparent); animation: vira-backdrop-in 220ms ease-out; }
+.vira-dialog { position: fixed; inset: 50% auto auto 50%; z-index: 81; transform: translate(-50%, -50%); display: grid; width: min(680px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; background: var(--surface-100); color: var(--ink); border: 1px solid var(--hairline); border-radius: 16px; box-shadow: 0 24px 80px #0005; outline: none; animation: vira-card-in 280ms cubic-bezier(.2,.8,.2,1); }
+.vira-close { position: absolute; inset: 12px 12px auto auto; z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; color: var(--on-cistern); background: color-mix(in srgb, var(--roast) 24%, transparent); border: 1px solid color-mix(in srgb, var(--on-cistern) 40%, transparent); border-radius: 50%; }
+.vira-close:hover { background: var(--roast); }
+.vira-close:focus-visible { outline: 2px solid var(--saffron); outline-offset: 3px; }
+.vira-brand-panel { display: grid; justify-items: center; align-content: center; gap: 16px; padding: 52px 24px 24px; background: var(--cistern); color: var(--on-cistern); background-image: radial-gradient(ellipse at 0 100%, color-mix(in srgb, var(--saffron) 25%, transparent), transparent 70%); }
+.vira-logo { display: block; width: 132px; aspect-ratio: 611 / 666; background: var(--on-cistern); mask: url('/brand/vira-logo.png') center / contain no-repeat; }
+.vira-brand-caption { font-size: 12px; letter-spacing: .24em; color: var(--on-cistern); }
+.vira-contact-panel { padding: 24px; }
+.vira-eyebrow { font-size: 12px; font-weight: 700; color: var(--cistern); margin-bottom: 6px; }
+.vira-title { font-family: var(--font-fa-display); font-size: 30px; line-height: 1.4; }
+.vira-description { font-size: 14px; line-height: 1.9; color: var(--ink-muted); margin-top: 8px; }
+.vira-contact-list { display: grid; gap: 10px; margin-top: 24px; }
+.vira-contact-list a { display: flex; align-items: center; gap: 12px; padding: 12px; min-height: 72px; border: 1px solid var(--hairline); border-radius: 8px; background: color-mix(in srgb, var(--surface-200) 50%, transparent); transition: background 180ms, border-color 180ms; }
+.vira-contact-list a:hover { background: var(--surface-200); border-color: var(--cistern); }
+.vira-contact-list a:focus-visible { outline: 2px solid var(--cistern); outline-offset: 3px; }
+.vira-contact-icon { display: grid; place-items: center; flex: none; width: 42px; height: 42px; border-radius: 50%; background: var(--cistern); color: var(--on-cistern); }
+.vira-contact-text { min-width: 0; flex: 1; display: grid; gap: 3px; }
+.vira-contact-text > span { font-size: 12px; color: var(--ink-muted); }
+.vira-contact-text strong { font-family: var(--font-body); font-size: 14px; font-weight: 600; text-align: start; overflow-wrap: anywhere; }
+.vira-contact-list a > svg { flex: none; color: var(--cistern); }
+.vira-contact-note { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--hairline); font-size: 12px; color: var(--ink-muted); }
+.vira-dialog[role="dialog"][data-state="open"] { animation: vira-card-in 280ms cubic-bezier(.2,.8,.2,1); }
+.vira-dialog[role="dialog"][data-state="closed"] { animation: vira-card-out 160ms ease-in forwards; }
+.vira-overlay[data-state="closed"] { animation: vira-backdrop-out 160ms ease-in forwards; }
+@keyframes vira-card-in { from { opacity: 0; transform: translate(-50%, calc(-50% + 16px)) scale(.96); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes vira-card-out { to { opacity: 0; transform: translate(-50%, calc(-50% + 8px)) scale(.98); } }
+@keyframes vira-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes vira-backdrop-out { to { opacity: 0; } }
+@media (min-width: 640px) { .vira-dialog { grid-template-columns: 220px 1fr; } .vira-brand-panel { padding: 48px 24px; } .vira-logo { width: 160px; } .vira-contact-panel { padding: 32px; } }
+@media (max-width: 639px) { .vira-brand-panel { gap: 10px; } .vira-logo { width: 96px; } }
+@media (prefers-reduced-motion: reduce) { .vira-dialog, .vira-overlay[data-slot="dialog-overlay"] { animation: none; } .vira-credit, .vira-contact-list a { transition: none; } }
+
 .footer-contact svg { flex: none; color: var(--saffron); }
 .site-footer a:focus-visible { outline: 2px solid var(--on-roast); outline-offset: 2px; }
 @media (min-width: 761px) { .footer-grid { grid-template-columns: 1.2fr 1fr 1fr; align-items: start; } }
