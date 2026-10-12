@@ -77,7 +77,7 @@ function LoginForm() {
 
   return (
     <div className="ed-shell max-w-xl pt-28 pb-24">
-      <p className="latin-name text-sm text-(--brick)">PAL Coffee</p>
+      <p className="latin-name text-sm text-(--cistern)">PAL Coffee</p>
       <h1 className="fa-h1 mt-3">{staff ? "ورود مدیریت پَل" : "ورود یا ساخت حساب"}</h1>
       <p className="lead mt-4 border-b border-(--outline) pb-6">
         {staff ? "با شمارهٔ موبایل و رمز عبور حساب مدیریت وارد شوید." : step === "phone"

@@ -1,6 +1,6 @@
 # Friday event launch plan — working status, 30 September 2026
 
-**Worktree only:** frontend/backend implementation in progress; no production deployment or payment activation. Existing worktree changes preserved. Source of truth for visual rules: [`DESIGN.md`](../DESIGN.md).
+**Worktree only:** frontend/backend implementation in progress; no production deployment or payment activation. Existing worktree changes preserved. Source of truth for visual rules: [current design.md](../design.md).
 
 ## Current state and decisions needed
 

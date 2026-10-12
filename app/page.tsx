@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import EventArtwork from "@/components/event/EventArtwork"
 import ProductCard from "@/components/shop/ProductCard"
 import PalStory from "@/components/landing/PalStory"
 import {
@@ -43,17 +42,17 @@ export default function HomePage() {
     next?.title ?? (eventError || (events ? "به‌زودی" : "در حال دریافت…"))
 
   return (
-    <main className="min-h-screen bg-(--surface-100) pt-20 text-(--ink)">
+    <main className="industrial-home min-h-screen pt-20 text-(--ink)">
       {/* Hero */}
-      <section aria-labelledby="hero-title" className="ed-shell hero-section">
-        <div className="hero-layout">
+      <section aria-labelledby="hero-title" className="industrial-hero">
+        <div className="ed-shell hero-section hero-layout">
           <div className="hero-intro">
-            <p className="text-sm font-bold text-(--brick)">پَل در بیرجند · قهوه و دورهمی</p>
+            <p className="hero-eyebrow">پَل در بیرجند · قهوه و دورهمی</p>
             <h1 id="hero-title" className="fa-hero mt-3">قهوه‌های پَل</h1>
             <p className="lead mt-4">قهوه برای خانه؛ دورهمی برای کنار هم بودن.</p>
           </div>
-          <div className="hero-art">
-            <EventArtwork variant="landing" />
+          <div className="hero-art hero-lockup">
+            <Image src="/brand/new-design/svg/logo-lockup.svg" alt="پَل، برشته‌کاری قهوه" width={310} height={440} priority />
           </div>
           <div className="hero-actions">
             <div className="flex flex-wrap gap-3">
@@ -74,9 +73,12 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <div className="brand-strip" dir="ltr" aria-hidden="true">
+        <span>PAL COFFEE ROASTERY</span><span>COFFEE & COMMUNITY</span><span>BIRJAND</span>
+      </div>
 
       {/* Coffees */}
-      <section aria-labelledby="coffees-title" className="ed-shell section pt-0">
+      <section aria-labelledby="coffees-title" className="ed-shell section home-coffees">
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-(--outline) pb-4">
           <h2 id="coffees-title" className="fa-h1">
             قهوه‌های این فصل

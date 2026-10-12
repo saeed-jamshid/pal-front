@@ -1,6 +1,48 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { CATEGORY_LABELS, inCategory, toProduct, toCartItem, toOrder, formatPrice, fetchPages, splitDescription } from "./shop"
+import { CATEGORY_LABELS, inCategory, toProduct, toCartItem, toOrder, formatPrice, fetchPages, fetchProduct, preloadProduct, splitDescription } from "./shop"
+
+test("product intent preload is reused once, expires, and recovers after failure", async () => {
+  const originalFetch = globalThis.fetch, originalNow = Date.now
+  const calls = new Map<string, number>()
+  let now = 1000, fail = false
+  Date.now = () => now
+  globalThis.fetch = async input => {
+    const path = String(input)
+    if (path.endsWith("/categories/")) return new Response("[]")
+    const slug = path.split("/").at(-2)!
+    calls.set(slug, (calls.get(slug) ?? 0) + 1)
+    return new Response(JSON.stringify(fail ? { detail: "unavailable" } : { id: 1, slug, name: slug }), { status: fail ? 503 : 200 })
+  }
+  try {
+    preloadProduct("warm")
+    preloadProduct("warm")
+    assert.equal((await fetchProduct("warm")).slug, "warm")
+    assert.equal(calls.get("warm"), 1, "pending hover/focus/click share one request")
+    await fetchProduct("warm")
+    assert.equal(calls.get("warm"), 2, "consumed preload does not become a stale cache")
+    preloadProduct("expired")
+    now += 30_001
+    await fetchProduct("expired")
+    assert.equal(calls.get("expired"), 2, "expired speculation is refetched")
+    fail = true
+    preloadProduct("retry")
+    await new Promise(resolve => setTimeout(resolve, 0))
+    fail = false
+    assert.equal((await fetchProduct("retry")).slug, "retry")
+    assert.equal(calls.get("retry"), 2, "failed preload does not poison navigation")
+    fail = true
+    preloadProduct("old-failure")
+    fail = false
+    preloadProduct("new-intent")
+    await new Promise(resolve => setTimeout(resolve, 0))
+    await fetchProduct("new-intent")
+    assert.equal(calls.get("new-intent"), 1, "old rejection does not discard a newer intent")
+  } finally {
+    globalThis.fetch = originalFetch
+    Date.now = originalNow
+  }
+})
 
 test("category labels change without moving existing groups or URLs", () => {
   assert.deepEqual(Object.entries(CATEGORY_LABELS), [

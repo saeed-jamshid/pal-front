@@ -1,6 +1,6 @@
 # palCoffee — New Catalog Plan (v2)
 
-Goal: catalog with 3 product tiers, cart + order tracking, and a blog. Persian RTL; visual direction is `DESIGN.md` (cream editorial Pal Coffee Press).
+Historical catalog plan; sales and UI descriptions below are not the current release contract. Current visual rules: [design.md](../design.md). Current flows: [flows.md](flows.md).
 
 ## 1. Data Model
 
@@ -82,7 +82,7 @@ interface BlogPost {
 ## 3. UI Direction (ui-ux-pro-max: premium e-commerce)
 
 - **Style**: warm editorial grids and bold Persian typography, shared with home page.
-- **Palette**: cream `#FFF9F0`, espresso `#280000`, terracotta `#9F3422`; see `DESIGN.md`.
+- **Palette**: cream `#FFF9F0`, espresso `#280000`, terracotta `#9F3422`; historical palette only; public pages now follow [design.md](../design.md).
 - **Typography**: Vazirmatn (body, RTL) + existing display font for headings — keep, don't add Google fonts
 - **Sensory profile**: horizontal bars (acidity/sweetness/bitterness/body), no chart lib needed
 - **Brew-device theme**: accent color + background tint per device (espresso=dark amber, v60=bright, etc.) via CSS var swap on the product page

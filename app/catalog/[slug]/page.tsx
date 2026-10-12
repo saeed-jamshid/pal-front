@@ -5,7 +5,6 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Suspense, use, useEffect, useState } from "react"
-import CoffeeArt from "@/components/shop/CoffeeArt"
 import { nameLines } from "@/components/shop/ProductCard"
 import {
   fetchProduct,
@@ -43,14 +42,16 @@ function Skeleton() {
 
 function ProductPageContent({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
-  const [product, setProduct] = useState<Product | null>(null)
-  const [error, setError] = useState("")
+  const [loaded, setLoaded] = useState<{ slug: string; value: Product | Error }>()
+  const result = loaded?.slug === slug ? loaded.value : null
+  const product = result && !(result instanceof Error) ? result : null
+  const error = result instanceof Error ? result.message : ""
 
   useEffect(() => {
     let alive = true
     fetchProduct(slug)
-      .then((p) => alive && setProduct(p))
-      .catch(() => alive && setError("این قهوه پیدا نشد یا اطلاعاتش در دسترس نیست."))
+      .then((p) => alive && setLoaded({ slug, value: p }))
+      .catch(() => alive && setLoaded({ slug, value: new Error("این قهوه پیدا نشد یا اطلاعاتش در دسترس نیست.") }))
     return () => {
       alive = false
     }
@@ -77,20 +78,18 @@ function ProductPageContent({ params }: { params: Promise<{ slug: string }> }) {
   ].filter(([, v]) => v) as [string, string][]).entries())
 
   return (
-    <article className="grid items-start gap-10 min-[1001px]:grid-cols-2">
-      <div className="arch relative grid aspect-square place-items-center">
-        {product.image ? (
+    <article key={slug} className="product-detail grid items-start gap-10 min-[1001px]:grid-cols-2">
+      <div>
+        <div className="product-art arch relative grid aspect-square place-items-center">
           <Image
-            src={product.image}
-            alt={product.title}
+            src={product.image || "/brand/new-design/images/coffee-bag-1600.webp"}
+            alt={product.image ? product.title : "طرح بسته‌بندی پَل"}
             fill
             priority
-            sizes="(max-width: 1000px) 100vw, 50vw"
-            className="object-contain p-[15%]"
+            sizes="(max-width: 1000px) 90vw, 45vw"
+            className="object-contain"
           />
-        ) : (
-          <CoffeeArt product={product} className="w-[90%]" />
-        )}
+        </div>
       </div>
 
       <div className="grid gap-6">
@@ -102,7 +101,7 @@ function ProductPageContent({ params }: { params: Promise<{ slug: string }> }) {
             <span className="text-sm text-(--ink-muted)"> / {product.categoryName}</span>
           )}
         </nav>
-        <h1 className="latin-name text-[clamp(28px,4vw,44px)] leading-[1.1]">
+        <h1 dir="auto" className="product-name text-[clamp(28px,4vw,44px)] leading-[1.4] font-extrabold">
           {first}
           {second && (
             <>

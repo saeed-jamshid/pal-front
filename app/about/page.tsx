@@ -7,7 +7,7 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen bg-(--surface-100) pt-24 text-(--ink)">
       <div className="ed-shell section">
-        <p className="text-sm font-bold text-(--brick)">پَل · بیرجند</p>
+        <p className="hero-eyebrow">پَل · بیرجند</p>
         <h1 className="fa-h1 mt-2 border-b border-(--outline) pb-6">دربارهٔ ما</h1>
         <div className="mt-8 grid items-center gap-10 min-[1001px]:grid-cols-[2fr_3fr]">
           <div className="max-w-xl">

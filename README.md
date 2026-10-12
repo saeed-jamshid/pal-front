@@ -4,7 +4,7 @@ Persian-first Next.js 16 **coffee store + events**. Unified Django backend: `../
 
 - [Current integration docs](docs/README.md): API, flows, setup and test evidence.
 - [CI/CD and recovery](docs/deployment.md): GitHub Actions, standalone releases, PM2 and deployment gates.
-- [Existing visual rules](DESIGN.md): retained until user approves redesign.
+- [Current visual rules](design.md): approved navy/sky redesign from `newDesign/`; warm admin palette retained.
 - [Historical event launch plan](docs/friday-event-launch-plan.md): old standalone API assumptions no longer apply.
 
 ```sh
@@ -21,6 +21,6 @@ bun run build
 
 Local backend/API/admin: `http://127.0.0.1:8081`; frontend: `http://localhost:3005`. `.env.local`: empty `NEXT_PUBLIC_API_BASE_URL` + server-only `PAL_BACKEND_URL=http://127.0.0.1:8081`. Next proxy preserves Django trailing slashes and POST bodies. Production requires explicit backend proxy configuration and rebuild.
 
-`/catalog` → `/cart` → address/checkout → `/orders/{number}` → card-to-card receipt/manual review. `/submit` lists backend events; paid registration needs card + receipt, free registration auto-confirms. `/login` shared OTP. `/submit/status/{uuid}` requires owner/staff login; identifier alone grants no access. `/dashboard` staff-only registration review, same account/token system. Real Saman/Bale payment activation remains separate release gate.
+`/catalog` lists coffees and their details. Store sales remain disabled; `/cart` and `/orders` redirect to `/catalog`. `/submit` lists backend events; paid registration needs card + receipt, free registration auto-confirms. `/login` shared OTP. `/submit/status/{uuid}` requires owner/staff login; identifier alone grants no access. `/dashboard` staff-only registration review, same account/token system. Real Saman/Bale payment activation remains separate release gate.
 
-Local SMS prints console codes; mock gateway and dummy demo card are **not real payment**. Never transfer money to demo card. No production deployment/payment or visual redesign performed. Existing unrelated worktree changes retained.
+Local SMS prints console codes; mock gateway and dummy demo card are **not real payment**. Never transfer money to demo card. Public visual redesign is local-only; no production deployment or payment activation. Existing unrelated worktree changes retained.

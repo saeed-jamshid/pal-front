@@ -271,7 +271,23 @@ export async function fetchProducts(
   ])
   return data.map((r) => toProduct(r, categories))
 }
+// One intent slot, consumed by navigation; never a persistent catalog cache.
+let productPreload: { slug: string; expires: number; promise: Promise<Product> } | undefined
+
+export function preloadProduct(slug: string) {
+  if (productPreload?.slug === slug && productPreload.expires > Date.now()) return
+  const entry = { slug, expires: Date.now() + 30_000, promise: fetchProduct(slug) }
+  productPreload = entry
+  // Failed speculation must not become an unhandled rejection or poison a click.
+  void entry.promise.catch(() => { if (productPreload === entry) productPreload = undefined })
+}
+
 export async function fetchProduct(slug: string): Promise<Product> {
+  const preload = productPreload
+  if (preload?.slug === slug) {
+    productPreload = undefined
+    if (preload.expires > Date.now()) return preload.promise
+  }
   const [product, categories] = await Promise.all([
     api.get(`/products/${encodeURIComponent(slug)}/`),
     fetchCategories(),

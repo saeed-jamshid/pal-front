@@ -21,7 +21,7 @@ export default function Gallery() {
   return (
     <main className="min-h-screen bg-(--surface-100) text-(--ink)">
       <div className="ed-shell pt-28 pb-20">
-        <p className="text-sm font-semibold text-(--brick)">از دورهمی‌های قبلی پَل</p>
+        <p className="hero-eyebrow">از دورهمی‌های قبلی پَل</p>
         <div className="mt-4 flex flex-wrap items-end justify-between gap-5 border-b border-(--outline) pb-6">
           <h1 className="fa-h1">چند قاب از کنار هم بودن</h1>
           <Link href="/submit" className="min-h-11 content-center text-sm underline underline-offset-4">رویدادهای پَل</Link>

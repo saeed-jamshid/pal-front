@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>PAL · گربه و قهوه</title>
 <style>
-:root{ --paper:#efe3cf; color-scheme:light; }
+:root{ --paper:#f1f1f2; color-scheme:light; }
 *,*::before,*::after{ box-sizing:border-box; }
 html,body{ margin:0; width:100%; height:100%; background:var(--paper); }
 body{ display:grid; place-items:center; }
 .card{ display:block; width:100%; padding:0; border:0; background:transparent; cursor:pointer; overflow:hidden; }
-.card:focus-visible{ outline:2px solid #2a6461; outline-offset:-3px; }
+.card:focus-visible{ outline:2px solid #2e3191; outline-offset:-3px; }
 svg{ display:block; width:100%; height:auto; shape-rendering:geometricPrecision; }
 
 /* one-shot entrance, same vocabulary as the landing scene */
@@ -79,6 +79,20 @@ body.paused *,body.offscreen *,body.static *{ animation-play-state:paused !impor
   .zz{ animation:none; opacity:1; }
   .head{ transition:none; }
 }
+/* Public navy/sky palette; scene geometry and interaction remain unchanged. */
+[fill="#fffdf9"], [fill="#f8f3eb"] { fill:#f1f1f2; }
+[fill="#dcc8a4"], [fill="#c7bcad"] { fill:#dcecf5; }
+[fill="#1c1512"], [fill="#54201c"], [fill="#4a2618"], [fill="#6b3a24"], [fill="#7a3b22"] { fill:#2e3191; }
+[fill="#a23a24"] { fill:#2e3191; }
+[fill="#ff8030"], [fill="#f0a860"], [fill="#c98b4e"] { fill:#ee9141; }
+[fill="#bebd8e"], [fill="#a9ad72"], [fill="#c9c79a"] { fill:#93caed; }
+[stroke="#1c1512"], [stroke="#54201c"], [stroke="#6b6532"], [stroke="#a23a24"] { stroke:#2e3191; }
+[stroke="#6fa99b"], [stroke="#c7bcad"] { stroke:#93caed; }
+[stroke="#efe3cf"], [stroke="#f8f3eb"] { stroke:#f1f1f2; }
+[stroke="#ff8030"] { stroke:#ee9141; }
+[stop-color="#ffc47e"] { stop-color:#93caed; }
+[stop-color="#ffdcb0"] { stop-color:#dcecf5; }
+[stop-color="#fffdf9"] { stop-color:#f1f1f2; }
 </style>
 </head>
 <body>
@@ -238,7 +252,7 @@ body.paused *,body.offscreen *,body.static *{ animation-play-state:paused !impor
 (function(){
   const NS='http://www.w3.org/2000/svg';
   const art=document.getElementById('art'), card=document.getElementById('card');
-  const C={ ink:'#1c1512', terra:'#a23a24', orange:'#ff8030', olive:'#6b6532', sage:'#bebd8e', stone:'#c7bcad' };
+  const C={ ink:'#2e3191', terra:'#2e3191', orange:'#ee9141', olive:'#555778', sage:'#93caed', stone:'#dcecf5' };
   function el(tag,attrs,parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
   let seed=11;
   function rnd(){ seed=(seed*16807)%2147483647; return (seed-1)/2147483646; }

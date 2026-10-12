@@ -21,7 +21,7 @@ export default function Footer() {
       <div className="ed-shell footer-compact">
         <div className="footer-grid">
           <div>
-            <span className="font-(family-name:--font-display) text-[28px] leading-none font-extrabold" dir="ltr">PAL</span>
+            <span className="footer-logo" role="img" aria-label="پَل، برشته‌کاری قهوه" />
             <p className="mt-2 text-sm opacity-80">قهوه و دورهمی در بیرجند</p>
           </div>
           <nav aria-label="پیوندهای پَل" className="footer-links">
@@ -43,10 +43,10 @@ export default function Footer() {
           <ViraContact />
           <a referrerPolicy="origin" target="_blank" rel="noopener"
             href="https://trustseal.enamad.ir/?id=8054802&Code=TBHSRCM6WIwIhBy88yaDKGyR66p06qAj"
-            aria-label="بررسی نماد اعتماد الکترونیکی پَل" className="inline-flex rounded-(--radius-sm) bg-white p-2 text-(--ink)">
+            aria-label="بررسی نماد اعتماد الکترونیکی پَل" className="inline-flex w-8 h-8 items-center justify-center rounded-(--radius-sm) bg-white p-2 text-(--ink)">
             {/* eslint-disable-next-line @next/next/no-img-element -- Enamad requires its own live seal URL and origin referrer. */}
             <img referrerPolicy="origin" src="https://trustseal.enamad.ir/logo.aspx?id=8054802&Code=TBHSRCM6WIwIhBy88yaDKGyR66p06qAj"
-              alt="نماد اعتماد الکترونیکی پَل" width={125} height={136} loading="lazy" style={{ cursor: "pointer" }}
+              alt="نماد اعتماد الکترونیکی پَل" width={125} height={136} loading="lazy" className="h-4 w-4 object-contain" style={{ cursor: "pointer" }}
               {...{ code: "TBHSRCM6WIwIhBy88yaDKGyR66p06qAj" }} />
           </a>
         </div>

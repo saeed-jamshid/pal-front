@@ -59,3 +59,18 @@ pm2 save
 Latest deployed frontend81047a3, successful CI/CD run37351058232 attempt2. Local setup clone under ~/.local/state/vinext-pal-setup/pal-front-release is not a production dependency. Scripts are versioned in this repo and copied to VPS releases; original dirty checkout was not overwritten.
 
 Run isolated deployment checks with `bash scripts/test-deploy-front.sh`; no live services are touched.
+
+## Navy/sky redesign release checkpoint (12 October 2026)
+
+Local release preparation passed: 17 unit tests, typecheck, lint (7 existing unused-disable warnings), production build, and isolated deployment/rollback/backend-gate checks. A fresh standalone package with `public` and `.next/static`, no `.env*` files and hydrated LFS assets passed 190 redesign, 60 navigation/prefetch, 16 mocked editor and 30 Vira dialog browser checks. Local standalone API proxy returned all 8 seeded coffees. Evidence: `/tmp/pal-release-*.log` and `/tmp/pal-release-{redesign,navigation,editor,vira}/` on the preparation machine, not production acceptance.
+
+Before publishing:
+
+- Push to `origin/main` only with deployment approval: the current workflow may activate production automatically when `DEPLOY_ENABLED=true`. A local commit does not trigger it.
+- Verify current GitHub production variables, SSH host key and backend health; do not assume historical settings above are still current. Build must use the production loopback backend URL, not local `8081`.
+- Watch CI artifact/activation checks. Confirm public homepage, catalog, detail navigation, image URLs, phone menu, registration access and unchanged warm admin after activation. Third-party Enamad availability needs a live check; its image is now 1rem square with a 44px link target.
+- Local seed populated only the local DB. Do not seed/overwrite production content automatically; review any production content import separately. Keep sales and public OTP gates unchanged.
+- Keep previous release available for rollback. No production deployment, credential verification, live SMS or payment acceptance was performed during this checkpoint.
+- An existing Git remote contains an embedded credential. Rotate it and switch that remote to credential-free authentication before using it. Never copy the remote URL into release logs or docs.
+
+Only optimized runtime brand assets are part of this release; large local `newDesign/` reference inputs and agent/MCP setup files are not deployment dependencies.

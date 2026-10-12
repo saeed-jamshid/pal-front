@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname, useRouter } from "next/navigation"
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react"
 import { IconHome, IconCoffee, IconInfoCircle, IconPhoto, IconLogout, IconLogin, IconUser, IconMenu2, IconX } from "@tabler/icons-react"
@@ -54,7 +55,10 @@ function Header({ path }: { path: string }) {
   return (
     <header className="public-navigation">
       <div className="navigation-shell ed-shell">
-        <Link href="/" className="nav-brand" aria-label="پَل، خانه" dir="ltr">PAL</Link>
+        <Link href="/" className="nav-brand" aria-label="پَل، خانه" dir="ltr">
+          <Image src="/brand/new-design/svg/logo-mark.svg" alt="" width={32} height={48} className="nav-logo-mark" priority />
+          <Image src="/brand/new-design/svg/wordmark.svg" alt="" width={60} height={48} className="nav-wordmark" priority />
+        </Link>
         <nav className="desktop-nav" aria-label="ناوبری دسکتاپ">
           {NAV.map(({ href, label }) => <Link key={href} href={href} aria-current={current(href)}>{label}</Link>)}
         </nav>

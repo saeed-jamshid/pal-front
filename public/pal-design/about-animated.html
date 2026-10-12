@@ -6,7 +6,7 @@
 <title>PAL · درباره ما</title>
 <style>
 :root{
-  --paper:#efe3cf;
+  --paper:#f1f1f2;
   color-scheme:light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -16,7 +16,7 @@ html{ scroll-padding-top:env(safe-area-inset-top,0px); }
 *,*::before,*::after{ box-sizing:inherit; }
 html,body{ margin:0; height:100%; }
 body{ background:var(--paper); display:grid; place-items:center; padding:0; }
-button:focus-visible{ outline:2px solid #2a6461; outline-offset:-3px; }
+button:focus-visible{ outline:2px solid #2e3191; outline-offset:-3px; }
 body.motion-paused *, body.motion-static * { animation-play-state:paused !important; }
 .card{ display:block; width:100%; background:var(--paper); border:0; padding:0; cursor:pointer; overflow:hidden; }
 svg{ display:block; width:100%; height:auto; }
@@ -75,6 +75,20 @@ body.motion-static *, body.motion-paused *{animation-play-state:paused !importan
 .zz{ opacity:0; animation:zz 3s ease-in-out 1; }
 @keyframes zz{ 0%{ opacity:0; transform:translate(0,4px); } 30%{ opacity:1; } 100%{ opacity:0; transform:translate(6px,-10px); } }
 @media (prefers-reduced-motion: reduce){ .zz{ animation:none; opacity:1; } }
+/* Public navy/sky palette; scene geometry and interaction remain unchanged. */
+[fill="#fffdf9"], [fill="#f8f3eb"] { fill:#f1f1f2; }
+[fill="#dcc8a4"], [fill="#c7bcad"] { fill:#dcecf5; }
+[fill="#1c1512"], [fill="#54201c"], [fill="#4a2618"], [fill="#6b3a24"], [fill="#7a3b22"] { fill:#2e3191; }
+[fill="#a23a24"] { fill:#2e3191; }
+[fill="#ff8030"], [fill="#f0a860"], [fill="#c98b4e"] { fill:#ee9141; }
+[fill="#bebd8e"], [fill="#a9ad72"], [fill="#c9c79a"] { fill:#93caed; }
+[stroke="#1c1512"], [stroke="#54201c"], [stroke="#6b6532"], [stroke="#a23a24"] { stroke:#2e3191; }
+[stroke="#6fa99b"], [stroke="#c7bcad"] { stroke:#93caed; }
+[stroke="#efe3cf"], [stroke="#f8f3eb"] { stroke:#f1f1f2; }
+[stroke="#ff8030"] { stroke:#ee9141; }
+[stop-color="#ffc47e"] { stop-color:#93caed; }
+[stop-color="#ffdcb0"] { stop-color:#dcecf5; }
+[stop-color="#fffdf9"] { stop-color:#f1f1f2; }
 </style>
 </head>
 <body>
@@ -299,7 +313,7 @@ body.motion-static *, body.motion-paused *{animation-play-state:paused !importan
 <script>
 (function(){
   const NS='http://www.w3.org/2000/svg';
-  const C={ ink:'#1c1512', terra:'#a23a24', orange:'#ff8030', olive:'#6b6532', sage:'#bebd8e', stone:'#c7bcad' };
+  const C={ ink:'#2e3191', terra:'#2e3191', orange:'#ee9141', olive:'#555778', sage:'#93caed', stone:'#dcecf5' };
   function el(tag,attrs,parent){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(parent) parent.appendChild(e); return e; }
   let seedState=7;
   function rnd(){ seedState=(seedState*16807)%2147483647; return (seedState-1)/2147483646; }
