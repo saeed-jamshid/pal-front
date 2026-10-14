@@ -49,7 +49,7 @@ export default function HomePage() {
           <div className="hero-intro">
             <p className="hero-eyebrow">پَل در بیرجند · قهوه و دورهمی</p>
             <h1 id="hero-title" className="fa-hero mt-3">قهوه‌های پَل</h1>
-            <p className="lead mt-4">قهوه برای خانه؛ دورهمی برای کنار هم بودن.</p>
+            <p className="lead mt-4">قهوه‌ای برای هر روز، بهانه‌ای برای باهم بودن.</p>
           </div>
           <div className="hero-art hero-lockup">
             <Image src="/brand/new-design/svg/logo-lockup.svg" alt="پَل، برشته‌کاری قهوه" width={310} height={440} priority />

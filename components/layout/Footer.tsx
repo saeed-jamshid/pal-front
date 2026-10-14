@@ -22,7 +22,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div>
             <span className="footer-logo" role="img" aria-label="پَل، برشته‌کاری قهوه" />
-            <p className="mt-2 text-sm opacity-80">قهوه و دورهمی در بیرجند</p>
+            <p className="mt-2 text-sm opacity-80">پل یعنی دوستی</p>
           </div>
           <nav aria-label="پیوندهای پَل" className="footer-links">
             {LINKS.map(({ href, label }) => <Link key={href} href={href}>{label}</Link>)}
