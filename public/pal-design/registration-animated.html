@@ -58,6 +58,11 @@ svg{ display:block; width:100%; height:auto; shape-rendering:geometricPrecision;
 
 /* cat moods: tap reacts, pointer is watched, idle cat dozes off */
 .m,.heart{ display:none; }
+[data-mood=sad] .m-sad{ display:inline; }
+[data-status=pending] .tail,[data-status=pending] .ear{ animation:none; }
+[data-status=pending] .head{ transform:translateY(7px) rotate(9deg); }
+[data-status=pending] .breath{ animation-duration:5s; }
+[data-status=rejected] .head{ transform:translateY(3px) rotate(-5deg); }
 [data-mood=idle] .m-idle,[data-mood=surprised] .m-surprised,[data-mood=happy] .m-happy,[data-mood=wink] .m-wink,[data-mood=sleepy] .m-sleepy{ display:inline; }
 .blink{ transform-box:fill-box; transform-origin:center; animation:blink 5.2s ease-in-out infinite; }
 @keyframes blink{ 0%,90%,100%{transform:scaleY(1)} 94%{transform:scaleY(.1)} }
@@ -193,7 +198,8 @@ body.paused *,body.offscreen *,body.static *{ animation-play-state:paused !impor
           <g class="m m-surprised"><circle cx="314" cy="310" r="3.2" fill="#1c1512" stroke="none"/><circle cx="346" cy="310" r="3.2" fill="#1c1512" stroke="none"/><ellipse cx="330" cy="331" rx="3" ry="3.8" stroke-width="1.6"/></g>
           <g class="m m-happy"><path d="M308 313 q6 -7 12 0 M340 313 q6 -7 12 0"/><path d="M324 328 q6 6 12 0" stroke-width="1.6"/></g>
           <g class="m m-wink"><path d="M340 313 q6 -7 12 0"/><path d="M325 328 q5 4 10 0" stroke-width="1.6"/></g>
-          <g class="m m-sleepy"><path d="M308 312 h12 M340 312 h12"/></g>
+          <g class="m m-sleepy"><path d="M308 312 q6 4 12 0 M340 312 q6 4 12 0"/></g>
+          <g class="m m-sad"><path d="M308 310 l12 3 M340 313 l12 -3 M325 332 q5 -5 10 0"/></g>
         </g>
         <path d="M327 320 H333 L330 323.5 Z" fill="#a23a24"/>
         <g stroke="#1c1512" stroke-width="1.2" opacity=".55"><path d="M292 316 H276 M293 322 L278 328 M368 316 H384 M367 322 L382 328"/></g>
@@ -299,18 +305,26 @@ body.paused *,body.offscreen *,body.static *{ animation-play-state:paused !impor
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
   const cat=document.getElementById('cat'), head=document.getElementById('head');
   let visible=true, timer=0, sleepTimer=0, taps=0;
-  const done=()=>/success|done|registered/.test(location.hash);
-  const rest=()=>done()?'happy':'idle';
+  const status=()=>['pending','confirmed','rejected'].includes(location.hash.slice(1))?location.hash.slice(1):'';
+  const done=()=>status()==='confirmed'||/success|done|registered/.test(location.hash);
+  const rest=()=>status()==='pending'?'sleepy':status()==='rejected'?'sad':done()?'happy':'idle';
   function mood(m){ art.dataset.mood=m; }
-  function doze(){ clearTimeout(sleepTimer); sleepTimer=setTimeout(()=>{ if(art.dataset.mood===rest()&&!done()) mood('sleepy'); },12000); }
-  function settle(){ mood(rest()); art.classList.toggle('registered',done()); doze(); }
+  function doze(){ clearTimeout(sleepTimer); if(status()) return; sleepTimer=setTimeout(()=>{ if(art.dataset.mood===rest()&&!done()) mood('sleepy'); },12000); }
+  function settle(){
+    art.dataset.status=status(); mood(rest()); art.classList.toggle('registered',done());
+    card.setAttribute('aria-label',status()?'پخش دوبارهٔ تصویر وضعیت ثبت‌نام':'نوازش گربهٔ پَل');
+    art.setAttribute('aria-label',status()==='pending'?'گربهٔ خوابیده؛ در انتظار بررسی':status()==='confirmed'?'گربهٔ خوشحال؛ ثبت‌نام تأیید شده':status()==='rejected'?'گربهٔ ناراحت؛ رسید رد شده':'گربهٔ پَل کنار فنجان قهوه');
+    doze();
+  }
   function react(){
+    if(status()){ art.classList.remove('play'); void art.getBoundingClientRect(); art.classList.add('play'); return; }
     clearTimeout(timer); taps++;
     cat.classList.remove('jump'); void cat.getBoundingClientRect(); if(!motion.matches) cat.classList.add('jump');
     mood('surprised');
     timer=setTimeout(()=>{ mood(taps%2?'happy':'wink'); timer=setTimeout(settle,2200); },650);
   }
   function look(e){
+    if(status()) return;
     if(art.dataset.mood==='sleepy') settle(); else doze();
     if(motion.matches) return;
     const r=art.getBoundingClientRect(), k=r.width/800;
@@ -325,7 +339,10 @@ body.paused *,body.offscreen *,body.static *{ animation-play-state:paused !impor
   card.addEventListener('click',react);
   card.addEventListener('pointermove',look); card.addEventListener('pointerleave',leave);
   motion.addEventListener('change',sync); document.addEventListener('visibilitychange',sync);
-  new IntersectionObserver(([e])=>{ visible=e.isIntersecting; sync(); }).observe(card); sync();
+  const observer=new IntersectionObserver(([e])=>{ visible=e.isIntersecting; sync(); });
+  observer.observe(card); sync();
+  // Parent route entrance can report zero intersection before its fade settles.
+  setTimeout(()=>{ observer.unobserve(card); observer.observe(card); },350);
 })();
 </script>
 </body>

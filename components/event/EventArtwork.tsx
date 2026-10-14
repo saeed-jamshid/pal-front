@@ -16,6 +16,21 @@ const artwork = {
     title: "تصویر متحرک گربهٔ خوشحال پَل کنار فنجان قهوه؛ با انتخاب تصویر گربه واکنش نشان می‌دهد",
     ratio: "aspect-[8/5]",
   },
+  pending: {
+    src: "/pal-design/registration-animated.html#pending",
+    title: "گربهٔ خوابیدهٔ پَل؛ ثبت‌نام در انتظار بررسی",
+    ratio: "aspect-[8/5]",
+  },
+  confirmed: {
+    src: "/pal-design/registration-animated.html#confirmed",
+    title: "گربهٔ خوشحال پَل؛ ثبت‌نام تأیید شده",
+    ratio: "aspect-[8/5]",
+  },
+  rejected: {
+    src: "/pal-design/registration-animated.html#rejected",
+    title: "گربهٔ ناراحت پَل؛ رسید نیاز به بررسی دوباره دارد",
+    ratio: "aspect-[8/5]",
+  },
   about: {
     src: "/pal-design/about-animated.html",
     title: "تصویر متحرک مسیر قهوه از مزرعه تا دورهمی پَل",

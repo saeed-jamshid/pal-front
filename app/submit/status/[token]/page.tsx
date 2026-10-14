@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import EventArtwork from "@/components/event/EventArtwork"
 import { useParams, useRouter } from "next/navigation"
 import { api, errorMessage, isAuthed } from "@/lib/api"
 import {
@@ -63,7 +64,7 @@ export default function RegistrationStatusPage() {
   }
   return (
     <main className="min-h-screen w-full bg-(--surface-100) pt-24 text-(--ink)">
-      <div className="ed-shell section max-w-3xl">
+      <div className="ed-shell section">
         <h1 className="fa-h1 border-b border-(--outline) pb-6">
           پیگیری ثبت‌نام
         </h1>
@@ -73,7 +74,8 @@ export default function RegistrationStatusPage() {
           </p>
         )}
         {data ? (
-          <div className="mt-8 space-y-4 leading-8" role="status">
+          <div className="mt-8 grid items-start gap-8 min-[1001px]:grid-cols-2">
+          <div className="space-y-4 leading-8" role="status">
             <h2 className="fa-h2">{data.event_title}</h2>
             <p>نام: {data.full_name}</p>
             <p className="flex items-center gap-3">
@@ -139,6 +141,10 @@ export default function RegistrationStatusPage() {
               </form>
             )}
           </div>
+          <div className="order-first min-[1001px]:order-last">
+            <EventArtwork key={data.status} variant={data.status} />
+          </div>
+          </div>
         ) : (
           !error && (
             <p className="mt-8" role="status">
@@ -148,9 +154,6 @@ export default function RegistrationStatusPage() {
             </p>
           )
         )}
-        <p className="mt-8 text-sm text-(--ink-muted)">
-          نمایش وضعیت و رسید فقط با ورود صاحب حساب یا مدیر ممکن است.
-        </p>
         <Link
           href="/submit"
           className="mt-4 inline-flex min-h-12 items-center font-bold text-(--cistern) underline underline-offset-4"

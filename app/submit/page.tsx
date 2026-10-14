@@ -26,7 +26,6 @@ export default function Submit() {
   const [events, setEvents] = useState<PalEvent[]>([])
   const [cards, setCards] = useState<BankCard[]>([])
   const [registrations, setRegistrations] = useState<Registration[]>([])
-  const [eventId, setEventId] = useState(0)
   const [cardId, setCardId] = useState(0)
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
@@ -36,8 +35,8 @@ export default function Submit() {
   const [error, setError] = useState("")
   const [result, setResult] = useState<Registration | null>(null)
   const selectedCard = cards.find((c) => c.id === cardId)
-  const selected = events.find((e) => e.id === eventId)
-  const existing = registrations.find((r) => r.event === eventId)
+  const selected = events[0]
+  const existing = registrations.find((r) => r.event === selected?.id)
 
   useEffect(() => {
     let alive = true
@@ -46,7 +45,6 @@ export default function Submit() {
         const list = await fetchEvents()
         if (!alive) return
         setEvents(list)
-        setEventId(list[0]?.id ?? 0)
         const loggedIn = isAuthed()
         setAuthed(loggedIn)
         if (loggedIn) {
@@ -146,9 +144,6 @@ export default function Submit() {
               >
                 پیگیری ثبت‌نام
               </Link>
-              <p className="text-sm text-(--ink-muted)">
-                برای دیدن وضعیت، با همین شماره وارد شوید.
-              </p>
             </div>
             <div className="order-first min-[1001px]:order-last">
               <EventArtwork variant="success" />
@@ -162,24 +157,6 @@ export default function Submit() {
                   <p className="lead">رویداد بعدی به‌زودی اعلام می‌شود.</p>
                 ) : (
                   <>
-                    <label>
-                      رویداد
-                      <select
-                        className={field}
-                        value={eventId}
-                        disabled={busy}
-                        onChange={(e) => {
-                          setEventId(Number(e.target.value))
-                          setCardId(0)
-                        }}
-                      >
-                        {events.map((ev) => (
-                          <option key={ev.id} value={ev.id}>
-                            {ev.title}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
                     {selected && (
                       <div className="my-6 space-y-3">
                         <h2 className="fa-h2">{selected.title}</h2>
@@ -216,7 +193,7 @@ export default function Submit() {
                     ) : (
                       selected && (
                         <form
-                          key={eventId}
+                          key={selected.id}
                           onSubmit={submit}
                           className="space-y-5"
                         >

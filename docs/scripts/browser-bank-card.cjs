@@ -19,14 +19,14 @@ const events = [1, 2].map(id => ({ id, title: id === 1 ? 'رویداد آزما�
     for (const width of [320, 390, 1440]) {
       const context = await browser.newContext({ viewport: { width, height: 1000 }, permissions: ['clipboard-read', 'clipboard-write'] })
       const page = await context.newPage()
-      let emptyCards = false
+      let emptyCards = false, free = false
       page.on('pageerror', e => errors.push(String(e)))
       await page.addInitScript(() => { if (window === window.top && /^https?:\/\/(localhost|127\.0\.0\.1):/.test(location.href)) localStorage.setItem('pal_access_token', 'local-mock') })
       await page.route('**/api/v1/**', route => {
         const req = route.request()
         if (req.method() !== 'GET') { writes++; return route.abort() }
         const p = new URL(req.url()).pathname
-        const body = p === '/api/v1/events/' ? { results: events, next: null }
+        const body = p === '/api/v1/events/' ? { results: free ? [events[1]] : events, next: null }
           : p === '/api/v1/payments/cards/' ? { results: emptyCards ? [] : cards, next: null }
           : p === '/api/v1/auth/me/' ? { id: 1, full_name: 'مهمان آزمایشی', phone_number: '09120000000' }
           : { results: [], next: null }
@@ -64,10 +64,15 @@ const events = [1, 2].map(id => ({ id, title: id === 1 ? 'رویداد آزما�
       await panel.getByRole('button', { name: 'کپی شماره کارت' }).click()
       await panel.getByRole('status').filter({ hasText: 'کپی ممکن نشد' }).waitFor()
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
-      await page.getByLabel('رویداد').selectOption('2')
+      assert.equal(await page.locator('select').count(), 2, 'only slot/card selectors remain')
+      free = true
+      await page.reload()
+      await page.getByRole('heading', { name: 'رویداد رایگان', exact: true }).waitFor()
       assert.equal(await panel.count(), 0)
       assert.equal(await page.getByLabel('رسید پرداخت').count(), 0)
-      await page.getByLabel('رویداد').selectOption('1')
+      free = false
+      await page.reload()
+      await page.getByLabel('کارت مقصد').waitFor()
       assert.equal(await page.getByLabel('کارت مقصد').inputValue(), '')
       assert.equal(await panel.count(), 0)
       emptyCards = true

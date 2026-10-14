@@ -73,6 +73,12 @@ Spacing: 4, 8, 16, 24, 40, 64px. Public max width 1440px; responsive gutters 16â
 - Admin receipts use authenticated blob requests, allow only JPEG/PNG/WebP/PDF preview, and release object URLs on close. No public receipt URLs or automatic approvals.
 - Customer status filtering covers all matching API pages before local pagination because the current backend does not support this filter. Active/inactive filters reuse existing search; move filtering server-side when lists grow.
 
+## Signup and status scenes
+
+- Signup shows the first upcoming event title directly, matching the homepage; no event selector. Slot/card selection and authentication stay unchanged. Remove the two requested account-access helper sentences, not their access checks.
+- Status page reuses the signup SVG scene: pending shows a sleeping cat with closed eyes and drifting sleep marks, confirmed a happy cat with a heart, rejected a sad cat. Status scenes keep their mood on hover/tap; tap only replays entrance. Existing signup petting remains unchanged.
+- Keep sandboxed artwork, navy/sky palette, reduced motion and offscreen pauses. Check all three statuses, receipt resubmission, first-event slot payload and empty-event state on phone/desktop.
+
 ## Verification
 
 Run typecheck, unit tests, lint and production build. Browser-check real rendering with isolated mocked API responses if local backend is unavailable: populated/error/empty catalog, filtering, long titles, product detail, mobile popover/keyboard, gallery dialog, login, event/status states and preserved admin colors. Capture phone/desktop screenshots. Report bugs and fixes separately; no deployment or production mutations.
