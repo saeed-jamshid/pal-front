@@ -59,6 +59,20 @@ Spacing: 4, 8, 16, 24, 40, 64px. Public max width 1440px; responsive gutters 16â
 - Hero lockup enters once on page load: logo fades/rises over 900ms, sky circle scales in over 1000ms, outline ring follows with a 180ms delay. Only transform/opacity animate; no loops or layout shifts. Reduced motion shows the complete artwork immediately.
 - Keep existing finite animations, reduced-motion support and offscreen/hidden-tab pauses in scenes. No new autoplay marquee or motion library.
 
+## Card-to-card payment
+
+- Event signup and order payment share a destination-card panel using existing navy/sky tokens. Show backend bank name, account holder, grouped LTR card number and optional IBAN; never invent banking details.
+- Keep the destination selector and payment/receipt workflow. Show the selected card; reset event card selection when the event changes. Copy buttons use `type="button"`, copy values without spaces, announce success or failure, and leave values selectable for manual copy.
+- Check phone/desktop layout, keyboard copy, destination changes, missing IBAN/cards, free events and denied clipboard access. Sales remain disabled.
+
+## Persian display and admin controls
+
+- User confirmed the event amount problem is extra decimals. Display whole toman with Persian digits and grouping; round only for display. Stored amounts and API payloads remain IRR.
+- User requested both public and admin date/time fixes. Dates use the Persian calendar; admin date selection converts back to Gregorian ISO dates. Time selectors show Persian 24-hour values while preserving seconds in API payloads. Keep public navy/sky and admin warm palettes.
+- Preserve useful Persian validation messages; replace English errors, expired-session, permission, throttling and server failures with Persian guidance.
+- Admin receipts use authenticated blob requests, allow only JPEG/PNG/WebP/PDF preview, and release object URLs on close. No public receipt URLs or automatic approvals.
+- Customer status filtering covers all matching API pages before local pagination because the current backend does not support this filter. Active/inactive filters reuse existing search; move filtering server-side when lists grow.
+
 ## Verification
 
 Run typecheck, unit tests, lint and production build. Browser-check real rendering with isolated mocked API responses if local backend is unavailable: populated/error/empty catalog, filtering, long titles, product detail, mobile popover/keyboard, gallery dialog, login, event/status states and preserved admin colors. Capture phone/desktop screenshots. Report bugs and fixes separately; no deployment or production mutations.
@@ -72,3 +86,11 @@ Run typecheck, unit tests, lint and production build. Browser-check real renderi
 - Screenshots and report: `/tmp/pal-redesign-production/`; Vira screenshots: `/tmp/pal-redesign-vira/`. Local preview: `http://localhost:3006`.
 - Bugs fixed: Persian card/detail names incorrectly inherited forced LTR Latin styling; keyboard outlines inside dark info panels blended into their background. Names now use automatic direction; panel focus outlines use white.
 - Local backend was offline. API responses in browser checks were mocked; no live OTP/payment/registration or production acceptance claimed. Third-party Enamad availability was excluded from local checks; original seal integration is preserved, not replaced with a fake seal.
+
+### Payment/admin polish verification, 2026-10-14
+
+- `bun test lib/*.test.ts`: 20 passed. Typecheck/build passed; lint has zero errors and the same 7 older unused-disable warnings.
+- `docs/scripts/browser-bank-card.cjs`: passed at 320/390/1440px with mocked API. Covers Persian whole-toman amount and Jalali date, selected card, keyboard/clipboard, denied copy, optional IBAN, free events, empty cards and event selection reset; zero API writes/page errors. Screenshots: `/tmp/pal-bank-card/`.
+- `docs/scripts/browser-admin-polish.cjs`: passed at 320/390/1440px in Asia/Tehran. Covers Jalali date selection to Gregorian API payload, unchanged IRR, Persian hour/minute/second controls, matching theme/no dialog overflow, active/inactive customer filtering across API pages, authenticated image/PDF preview, invalid MIME/PDF rejection, object-URL release and Persian permission/throttle errors. Only two date/time saves per viewport, both intercepted mocks; no real writes. Screenshots: `/tmp/pal-admin-polish/`.
+- Existing product-editor regression: 16 checks passed. Sandbox originally blocked native PDF preview; replaced with a MIME/signature-checked PDF blob in the browser viewer. PDF rendering visually checked. Native viewer appearance remains browser-dependent; download remains available.
+- Sales remain disabled; hidden order payment integration was typechecked/built, not browser-accepted through redirected order routes. No backend changes, live payment, deployment or production acceptance claimed.

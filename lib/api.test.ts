@@ -1,6 +1,18 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { api, ApiError, safeNextPath, requestOtp, verifyOtp, loginStaff } from "./api"
+import { api, ApiError, errorMessage, safeNextPath, requestOtp, verifyOtp, loginStaff } from "./api"
+
+test("user errors are Persian, actionable, preserve Persian validation", () => {
+  for (const status of [401, 403, 404, 429, 500, 503]) {
+    const message = errorMessage(new ApiError(status, "Internal English error"), "fallback")
+    assert.match(message, /[آ-ی]/)
+    assert.ok(!message.includes("Internal"))
+  }
+  assert.equal(errorMessage(new ApiError(400, "This field is required."), "ارتباط قطع شد."), "اطلاعات واردشده کامل یا معتبر نیست. قسمت‌های مشخص‌شده را بررسی کنید.")
+  assert.match(errorMessage(new ApiError(409, "Conflict"), "ارتباط قطع شد."), /بازخوانی/)
+  assert.equal(errorMessage(new ApiError(400, "ظرفیت تکمیل است."), "خطا"), "ظرفیت تکمیل است.")
+  assert.equal(errorMessage(new TypeError("Failed to fetch"), "اتصال اینترنت را بررسی کنید."), "اتصال اینترنت را بررسی کنید.")
+})
 
 test("login redirect accepts local path, rejects external or script URLs", () => {
   assert.equal(safeNextPath("/orders/123"), "/orders/123")

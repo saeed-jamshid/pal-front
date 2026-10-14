@@ -77,6 +77,9 @@ test("backend fields mapped without invented weight, price or status", () => {
     formatPrice(1250000),
     `${(125000).toLocaleString("fa-IR")} تومان`
   )
+  assert.equal(formatPrice(1250001), "۱۲۵٬۰۰۰ تومان")
+  assert.equal(formatPrice(1250009), "۱۲۵٬۰۰۱ تومان")
+  assert.equal(formatPrice(0), "۰ تومان")
   const item = toCartItem({
     id: 1,
     product_name: "Coffee",

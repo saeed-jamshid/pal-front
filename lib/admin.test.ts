@@ -1,6 +1,7 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { formPayload, resources, displayValue } from "./admin"
+import { formPayload, resources, displayValue, fetchAdminPage } from "./admin"
+import { api } from "./api"
 
 test("admin editor serializes whitelist, keeps IRR, rejects unsafe integer input", () => {
   const resource = resources.find((r) => r.key === "products")!
@@ -28,6 +29,49 @@ test("admin editor serializes whitelist, keeps IRR, rejects unsafe integer input
     data.set("price", price)
     assert.throws(() => formPayload(resource, data))
   }
+})
+
+test("Persian admin dates/times keep Gregorian API values and seconds", () => {
+  assert.equal(displayValue("price_rial", 1000001), "۱۰۰٬۰۰۰ تومان")
+  assert.equal(displayValue("date", "2026-10-16"), "۱۴۰۵/۷/۲۴")
+  assert.equal(displayValue("start_time", "10:05:30"), "۱۰:۰۵")
+  assert.equal(displayValue("time_slot", { start_time: "10:05", end_time: "12:00" }), "۱۰:۰۵ تا ۱۲:۰۰")
+  const resource = resources.find(r => r.key === "slots")!
+  const data = new FormData()
+  data.set("event", "1")
+  data.set("registration_ceiling", "10")
+  for (const key of ["start_time", "end_time"]) {
+    data.set(`${key}_0`, "10")
+    data.set(`${key}_1`, "05")
+    data.set(`${key}_2`, "30")
+  }
+  assert.equal(formPayload(resource, data).start_time, "10:05:30")
+  data.set("end_time_0", "24")
+  assert.throws(() => formPayload(resource, data), /ساعت و دقیقه/)
+  const product = resources.find(r => r.key === "products")!
+  const invalidDate = new FormData()
+  invalidDate.set("roast_date", "2026-02-31")
+  // Test date field alone to avoid unrelated required product fields.
+  assert.throws(() => formPayload({ ...product, fields: product.fields!.filter(f => f.key === "roast_date") }, invalidDate), /تاریخ معتبر/)
+})
+
+test("customer status filter scans all API pages before paging, preserves search", async () => {
+  const original = api.get
+  const paths: string[] = []
+  api.get = async <T>(path: string) => {
+    paths.push(path)
+    return (path.includes("page=2")
+      ? { results: [{ id: 2, is_active: false }, { id: 3, is_active: true }], next: null }
+      : { results: [{ id: 1, is_active: true }], next: "http://local/api/v1/manage/customers/?page=2&search=Test+Name" }) as T
+  }
+  try {
+    const page = await fetchAdminPage("customers", new URLSearchParams({ page: "1", is_active: "false", search: "Test Name" }))
+    assert.deepEqual(page.results.map(r => r.id), [2])
+    assert.equal(page.count, 1)
+    assert.equal(page.next, null)
+    assert.ok(paths[0].includes("search=Test+Name"))
+    assert.equal(paths.length, 2)
+  } finally { api.get = original }
 })
 
 test("financial histories never expose generic CRUD; resource keys unique", () => {

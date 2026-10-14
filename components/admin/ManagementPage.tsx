@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 import AdminEditor from "./AdminEditor"
 import { useAdmin } from "./AdminShell"
-import { api, ApiError } from "@/lib/api"
+import { api, errorMessage, normalizePhone } from "@/lib/api"
 import {
   displayValue,
   fetchAdminPage,
@@ -43,20 +43,14 @@ export default function ManagementPage({ resource }: { resource: Resource }) {
         setLoading(true)
         setError("")
         try {
-          const query = new URLSearchParams({ page: String(page), search })
+          const query = new URLSearchParams({ page: String(page), search: search.replace(/[۰-۹٠-٩]/g, normalizePhone) })
           if (filter && resource.filter) query.set(resource.filter.key, filter)
           const result = await fetchAdminPage(resource.key, query)
           if (alive) setResult(result)
         } catch (e) {
           if (alive) {
             setResult(null)
-            setError(
-              e instanceof ApiError && e.status === 403
-                ? "دسترسی مدیریت ندارید."
-                : e instanceof ApiError
-                  ? e.message
-                  : "اطلاعات بارگیری نشد. دوباره تلاش کنید."
-            )
+            setError(errorMessage(e, "فهرست دریافت نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید."))
           }
         } finally {
           if (alive) setLoading(false)
@@ -87,7 +81,7 @@ export default function ManagementPage({ resource }: { resource: Resource }) {
       setReload((n) => n + 1)
       refresh()
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "حذف انجام نشد.")
+      setError(errorMessage(e, "حذف انجام نشد. پیش از تلاش دوباره، فهرست را بازخوانی کنید."))
     } finally {
       setBusy(false)
     }

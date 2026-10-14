@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import EventArtwork from "@/components/event/EventArtwork"
-import { ApiError, fetchProfile, isAuthed, updateProfile } from "@/lib/api"
+import BankCardDisplay from "@/components/shop/BankCardDisplay"
+import { errorMessage, fetchProfile, isAuthed, updateProfile } from "@/lib/api"
 import {
   faDate,
   faDigits,
@@ -26,6 +27,7 @@ export default function Submit() {
   const [cards, setCards] = useState<BankCard[]>([])
   const [registrations, setRegistrations] = useState<Registration[]>([])
   const [eventId, setEventId] = useState(0)
+  const [cardId, setCardId] = useState(0)
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [authed, setAuthed] = useState(false)
@@ -33,6 +35,7 @@ export default function Submit() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
   const [result, setResult] = useState<Registration | null>(null)
+  const selectedCard = cards.find((c) => c.id === cardId)
   const selected = events.find((e) => e.id === eventId)
   const existing = registrations.find((r) => r.event === eventId)
 
@@ -60,9 +63,7 @@ export default function Submit() {
         }
       } catch (e) {
         if (alive)
-          setError(
-            e instanceof ApiError ? e.message : "دریافت اطلاعات ممکن نشد."
-          )
+          setError(errorMessage(e, "اطلاعات ثبت‌نام دریافت نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید."))
       } finally {
         if (alive) setLoading(false)
       }
@@ -100,11 +101,7 @@ export default function Submit() {
       await updateProfile(name.trim())
       setResult(await registerEvent(data))
     } catch (e) {
-      setError(
-        e instanceof ApiError
-          ? e.message
-          : "ارتباط قطع شد. پیش از ارسال دوباره، ثبت‌نام‌های خود را بررسی کنید."
-      )
+      setError(errorMessage(e, "ارتباط قطع شد. پیش از ارسال دوباره، ثبت‌نام‌های خود را بررسی کنید."))
       try {
         setRegistrations(await fetchRegistrations())
       } catch {
@@ -171,7 +168,10 @@ export default function Submit() {
                         className={field}
                         value={eventId}
                         disabled={busy}
-                        onChange={(e) => setEventId(Number(e.target.value))}
+                        onChange={(e) => {
+                          setEventId(Number(e.target.value))
+                          setCardId(0)
+                        }}
                       >
                         {events.map((ev) => (
                           <option key={ev.id} value={ev.id}>
@@ -267,7 +267,8 @@ export default function Submit() {
                                     name="card_id"
                                     required
                                     className={field}
-                                    defaultValue=""
+                                    value={cardId || ""}
+                                    onChange={(e) => setCardId(Number(e.target.value))}
                                   >
                                     <option value="" disabled>
                                       انتخاب کارت
@@ -280,6 +281,9 @@ export default function Submit() {
                                     ))}
                                   </select>
                                 </label>
+                                {selectedCard && (
+                                  <BankCardDisplay key={selectedCard.id} card={selectedCard} />
+                                )}
                                 {!cards.length && (
                                   <p role="status">
                                     کارت پرداخت فعال نیست؛ وجهی واریز نکنید.

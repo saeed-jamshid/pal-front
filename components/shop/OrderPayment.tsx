@@ -12,6 +12,7 @@ import {
   type CardPayment,
 } from "@/lib/payments"
 import { formatPrice } from "@/lib/shop"
+import BankCardDisplay from "./BankCardDisplay"
 
 export default function OrderPayment({
   orderNumber,
@@ -21,6 +22,7 @@ export default function OrderPayment({
   onUpdate: () => void
 }) {
   const [cards, setCards] = useState<BankCard[]>([])
+  const [cardId, setCardId] = useState(0)
   const [payment, setPayment] = useState<CardPayment | null>(null)
   const [busy, setBusy] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -118,6 +120,7 @@ export default function OrderPayment({
       setBusy(false)
     }
   }
+  const selectedCard = cards.find((c) => c.id === cardId) ?? cards[0]
   const expired = payment && new Date(payment.expires_at).getTime() <= now
   return (
     <section className="my-8 space-y-4 border border-(--crp-sand) p-5">
@@ -130,10 +133,7 @@ export default function OrderPayment({
             {PAYMENT_LABELS[payment.status] ?? payment.status}
           </p>
           <p>مبلغ: {formatPrice(payment.amount_rial)}</p>
-          <p>
-            {payment.card.bank_name} — {payment.card.account_holder}
-          </p>
-          <p dir="ltr">{payment.card.card_number}</p>
+          <BankCardDisplay key={payment.payment_id} card={payment.card} />
           <p>مهلت: {new Date(payment.expires_at).toLocaleString("fa-IR")}</p>
           {payment.admin_note && <p>یادداشت بررسی: {payment.admin_note}</p>}
           <button
@@ -182,6 +182,8 @@ export default function OrderPayment({
                 کارت مقصد
                 <select
                   name="card_id"
+                  value={selectedCard?.id ?? ""}
+                  onChange={(e) => setCardId(Number(e.target.value))}
                   required
                   disabled={busy}
                   className="mt-2 min-h-12 w-full border px-3"
@@ -193,6 +195,9 @@ export default function OrderPayment({
                   ))}
                 </select>
               </label>
+              {selectedCard && (
+                <BankCardDisplay key={selectedCard.id} card={selectedCard} />
+              )}
               <button disabled={busy} className="outline-action min-h-12 px-5">
                 {busy ? "در حال دریافت…" : "دریافت اطلاعات پرداخت"}
               </button>

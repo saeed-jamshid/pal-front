@@ -8,7 +8,8 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { api, ApiError } from "@/lib/api"
+import { api, ApiError, errorMessage } from "@/lib/api"
+import DateTimeField from "./DateTimeField"
 import { fetchPages } from "@/lib/shop"
 import {
   displayValue,
@@ -59,6 +60,13 @@ export default function AdminEditor({
   )
   const [busy, setBusy] = useState(false)
   const [dirty, setDirty] = useState(false)
+  const [preview, setPreview] = useState<{ url: string; type: string } | null>(null)
+  const mounted = useRef(true)
+  useEffect(() => {
+    mounted.current = true
+    return () => { mounted.current = false }
+  }, [])
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview.url) }, [preview])
   const [error, setError] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
   const errorRef = useRef<HTMLDivElement>(null)
@@ -187,16 +195,16 @@ export default function AdminEditor({
       }
       onSaved()
     } catch (e) {
-      setError(e instanceof Error ? e.message : "ذخیره انجام نشد.")
+      setError(errorMessage(e, "ذخیره انجام نشد. اطلاعات فرم را بررسی کنید و دوباره تلاش کنید."))
       if (e instanceof ApiError) {
-        setErrors(e.fields)
+        setErrors(Object.fromEntries(Object.entries(e.fields).map(([key, message]) => [key, /[آ-ی]/.test(message) ? message : "مقدار این قسمت معتبر نیست؛ آن را بررسی کنید."])))
         if (product && Object.keys(e.fields).some(key => !EASY_PRODUCT_FIELDS.has(key))) setAdvanced(true)
       }
     } finally {
       setBusy(false)
     }
   }
-  async function receipt() {
+  async function receipt(download = false) {
     if (!record || busy) return
     setBusy(true)
     setError("")
@@ -206,14 +214,26 @@ export default function AdminEditor({
           ? `/events/registrations/${encodeURIComponent(String(record.registration_token))}/receipt/`
           : `/payments/card/${record.id}/receipt/download/`
       const blob = await api.blob(endpoint)
+      if (!mounted.current) return
+      if (!download && !["image/jpeg", "image/png", "image/webp", "application/pdf"].includes(blob.type)) {
+        setError("پیش‌نمایش این نوع فایل ممکن نیست. رسید را دانلود کنید.")
+        return
+      }
+      if (!download && blob.type === "application/pdf" && await blob.slice(0, 5).text() !== "%PDF-") {
+        setError("فایل رسید PDF معتبر نیست. رسید را دانلود و بررسی کنید.")
+        return
+      }
+      if (!mounted.current) return
       const url = URL.createObjectURL(blob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `receipt-${record.id}`
-      link.click()
-      setTimeout(() => URL.revokeObjectURL(url), 1000)
-    } catch {
-      setError("رسید دانلود نشد. دوباره تلاش کنید.")
+      if (download) {
+        const link = document.createElement("a")
+        link.href = url
+        link.download = `receipt-${record.id}`
+        link.click()
+        setTimeout(() => URL.revokeObjectURL(url), 1000)
+      } else setPreview({ url, type: blob.type })
+    } catch (e) {
+      if (mounted.current) setError(errorMessage(e, "دریافت رسید ممکن نشد. دوباره تلاش کنید."))
     } finally {
       setBusy(false)
     }
@@ -303,6 +323,8 @@ export default function AdminEditor({
               <input type="hidden" name={field.key} value={String(value)} />
             )}
           </>
+        ) : field.type === "date" || field.type === "time" ? (
+          <DateTimeField field={field} value={String(value)} invalid={!!errors[field.key]} describedBy={common["aria-describedby"]} onChange={() => setDirty(true)} />
         ) : field.type === "file" ? (
           <>
             <input
@@ -329,13 +351,7 @@ export default function AdminEditor({
             defaultValue={String(value)}
             required={field.required}
             min={field.type === "number" ? (field.min ?? 0) : undefined}
-            step={
-              field.type === "time"
-                ? 1
-                : field.type === "number"
-                  ? 1
-                  : undefined
-            }
+            step={field.type === "number" ? 1 : undefined}
             dir={
               ["slug", "sku", "card_number", "iban"].includes(field.key)
                 ? "ltr"
@@ -447,13 +463,22 @@ export default function AdminEditor({
         {resource.review &&
           record &&
           !!(record.has_receipt || record.receipt_url) && (
-            <button
-              className="admin-button secondary"
-              disabled={busy}
-              onClick={() => void receipt()}
-            >
-              دانلود رسید خصوصی
-            </button>
+            <section className="admin-receipt" aria-label="رسید خصوصی">
+              <div className="admin-receipt-actions">
+                <button type="button" className="admin-button secondary" disabled={busy} onClick={() => preview ? setPreview(null) : void receipt()}>
+                  {busy ? "در حال دریافت…" : preview ? "بستن پیش‌نمایش" : "پیش‌نمایش رسید"}
+                </button>
+                <button type="button" className="admin-button secondary" disabled={busy} onClick={() => void receipt(true)}>
+                  دانلود رسید خصوصی
+                </button>
+              </div>
+              {preview && (preview.type === "application/pdf"
+                ? <iframe src={preview.url} title="پیش‌نمایش رسید PDF" referrerPolicy="no-referrer" className="admin-receipt-pdf" />
+                // Authenticated blob only; never render arbitrary HTML/SVG receipts.
+                // eslint-disable-next-line @next/next/no-img-element
+                : <img src={preview.url} alt="پیش‌نمایش رسید پرداخت" className="admin-receipt-image" />)}
+              {preview?.type === "application/pdf" && <p className="admin-field-hint">اگر PDF نمایش داده نشد، از دکمهٔ دانلود رسید استفاده کنید.</p>}
+            </section>
           )}
         {loading ? (
           <p role="status">در حال دریافت گزینه‌ها…</p>

@@ -1,4 +1,6 @@
 import { api } from "./api"
+import { fetchPages, formatPrice } from "./shop"
+import { faDigits, faTime } from "./event-api"
 
 export type AdminRow = Record<string, unknown> & { id: number }
 export type AdminPage = {
@@ -539,6 +541,7 @@ export const resources: Resource[] = [
   },
   {
     key: "customers",
+    filter: booleanFilter,
     title: "مشتریان",
     singular: "مشتری",
     group: "حساب‌ها",
@@ -571,8 +574,22 @@ export const resources: Resource[] = [
 ]
 
 export const fetchOverview = () => api.get<Overview>("/manage/overview/", true)
-export const fetchAdminPage = (resource: string, query: URLSearchParams) =>
-  api.get<AdminPage>(`/manage/${resource}/?${query}`, true)
+export async function fetchAdminPage(resource: string, query: URLSearchParams): Promise<AdminPage> {
+  if (resource === "customers" && query.has("is_active")) {
+    // ponytail: backend has no customer status filter; fetch matching pages before filtering.
+    // Move this filter server-side if the customer list becomes large.
+    const search = new URLSearchParams({ search: query.get("search") ?? "" })
+    const active = query.get("is_active") === "true"
+    const rows = (await fetchPages<AdminRow>(`/manage/customers/?${search}`, true))
+      .filter(row => row.is_active === active)
+    const page = Number(query.get("page") || 1)
+    const start = (page - 1) * 20
+    return { count: rows.length, results: rows.slice(start, start + 20),
+      next: start + 20 < rows.length ? String(page + 1) : null,
+      previous: page > 1 ? String(page - 1) : null }
+  }
+  return api.get<AdminPage>(`/manage/${resource}/?${query}`, true)
+}
 
 export function formPayload(
   resource: Resource,
@@ -581,7 +598,16 @@ export function formPayload(
   const body: Record<string, unknown> = {}
   for (const field of resource.fields ?? []) {
     if (field.type === "file") continue
-    const value = String(data.get(field.key) ?? "")
+    const value = field.type === "time" && data.has(`${field.key}_0`)
+      ? [0, 1, 2].map(index => String(data.get(`${field.key}_${index}`) ?? "")).join(":")
+      : String(data.get(field.key) ?? "")
+    if (field.type === "time" && !/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/.test(value))
+      throw new Error(`${field.label}: ساعت و دقیقه را کامل انتخاب کنید.`)
+    if (field.type === "date" && value) {
+      const date = new Date(`${value}T12:00:00Z`)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value)
+        throw new Error(`${field.label}: تاریخ معتبر انتخاب کنید.`)
+    }
     if (field.type === "checkbox") body[field.key] = data.has(field.key)
     else if (field.type === "multi")
       body[field.key] = data.getAll(field.key).map(String)
@@ -611,19 +637,21 @@ export function displayValue(key: string, value: unknown): string {
       "shipping_cost",
     ].includes(key)
   )
-    return `${(Number(value) / 10).toLocaleString("fa-IR")} تومان`
+    return formatPrice(Number(value))
   if (key.endsWith("_at") || key === "date" || key === "roast_date") {
     const date = new Date(
       key.endsWith("_at") ? String(value) : `${value}T12:00:00`
     )
     return Number.isNaN(date.getTime())
       ? String(value)
-      : date.toLocaleDateString("fa-IR")
+      : date.toLocaleDateString("fa-IR-u-ca-persian-nu-arabext")
   }
   if (key === "time_slot" && typeof value === "object") {
     const slot = value as { start_time: string; end_time: string }
-    return `${slot.start_time.slice(0, 5)} تا ${slot.end_time.slice(0, 5)}`
+    return `${faTime(slot.start_time)} تا ${faTime(slot.end_time)}`
   }
+  if (key === "start_time" || key === "end_time") return faTime(String(value))
+  if (typeof value === "number") return faDigits(value)
   if (key.endsWith("status"))
     return (
       [

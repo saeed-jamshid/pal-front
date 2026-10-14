@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { api, ApiError, isAuthed } from "@/lib/api"
-import { type Registration } from "@/lib/event-api"
+import { api, errorMessage, isAuthed, normalizePhone } from "@/lib/api"
+import { faDigits, faTime, type Registration } from "@/lib/event-api"
 
 export default function DashboardPage() {
   const [rows, setRows] = useState<Registration[]>([])
@@ -31,7 +31,7 @@ export default function DashboardPage() {
         const query = new URLSearchParams({
           page: String(page),
           status,
-          search,
+          search: search.replace(/[۰-۹٠-٩]/g, normalizePhone),
         })
         const result = await api.get<{
           results: Registration[]
@@ -44,13 +44,7 @@ export default function DashboardPage() {
       } catch (e) {
         if (alive) {
           setRows([])
-          setError(
-            e instanceof ApiError && e.status === 403
-              ? "این صفحه فقط برای مدیر است."
-              : e instanceof ApiError
-                ? e.message
-                : "دریافت اطلاعات ممکن نشد."
-          )
+          setError(errorMessage(e, "ثبت‌نام‌ها دریافت نشد. اتصال اینترنت را بررسی کنید و دوباره تلاش کنید."))
         }
       } finally {
         if (alive) setLoading(false)
@@ -77,7 +71,7 @@ export default function DashboardPage() {
       )
       setReload((r) => r + 1)
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "تصمیم ثبت نشد.")
+      setError(errorMessage(e, "نتیجهٔ بررسی ثبت نشد. پیش از تلاش دوباره، وضعیت ثبت‌نام را بازخوانی کنید."))
     } finally {
       setBusy(false)
     }
@@ -169,8 +163,8 @@ export default function DashboardPage() {
               </p>
               {r.time_slot && (
                 <p>
-                  {r.time_slot.start_time.slice(0, 5)} تا{" "}
-                  {r.time_slot.end_time.slice(0, 5)}
+                  {faTime(r.time_slot.start_time)} تا{" "}
+                  {faTime(r.time_slot.end_time)}
                 </p>
               )}
               <p>شماره مرجع: {r.reference_number || "—"}</p>
@@ -239,7 +233,7 @@ export default function DashboardPage() {
             >
               قبلی
             </button>
-            <span>{page}</span>
+            <span>{faDigits(page)}</span>
             <button
               className="min-h-12"
               disabled={!hasNext || loading}

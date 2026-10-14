@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
-import { api, ApiError, isAuthed } from "@/lib/api"
+import { api, errorMessage, isAuthed } from "@/lib/api"
 import {
   faTime,
   fetchRegistration,
@@ -40,7 +40,7 @@ export default function RegistrationStatusPage() {
     try {
       setData(await resubmitReceipt(token, body))
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "ارسال رسید ممکن نشد.")
+      setError(errorMessage(e, "ارسال رسید ممکن نشد. پیش از تلاش دوباره، وضعیت ثبت‌نام را بررسی کنید."))
     } finally {
       setBusy(false)
     }

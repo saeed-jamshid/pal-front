@@ -14,6 +14,20 @@ export class ApiError extends Error {
   }
 }
 
+// Keep useful Persian validation messages; never show raw English/server failures.
+export function errorMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiError) {
+    if (error.status === 401) return "نشست شما تمام شده است. دوباره وارد حساب شوید."
+    if (error.status === 403) return "حساب شما اجازهٔ دسترسی به این بخش را ندارد."
+    if (error.status === 404) return "اطلاعات موردنظر پیدا نشد؛ فهرست را دوباره دریافت کنید."
+    if (error.status === 400 && !/[آ-ی]/.test(error.message)) return "اطلاعات واردشده کامل یا معتبر نیست. قسمت‌های مشخص‌شده را بررسی کنید."
+    if (error.status === 409 && !/[آ-ی]/.test(error.message)) return "وضعیت این مورد تغییر کرده است. ابتدا اطلاعات را بازخوانی کنید."
+    if (error.status === 429) return "درخواست‌های زیادی ارسال شده است. کمی صبر کنید و دوباره تلاش کنید."
+    if (error.status >= 500) return "سرویس موقتاً در دسترس نیست. کمی بعد دوباره تلاش کنید."
+  }
+  return error instanceof Error && /[آ-ی]/.test(error.message) ? error.message : fallback
+}
+
 export function getAccessToken() {
   return typeof window === "undefined"
     ? ""

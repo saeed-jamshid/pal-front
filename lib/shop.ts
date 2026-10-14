@@ -384,7 +384,7 @@ export function createAddress(a: Omit<Address, "id">) {
 
 // API amounts remain IRR; convert only at display boundary.
 export const formatPrice = (rial: number) =>
-  `${(rial / 10).toLocaleString("fa-IR")} تومان`
+  `${(rial / 10).toLocaleString("fa-IR-u-nu-arabext", { maximumFractionDigits: 0 })} تومان`
 export const PAYMENT_STATUS_LABELS = {
   unpaid: "پرداخت‌نشده",
   pending: "در انتظار پرداخت / بررسی",
