@@ -41,7 +41,7 @@ test("Persian admin dates/times keep Gregorian API values and seconds", () => {
   data.set("event", "1")
   data.set("registration_ceiling", "10")
   for (const key of ["start_time", "end_time"]) {
-    data.set(`${key}_0`, "10")
+    data.set(`${key}_0`, key === "end_time" ? "12" : "10")
     data.set(`${key}_1`, "05")
     data.set(`${key}_2`, "30")
   }
@@ -53,6 +53,32 @@ test("Persian admin dates/times keep Gregorian API values and seconds", () => {
   invalidDate.set("roast_date", "2026-02-31")
   // Test date field alone to avoid unrelated required product fields.
   assert.throws(() => formPayload({ ...product, fields: product.fields!.filter(f => f.key === "roast_date") }, invalidDate), /تاریخ معتبر/)
+})
+
+test("event location validates paired coordinates and slots require increasing times", () => {
+  const event = resources.find(r => r.key === "events")!
+  const data = new FormData()
+  data.set("title", "Event")
+  data.set("price_rial", "0")
+  assert.equal(formPayload(event, data).latitude, null)
+  data.set("latitude", "0")
+  assert.throws(() => formPayload(event, data), /با هم/)
+  data.set("longitude", "59.220001")
+  assert.equal(formPayload(event, data).longitude, "59.220001")
+  for (const value of ["91", "NaN", "32.1234567", "Infinity"]) {
+    data.set("latitude", value)
+    assert.throws(() => formPayload(event, data), /مختصات/)
+  }
+  const slots = resources.find(r => r.key === "slots")!
+  const slot = new FormData()
+  slot.set("event", "1")
+  slot.set("registration_ceiling", "10")
+  slot.set("start_time", "12:00")
+  for (const time of ["11:00", "12:00"]) {
+    slot.set("end_time", time)
+    assert.throws(() => formPayload(slots, slot), /بعد از/)
+  }
+  assert.equal(resources.find(r => r.key === "customers")!.remove, true)
 })
 
 test("customer status filter scans all API pages before paging, preserves search", async () => {

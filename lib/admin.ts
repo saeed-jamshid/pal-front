@@ -24,6 +24,7 @@ export type Field = {
   label: string
   type?:
     | "number"
+    | "decimal"
     | "textarea"
     | "checkbox"
     | "select"
@@ -37,6 +38,7 @@ export type Field = {
   hint?: string
   default?: string | number | boolean
   min?: number
+  max?: number
 }
 export type Resource = {
   key: string
@@ -386,6 +388,10 @@ export const resources: Resource[] = [
     fields: [
       { key: "title", label: "عنوان", required: true },
       description,
+      { key: "location_name", label: "محل برگزاری" },
+      { key: "address", label: "نشانی محل برگزاری", type: "textarea" },
+      { key: "latitude", label: "عرض جغرافیایی", type: "decimal", min: -90, max: 90, hint: "مختصات محل رویداد؛ هر دو مقدار را وارد کنید یا هر دو را خالی بگذارید. تا ۶ رقم اعشار." },
+      { key: "longitude", label: "طول جغرافیایی", type: "decimal", min: -180, max: 180, hint: "از مختصات معتبر محل استفاده کنید؛ موقعیت پیش‌فرض ثبت نمی‌شود." },
       { key: "date", label: "تاریخ", type: "date" },
       money("price_rial", "هزینه"),
       active,
@@ -546,7 +552,8 @@ export const resources: Resource[] = [
     singular: "مشتری",
     group: "حساب‌ها",
     description:
-      "نام و فعال بودن مشتری؛ شماره و دسترسی کارکنان از این پنل قابل تغییر نیست.",
+      "نام و وضعیت مشتری؛ حذف فقط بدون سابقه ثبت‌نام، سفارش یا پرداخت مجاز است. برای مشتری دارای سابقه از غیرفعال‌سازی استفاده کنید.",
+    remove: true,
     columns: [
       ["full_name", "نام"],
       ["phone_number", "موبایل"],
@@ -611,13 +618,23 @@ export function formPayload(
     if (field.type === "checkbox") body[field.key] = data.has(field.key)
     else if (field.type === "multi")
       body[field.key] = data.getAll(field.key).map(String)
-    else if (field.type === "number" || field.source) {
+    else if (field.type === "decimal") {
+      const n = Number(value)
+      if (!value.trim()) body[field.key] = null
+      else if (!/^-?\d+(?:\.\d{1,6})?$/.test(value) || !Number.isFinite(n) || n < (field.min ?? -Infinity) || n > (field.max ?? Infinity))
+        throw new Error(`${field.label}: مختصات معتبر با حداکثر ۶ رقم اعشار وارد کنید.`)
+      else body[field.key] = value
+    } else if (field.type === "number" || field.source) {
       const n = Number(value)
       if (!value || !Number.isSafeInteger(n) || n < (field.min ?? 0))
         throw new Error(`${field.label}: عدد صحیح معتبر وارد کنید.`)
       body[field.key] = n
     } else body[field.key] = field.type === "date" && !value ? null : value
   }
+  if (resource.key === "events" && (body.latitude == null) !== (body.longitude == null))
+    throw new Error("عرض و طول جغرافیایی را با هم وارد کنید.")
+  if (resource.key === "slots" && `${body.start_time}:00`.slice(0, 8) >= `${body.end_time}:00`.slice(0, 8))
+    throw new Error("زمان پایان باید بعد از زمان شروع باشد.")
   return body
 }
 

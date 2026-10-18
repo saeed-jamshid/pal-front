@@ -1,45 +1,13 @@
-/* Pin the approved warm admin palette, including portaled dialogs. */
-body:has([data-pal-admin]) {
-  --surface-100: #efe3cf;
-  --surface-200: #e3d2b6;
-  --surface-300: #d8c29e;
-  --roast: #3a2214;
-  --on-roast: #f3e6d2;
-  --ink: #2a1a0f;
-  --ink-muted: #654c37;
-  --brick: #8a3a1c;
-  --on-brick: #f8efe0;
-  --cistern: #2a6461;
-  --on-cistern: #f8efe0;
-  --saffron: #c98a2b;
-  --outline: var(--ink);
-  --hairline: #cdb796;
-  --border-input: #85694c;
-  --font-fa-display: "Lalezar", "Vazirmatn", sans-serif;
-  --radius-md: 12px;
-  --crp-cream: var(--surface-100);
-  --crp-warm: var(--surface-200);
-  --crp-sand: var(--hairline);
-  --crp-espresso: var(--ink);
-  --crp-terracotta: var(--brick);
-  --crp-sage: var(--cistern);
-  --crp-dark: var(--ink-muted);
-  --crp-surface: var(--surface-200);
-  --background: var(--surface-100);
-  --foreground: var(--ink);
-  --border: var(--hairline);
-  --ring: var(--brick);
-  --destructive: var(--brick);
-}
+/* Share landing tokens with admin and portaled dialogs. */
 body:has([data-pal-admin]) > header,
 body:has([data-pal-admin]) > .site-footer {
   display: none;
 }
 .admin-root,
 .admin-dialog {
-  --adm-bg: var(--surface-200);
+  --adm-bg: var(--surface-100);
   --adm-surface: var(--surface-100);
-  --adm-well: var(--surface-200);
+  --adm-well: var(--surface-300);
   --adm-text: var(--crp-espresso);
   --adm-muted: var(--crp-dark);
   --adm-line: var(--crp-sand);

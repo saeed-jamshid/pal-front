@@ -1,0 +1,8 @@
+{
+  "project": "pal-front",
+  "repository": "registry.hamdocker.ir/virarayanesh/pal-front",
+  "url": "https://up.virarayanesh.ir",
+  "checks": [
+    ["bash", "-c", "bun test lib/*.test.ts && bun run lint && bun run typecheck"]
+  ]
+}

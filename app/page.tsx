@@ -174,7 +174,7 @@ export default function HomePage() {
                   </>
                 )}
                 <dt>مکان</dt>
-                <dd>بیرجند</dd>
+                <dd>{next.location_name || next.address || "بیرجند"}</dd>
                 <dt>هزینه</dt>
                 <dd>{next.price_rial ? formatPrice(next.price_rial) : "رایگان"}</dd>
               </dl>

@@ -1,0 +1,27 @@
+# Allow runtime/build sources only; no local env, generated output or design inputs.
+**
+!Dockerfile
+!.dockerignore
+!package.json
+!bun.lock
+!next.config.mjs
+!postcss.config.mjs
+!tsconfig.json
+!next-env.d.ts
+!eslint.config.mjs
+!app/
+!app/**
+!components/
+!components/**
+!hooks/
+!hooks/**
+!lib/
+!lib/**
+!public/
+!public/**
+**/.env*
+**/*.pem
+**/*.key
+**/node_modules
+**/.git
+**/*.tsbuildinfo

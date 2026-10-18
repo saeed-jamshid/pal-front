@@ -308,7 +308,7 @@ export default function AdminEditor({
           <>
             <select
               {...common}
-              defaultValue={String(value || options?.[0]?.[0] || "")}
+              defaultValue={String(value || (field.source ? "" : options?.[0]?.[0]) || "")}
               required={field.required}
               disabled={locked}
             >
@@ -347,13 +347,14 @@ export default function AdminEditor({
         ) : (
           <input
             {...common}
-            type={field.type ?? "text"}
+            type={field.type === "decimal" ? "number" : (field.type ?? "text")}
             defaultValue={String(value)}
             required={field.required}
-            min={field.type === "number" ? (field.min ?? 0) : undefined}
-            step={field.type === "number" ? 1 : undefined}
+            min={field.type === "decimal" ? field.min : field.type === "number" ? (field.min ?? 0) : undefined}
+            max={field.max}
+            step={field.type === "decimal" ? "0.000001" : field.type === "number" ? 1 : undefined}
             dir={
-              ["slug", "sku", "card_number", "iban"].includes(field.key)
+              ["slug", "sku", "card_number", "iban", "latitude", "longitude"].includes(field.key)
                 ? "ltr"
                 : undefined
             }

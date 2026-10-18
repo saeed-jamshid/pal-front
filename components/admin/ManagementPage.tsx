@@ -67,7 +67,7 @@ export default function ManagementPage({ resource }: { resource: Resource }) {
     if (
       busy ||
       !window.confirm(
-        `حذف ${resource.singular} «${String(row.name ?? row.title ?? row.label ?? row.id)}»؟ سوابق وابسته قابل حذف نیستند.`
+        `حذف ${resource.singular} «${String(row.name ?? row.title ?? row.full_name ?? row.label ?? row.id)}»؟ این کار برگشت‌پذیر نیست.${resource.key === "customers" ? " آدرس‌ها و سبد خرید این مشتری هم حذف می‌شوند." : ""} موارد دارای سابقه حذف نمی‌شوند.`
       )
     )
       return
@@ -286,11 +286,11 @@ export default function ManagementPage({ resource }: { resource: Resource }) {
                             <Eye size={17} aria-hidden="true" />
                           )}
                         </button>
-                        {resource.remove && (
+                        {resource.remove && !(resource.key === "customers" && (row.is_staff || row.is_superuser)) && (
                           <button
                             className="admin-icon-button danger"
                             disabled={busy}
-                            aria-label={`حذف ${String(row.name ?? row.title ?? row.label ?? row.id)}`}
+                            aria-label={`حذف ${String(row.name ?? row.title ?? row.full_name ?? row.label ?? row.id)}`}
                             onClick={() => void remove(row)}
                           >
                             <Trash2 size={16} aria-hidden="true" />

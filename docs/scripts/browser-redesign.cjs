@@ -87,9 +87,9 @@ const list = results => ({ count: results.length, next: null, previous: null, re
       }
       await page.evaluate(() => localStorage.setItem('pal_access_token', 'mock-staff'))
       await page.goto(origin + '/manage/products', { waitUntil: 'networkidle' })
-      check(`warm admin palette @${width}`, await page.evaluate(() => getComputedStyle(document.body).getPropertyValue('--surface-100').trim() === '#efe3cf'))
+      check(`shared admin palette @${width}`, await page.evaluate(() => getComputedStyle(document.body).getPropertyValue('--surface-100').trim() === '#f1f1f2'))
       await page.getByRole('button', { name: 'افزودن محصول', exact: true }).click()
-      check(`warm portal @${width}`, await page.getByRole('dialog').evaluate(e => getComputedStyle(e).getPropertyValue('--adm-surface').trim() === '#efe3cf'))
+      check(`shared portal @${width}`, await page.getByRole('dialog').evaluate(e => getComputedStyle(e).getPropertyValue('--adm-surface').trim() === '#f1f1f2'))
       await page.screenshot({ path: `${out}/admin-dialog-${width}.png`, fullPage: true })
       await page.keyboard.press('Escape')
       await page.goto(origin + '/catalog', { waitUntil: 'networkidle' })

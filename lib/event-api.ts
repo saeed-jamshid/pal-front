@@ -13,6 +13,10 @@ export type PalEvent = {
   id: number
   title: string
   description: string
+  location_name?: string
+  address?: string
+  latitude?: string | number | null
+  longitude?: string | number | null
   date: string | null
   price_rial: number
   time_slots: TimeSlot[]
@@ -33,6 +37,17 @@ export type Registration = {
   receipt_url: string | null
   created_at: string
 }
+export function eventMap(event: Pick<PalEvent, "latitude" | "longitude">) {
+  if (event.latitude == null || event.longitude == null || String(event.latitude).trim() === "" || String(event.longitude).trim() === "") return null
+  const lat = Number(event.latitude), lon = Number(event.longitude)
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return null
+  const bbox = [Math.max(-180, lon - 0.008), Math.max(-90, lat - 0.005), Math.min(180, lon + 0.008), Math.min(90, lat + 0.005)].join(",")
+  return {
+    link: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=17/${lat}/${lon}`,
+    embed: `https://www.openstreetmap.org/export/embed.html?${new URLSearchParams({ bbox, layer: "mapnik", marker: `${lat},${lon}` })}`,
+  }
+}
+
 export const fetchEvents = () => fetchPages<PalEvent>("/events/")
 export const fetchRegistrations = () =>
   fetchPages<Registration>("/events/registrations/", true)

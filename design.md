@@ -4,7 +4,7 @@
 
 PAL is a Persian-first coffee showcase and event site for customers in Birjand. The public design now follows `newDesign/designDemo/PAL Coffee â€” Industrial.html` and the supplied PDF references: navy typography, sky-blue circles and swirls, pale gray backgrounds, fine rules, generous spacing and square-edged product compositions.
 
-`design.md` is the single public design baseline. Superseded design documents were removed; the warm admin palette is pinned in `app/manage/admin.css`.
+`design.md` is the single public design baseline. Superseded design documents were removed. Admin now shares landing tokens, including portaled dialogs (user-approved update, 2026-10-18).
 
 ## Scope and preserved behavior
 
@@ -12,7 +12,7 @@ PAL is a Persian-first coffee showcase and event site for customers in Birjand. 
 - Sales stay disabled. Do not copy demo prices, weights, add buttons or cart links into this show-only site.
 - Keep current navigation labels and links, event CTA, login/account, logout and native phone popover.
 - Replace the landing scene with the supplied logo arch and geometric composition. Keep registration/about scenes, recolored; retain their sandbox, scripts, accessibility and motion controls.
-- Admin `/manage` stays on the warm palette, including dialogs. Staff login stays functional.
+- Admin `/manage` uses the landing navy/sky palette, including dialogs. Staff login stays functional.
 - Preserve gallery photos/viewer, historical story, PAL contact links, live Enamad code/URLs/referrer and Vira contact dialog.
 
 ## Assets and typography
@@ -68,7 +68,7 @@ Spacing: 4, 8, 16, 24, 40, 64px. Public max width 1440px; responsive gutters 16â
 ## Persian display and admin controls
 
 - User confirmed the event amount problem is extra decimals. Display whole toman with Persian digits and grouping; round only for display. Stored amounts and API payloads remain IRR.
-- User requested both public and admin date/time fixes. Dates use the Persian calendar; admin date selection converts back to Gregorian ISO dates. Time selectors show Persian 24-hour values while preserving seconds in API payloads. Keep public navy/sky and admin warm palettes.
+- User requested both public and admin date/time fixes. Dates use the Persian calendar; admin date selection converts back to Gregorian ISO dates. Time selectors show Persian 24-hour values while preserving seconds in API payloads. Keep public and admin navy/sky palettes.
 - Preserve useful Persian validation messages; replace English errors, expired-session, permission, throttling and server failures with Persian guidance.
 - Admin receipts use authenticated blob requests, allow only JPEG/PNG/WebP/PDF preview, and release object URLs on close. No public receipt URLs or automatic approvals.
 - Customer status filtering covers all matching API pages before local pagination because the current backend does not support this filter. Active/inactive filters reuse existing search; move filtering server-side when lists grow.
@@ -79,9 +79,23 @@ Spacing: 4, 8, 16, 24, 40, 64px. Public max width 1440px; responsive gutters 16â
 - Status page reuses the signup SVG scene: pending shows a sleeping cat with closed eyes and drifting sleep marks, confirmed a happy cat with a heart, rejected a sad cat. Status scenes keep their mood on hover/tap; tap only replays entrance. Existing signup petting remains unchanged.
 - Keep sandboxed artwork, navy/sky palette, reduced motion and offscreen pauses. Check all three statuses, receipt resubmission, first-event slot payload and empty-event state on phone/desktop.
 
+## Admin and event update, 2026-10-18
+
+- User approved matching admin to landing, venue maps (not user geolocation), safe deletion and the required changes in `../Pal-Back`. Use existing navy/sky, Vazirmatn, RTL spacing, 44px controls and visible focus. Keep error actions red. Dialogs inherit the same tokens; leaving admin does not alter public tokens.
+- Customer deletion requires confirmation. Backend blocks staff, superusers, self, registration/order/payment/review history. Existing nonfinancial address/cart cascades remain and are disclosed in confirmation. No new cascade rules. Registrations and financial records remain review-only; reserved event/slot deletion remains protected.
+- Event editor accepts venue name, address and paired latitude/longitude (up to six decimals, valid geographic bounds). No guessed venue/pin. Submit shows supplied venue details; map loads from OpenStreetMap only on request, with an external-map link and provider notice. No geolocation permission, new map dependency or API key.
+- Reference selects require an explicit choice. Slots validate increasing start/end times; backend still enforces capacity and historical time locks. Signup retains the first upcoming event and existing payment contract, labels input limits/file rules, distinguishes empty/full slots and refreshes availability after a failed request.
+- Backend migration `events/0002_event_address_event_latitude_event_location_name_and_more.py` must ship before frontend location saves. Generated/tested locally, not applied to an existing DB. Venue details still need staff entry.
+- Verification: 22 frontend unit tests; typecheck/build pass; lint zero errors (7 existing browser-script warnings). Backend admin/events suite: 23 tests, 22 pass, 1 row-lock concurrency test skipped on SQLite. Migration drift and diff checks pass. No MySQL acceptance claim.
+- Browser: new `docs/scripts/browser-admin-crud.cjs` passes at 320/390/1440px (customer cancel/delete/conflict, staff guard, venue editor/map keyboard toggle, explicit source selection, slot create/update/delete, capacity-refresh failure, empty slots and successful free signup). All writes and map content intercepted mocks. Existing admin-polish and bank-card scripts pass at the same widths; redesign suite passes 190 checks. Screenshots: `/tmp/pal-admin-crud/`, `/tmp/pal-admin-polish/`. Local production preview: `http://127.0.0.1:3006`. No live writes, existing DB migration, deploy or commit.
+
+### Subsequent mainVira release checkpoint
+
+The update above was subsequently deployed on18October2026: backend47 MySQL tests and frontend22 unit tests passed, location migration0002 applied with business row counts unchanged, frontend/backend/worker healthy. Public staff login/browser products verified; OTP/customer/financial writes remain gated after SMS provider rejection -111. GitHub Actions deploy workflows disabled; releases now use `.deploy.json` + sibling infrastructure `runScript`. See `docs/deployment.md`; historical local-only test notes above describe initial implementation, not current release state.
+
 ## Verification
 
-Run typecheck, unit tests, lint and production build. Browser-check real rendering with isolated mocked API responses if local backend is unavailable: populated/error/empty catalog, filtering, long titles, product detail, mobile popover/keyboard, gallery dialog, login, event/status states and preserved admin colors. Capture phone/desktop screenshots. Report bugs and fixes separately; no deployment or production mutations.
+Run typecheck, unit tests, lint and production build. Browser-check real rendering with isolated mocked API responses if local backend is unavailable: populated/error/empty catalog, filtering, long titles, product detail, mobile popover/keyboard, gallery dialog, login, event/status states and shared public/admin colors. Capture phone/desktop screenshots. Report bugs and fixes separately; no deployment or production mutations.
 
 ### Local verification, 2026-10-12
 

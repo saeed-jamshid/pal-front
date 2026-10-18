@@ -2,6 +2,7 @@ import { test } from "node:test"
 import assert from "node:assert/strict"
 import {
   csvCell,
+  eventMap,
   normalizePhone,
   registerEvent,
   fetchRegistration,
@@ -38,6 +39,15 @@ test("event registration uses unified multipart route; status requires JWT", asy
   } finally {
     globalThis.fetch = original
   }
+})
+
+test("venue maps reject missing/invalid coordinates, accept zero, clamp bounds", () => {
+  for (const coords of [{}, { latitude: "", longitude: "" }, { latitude: null, longitude: 59 }, { latitude: 91, longitude: 59 }, { latitude: 32, longitude: "NaN" }, { latitude: 32, longitude: "https://evil.test" }])
+    assert.equal(eventMap(coords), null)
+  assert.match(eventMap({ latitude: 0, longitude: 0 })!.link, /mlat=0&mlon=0/)
+  const map = eventMap({ latitude: "90.000000", longitude: "180.000000" })!
+  assert.equal(new URL(map.embed).hostname, "www.openstreetmap.org")
+  assert.equal(new URL(map.embed).searchParams.get("bbox"), "179.992,89.995,180,90")
 })
 
 test("Persian time and date formatting", () => {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import EventArtwork from "@/components/event/EventArtwork"
+import EventLocation from "@/components/event/EventLocation"
 import BankCardDisplay from "@/components/shop/BankCardDisplay"
 import { errorMessage, fetchProfile, isAuthed, updateProfile } from "@/lib/api"
 import {
@@ -27,6 +28,7 @@ export default function Submit() {
   const [cards, setCards] = useState<BankCard[]>([])
   const [registrations, setRegistrations] = useState<Registration[]>([])
   const [cardId, setCardId] = useState(0)
+  const [slotId, setSlotId] = useState("")
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [authed, setAuthed] = useState(false)
@@ -76,6 +78,10 @@ export default function Submit() {
     e.preventDefault()
     if (!selected || busy || existing) return
     const data = new FormData(e.currentTarget)
+    if (!selected.time_slots.some(s => String(s.id) === slotId && s.remaining_capacity > 0)) {
+      setError("یک بازه دارای ظرفیت انتخاب کنید.")
+      return
+    }
     const receipt = data.get("payment_receipt")
     if (
       selected.price_rial &&
@@ -101,7 +107,11 @@ export default function Submit() {
     } catch (e) {
       setError(errorMessage(e, "ارتباط قطع شد. پیش از ارسال دوباره، ثبت‌نام‌های خود را بررسی کنید."))
       try {
-        setRegistrations(await fetchRegistrations())
+        const [previous, latest] = await Promise.all([fetchRegistrations(), fetchEvents()])
+        setRegistrations(previous)
+        setEvents(latest)
+        setSlotId("")
+        setCardId(0)
       } catch {
         /* Keep original error. */
       }
@@ -162,6 +172,7 @@ export default function Submit() {
                         <h2 className="fa-h2">{selected.title}</h2>
                         {selected.description && <p className="leading-8">{selected.description}</p>}
                         {selected.date && <p className="font-bold">{faDate(selected.date)}</p>}
+                        <EventLocation key={selected.id} event={selected} />
                         <p>
                           هزینه:{" "}
                           {selected.price_rial
@@ -204,6 +215,7 @@ export default function Submit() {
                                 className={field}
                                 required
                                 autoComplete="name"
+                                maxLength={150}
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                               />
@@ -217,7 +229,9 @@ export default function Submit() {
                                 name="time_slot"
                                 className={field}
                                 required
-                                defaultValue=""
+                                value={slotId}
+                                onChange={e => setSlotId(e.target.value)}
+                                aria-describedby="slot-help"
                               >
                                 <option value="" disabled>
                                   انتخاب بازه
@@ -236,6 +250,13 @@ export default function Submit() {
                                 ))}
                               </select>
                             </label>
+                            <p id="slot-help" role="status" className="text-sm text-(--ink-muted)">
+                              {!selected.time_slots.length
+                                ? "هنوز بازه‌ای برای این رویداد تعریف نشده است."
+                                : !selected.time_slots.some(s => s.remaining_capacity > 0)
+                                  ? "ظرفیت همه بازه‌ها تکمیل شده است."
+                                  : "بازه حضور را انتخاب کنید؛ ظرفیت نهایی هنگام ثبت درخواست بررسی می‌شود."}
+                            </p>
                             {selected.price_rial > 0 && (
                               <>
                                 <label className="block">
@@ -278,8 +299,10 @@ export default function Submit() {
                                     type="file"
                                     required
                                     accept="image/jpeg,image/png,image/webp,application/pdf"
+                                    aria-describedby="receipt-help"
                                   />
                                 </label>
+                                <p id="receipt-help" className="text-sm text-(--ink-muted)">JPG، PNG، WebP یا PDF؛ حداکثر ۵ مگابایت.</p>
                                 <label className="block">
                                   شماره مرجع (اختیاری)
                                   <input
@@ -294,6 +317,7 @@ export default function Submit() {
                               className="btn btn--primary w-full"
                               disabled={
                                 busy ||
+                                !slotId ||
                                 !selected.time_slots.some(
                                   (s) => s.remaining_capacity > 0
                                 ) ||
